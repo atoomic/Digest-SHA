@@ -1,0 +1,9 @@
+Revision history for Perl extension Digest::SHA.
+
+0.01  Wed Oct  8 22:28:05 2003
+	- original version; created by h2xs 1.22 with options
+		-x -A -n Digest::SHA sha.h
+
+0.9   Thu Oct  9 20:43:54 MST 2003
+	- version updated to reflect portability check and passing
+		of all tests (1401)
