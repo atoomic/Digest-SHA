@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use integer;
 
-our $VERSION = '5.20';
+our $VERSION = '5.21';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -174,7 +174,7 @@ data.
 =head1 DESCRIPTION
 
 Digest::SHA is written in C for speed.  If your platform lacks a
-C compiler, you can install the functionally-equivalent (but much
+C compiler, you can install the functionally equivalent (but much
 slower) L<Digest::SHA::PurePerl> module.
 
 The programming interface is easy to use: it's the same one found

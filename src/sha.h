@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2004 Mark Shelor, All Rights Reserved
  *
- * Version: 5.20
- * Sun Aug 15 04:24:48 MST 2004
+ * Version: 5.21
+ * Mon Aug 23 04:02:00 MST 2004
  *
  */
 
@@ -52,13 +52,13 @@
 	#define ULLONG_MAX	ULONG_LONG_MAX
 #endif
 
-#if ULONG_MAX > SHA32_MAX && ULONG_MAX == SHA64_MAX
+#if (((ULONG_MAX >> 16) >> 16) >> 16) >> 15 == 1UL
 	#define SHA64	unsigned long
 	#define SHA64_CONST(c)	c ## UL
-#elif defined(ULLONG_MAX) && ULLONG_MAX == SHA64_MAX
+#elif defined(ULLONG_MAX) && defined(LONGLONGSIZE) && LONGLONGSIZE == 8
 	#define SHA64	unsigned long long
 	#define SHA64_CONST(c)	c ## ULL
-#elif defined(ULLONG_MAX) && ULLONG_MAX != SHA64_MAX
+#elif defined(ULLONG_MAX)
 	#undef  SHA64_ALIGNED
 	#undef  SHA64_SHR
 	#define SHA64_SHR(x, n)	(((x) & SHA64_MAX) >> (n))
