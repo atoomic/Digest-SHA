@@ -1,5 +1,8 @@
 Revision history for Perl extension Digest::SHA.
 
+4.2.2 Sat Jan 31 17:10:20 MST 2004
+	- repaired 32-bit SHA operations for 8-byte longs
+
 4.2.1 Sat Jan 24 00:56:54 MST 2004
 	- modified I/O and memory management in underlying C code
 		-- uses Perl libraries when compiled as CPAN module

@@ -68,7 +68,7 @@ use Digest::SHA;
 my $ctx = Digest::SHA->new("sha1");
 for (my $i = 0; $i < @msgs; $i++) {
 	is(
-		uc($ctx->add_bits($msgs[$i])->hexdigest),
+		uc($ctx->add(pack("B*", $msgs[$i]))->hexdigest),
 		$hashes[$i],
 		$hashes[$i]
 	);

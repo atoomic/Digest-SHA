@@ -13,11 +13,14 @@
 	*((unsigned long long *) pval) = hex2ull(p);	\
 	pval = (unsigned long long *) pval + 1
 
-#define ROTRQ(x, n)	( ( (x) >> (n) ) | ( (x) << (64 - (n)) ) )
-#define SIGMAQ0(x)	( ROTRQ(x, 28) ^ ROTRQ(x, 34) ^ ROTRQ(x, 39) )
-#define SIGMAQ1(x)	( ROTRQ(x, 14) ^ ROTRQ(x, 18) ^ ROTRQ(x, 41) )
-#define sigmaQ0(x)	( ROTRQ(x,  1) ^ ROTRQ(x,  8) ^   SHR(x,  7) )
-#define sigmaQ1(x)	( ROTRQ(x, 19) ^ ROTRQ(x, 61) ^   SHR(x,  6) )
+#define LO64(x)		((x) & 0xffffffffffffffffULL)
+#define SHRQ(x, n)	(LO64(x) >> (n))
+#define SHLQ(x, n)	LO64((x) << (n))
+#define ROTRQ(x, n)	(SHRQ(x, n) | SHLQ(x, 64-(n)))
+#define SIGMAQ0(x)	(ROTRQ(x, 28) ^ ROTRQ(x, 34) ^ ROTRQ(x, 39))
+#define SIGMAQ1(x)	(ROTRQ(x, 14) ^ ROTRQ(x, 18) ^ ROTRQ(x, 41))
+#define sigmaQ0(x)	(ROTRQ(x,  1) ^ ROTRQ(x,  8) ^  SHRQ(x,  7))
+#define sigmaQ1(x)	(ROTRQ(x, 19) ^ ROTRQ(x, 61) ^  SHRQ(x,  6))
 
 #define SHA_64		unsigned long long
 
@@ -73,7 +76,7 @@ unsigned long long ull;
 	int i;
 
 	for (i = 0; i < 8; i++)
-		*mem++ = SHR(ull, 56 - i * 8) & 0xff;
+		*mem++ = SHRQ(ull, 56 - i * 8) & 0xff;
 }
 
 /* strtoull() not always present, so cook up an alternative*/

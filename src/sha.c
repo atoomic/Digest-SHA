@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 4.2.1
- * Sat Jan 24 00:56:54 MST 2004
+ * Version: 4.2.2
+ * Sat Jan 31 17:10:20 MST 2004
  *
  */
 
@@ -17,18 +17,20 @@
 #include "sha.h"
 #include "sha64bit.h"
 
-#define SHR(x, n)	( (x) >> (n) )
-#define ROTR(x, n)	( ( (x) >> (n) ) | ( (x) << (32 - (n)) ) )
-#define ROTL(x, n)	( ( (x) << (n) ) | ( (x) >> (32 - (n)) ) )
+#define LO32(x)		((x) & 0xffffffffUL)
+#define SHR(x, n)	(LO32(x) >> (n))
+#define SHL(x, n)	LO32((x) << (n))
+#define ROTR(x, n)	(SHR(x, n) | SHL(x, 32-(n)))
+#define ROTL(x, n)	(SHL(x, n) | SHR(x, 32-(n)))
 
-#define Ch(x, y, z)	( (z) ^ ( (x) & ( (y) ^ (z) ) ) )
-#define Parity(x, y, z)	( (x) ^ (y) ^ (z) )
-#define Maj(x, y, z)	( ( (x) & (y) ) | ( (z) & ( (x) | (y) ) ) )
+#define Ch(x, y, z)		((z) ^ ((x) & ((y) ^ (z))))
+#define Parity(x, y, z)		((x) ^ (y) ^ (z))
+#define Maj(x, y, z)		(((x) & (y)) | ((z) & ((x) | (y))))
 
-#define SIGMA0(x)	( ROTR(x,  2) ^ ROTR(x, 13) ^ ROTR(x, 22) )
-#define SIGMA1(x)	( ROTR(x,  6) ^ ROTR(x, 11) ^ ROTR(x, 25) )
-#define sigma0(x)	( ROTR(x,  7) ^ ROTR(x, 18) ^  SHR(x,  3) )
-#define sigma1(x)	( ROTR(x, 17) ^ ROTR(x, 19) ^  SHR(x, 10) )
+#define SIGMA0(x)	(ROTR(x,  2) ^ ROTR(x, 13) ^ ROTR(x, 22))
+#define SIGMA1(x)	(ROTR(x,  6) ^ ROTR(x, 11) ^ ROTR(x, 25))
+#define sigma0(x)	(ROTR(x,  7) ^ ROTR(x, 18) ^  SHR(x,  3))
+#define sigma1(x)	(ROTR(x, 17) ^ ROTR(x, 19) ^  SHR(x, 10))
 
 #define K00	0x5a827999UL		/* SHA-1 constants */
 #define K20	0x6ed9eba1UL
