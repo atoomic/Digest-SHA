@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2004 Mark Shelor, All Rights Reserved
  *
- * Version: 5.26
- * Thu Oct  7 14:52:00 MST 2004
+ * Version: 5.27
+ * Sun Oct 24 02:54:00 MST 2004
  *
  */
 
@@ -168,10 +168,16 @@
 #define SHA_MAX_HEX_LEN		(SHA_MAX_DIGEST_BITS / 4)
 #define SHA_MAX_BASE64_LEN	(1 + (SHA_MAX_DIGEST_BITS / 6))
 
+#if defined(SHA64)
+	#define SHA_H_SIZE	sizeof(SHA64) * 8
+#else
+	#define SHA_H_SIZE	sizeof(SHA32) * 8
+#endif
+
 typedef struct {
 	int alg;
 	void (*sha)();
-	SHA32 H[SHA_MAX_DIGEST_BITS/32];
+	unsigned char H[SHA_H_SIZE];
 	unsigned char block[SHA_MAX_BLOCK_BITS/8];
 	unsigned int blockcnt;
 	unsigned int blocksize;

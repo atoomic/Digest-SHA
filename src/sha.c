@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2004 Mark Shelor, All Rights Reserved
  *
- * Version: 5.26
- * Thu Oct  7 14:52:00 MST 2004
+ * Version: 5.27
+ * Sun Oct 24 02:54:00 MST 2004
  *
  */
 
@@ -85,7 +85,7 @@ unsigned char *block;
 	W32 a, b, c, d, e;
 	SHA_STO_CLASS W32 W[16];
 	W32 *wp = W;
-	W32 *H = s->H;
+	W32 *H = (W32 *) s->H;
 
 	SHA32_SCHED(W, block);
 
@@ -155,7 +155,7 @@ unsigned char *block;
 	SHA_STO_CLASS W32 W[16];
 	W32 *kp = K256;
 	W32 *wp = W;
-	W32 *H = s->H;
+	W32 *H = (W32 *) s->H;
 
 	SHA32_SCHED(W, block);
 
@@ -226,17 +226,18 @@ W32 w32;
 
 #define SETBIT(str, pos)  str[(pos) >> 3] |=  (0x01 << (7 - (pos) % 8))
 #define CLRBIT(str, pos)  str[(pos) >> 3] &= ~(0x01 << (7 - (pos) % 8))
-#define BYTECNT(bitcnt)   (1 + (((bitcnt) - 1) >> 3))
+#define BYTECNT(bitcnt)   ((bitcnt) > 0 ? 1 + (((bitcnt) - 1) >> 3) : 0)
 
 /* digcpy: writes current state to digest buffer */
 static void digcpy(s)
 SHA *s;
 {
 	unsigned int i;
+	W32 *p = (W32 *) s->H;
 
 	if (s->blocksize == SHA1_BLOCK_BITS)
-		for (i = 0; i < 16; i++)
-			w32mem(s->digest + i * 4, s->H[i]);
+		for (i = 0; i < 8; i++)
+			w32mem(s->digest + i * 4, *p++);
 	else
 		digcpy64(s);
 }
@@ -513,7 +514,7 @@ int shadump(file, s)
 char *file;
 SHA *s;
 {
-	int i;
+	int i, j;
 	SHA_IO *f;
 	unsigned char *p;
 
@@ -524,15 +525,14 @@ SHA *s;
 	SHA_IO_printf(f, "alg:%d\n", s->alg);
 	SHA_IO_printf(f, "H");
 	p = shadigest(s);
-	if (s->alg <= SHA256) for (i = 0; i < 8; i++, p += 4)
-		SHA_IO_printf(f, ":%02x%02x%02x%02x",
-			p[0], p[1], p[2], p[3]);
-	else for (i = 0; i < 8; i++, p += 8)
-		SHA_IO_printf(f, ":%02x%02x%02x%02x%02x%02x%02x%02x",
-			p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7]);
+	for (i = 0; i < 8; i++) {
+		SHA_IO_printf(f, ":");
+		for (j = 0; j < (s->alg <= 256 ? 4 : 8); j++)
+			SHA_IO_printf(f, "%02x", *p++);
+	}
 	SHA_IO_printf(f, "\n");
 	SHA_IO_printf(f, "block");
-	for (i = 0; i < sizeof(s->block); i++)
+	for (i = 0; i < s->blocksize>>3; i++)
 		SHA_IO_printf(f, ":%02x", s->block[i]);
 	SHA_IO_printf(f, "\n");
 	SHA_IO_printf(f, "blockcnt:%u\n", s->blockcnt);
