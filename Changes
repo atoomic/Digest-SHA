@@ -24,3 +24,7 @@ Revision history for Perl extension Digest::SHA.
 		-- shadump() and shaload()
 	- reduced runtime of large bitstring tests (gillogly-hard)
 		-- illustrates usefulness of shadump()/shaload()
+
+2.0   Sat Nov  1 03:55:36 MST 2003
+	- added functions for HMAC-SHA-1/256/384/512 (FIPS PUB 198)
+	- shadump/shaload files now compatible between 32/64-bit machines

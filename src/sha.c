@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 1.01
- * Fri Oct 24 19:15:26 MST 2003
+ * Version: 2.0
+ * Sat Nov  1 02:03:19 MST 2003
  *
  */
 
@@ -460,6 +460,7 @@ int alg;
 	s->lenll = 0;
 	s->blockcnt = 0;
 	memset(s->H, 0, sizeof(s->H));
+	memset(s->block, 0, sizeof(s->block));
 	memset(s->digest, 0, sizeof(s->digest));
 	if (alg == SHA1) {
 		s->sha = sha1;
@@ -701,8 +702,6 @@ SHA *s;
 	int alg;
 	FILE *f;
 
-	if ((f = fopen(file, "w")) == NULL)
-		return(0);
 	if (s->digestlen == SHA1_DIGEST_BITS >> 3)
 		alg = SHA1;
 	else if (s->digestlen == SHA256_DIGEST_BITS >> 3)
@@ -717,10 +716,10 @@ SHA *s;
 
 #endif
 
-	else {
-		fclose(f);
+	else
 		return(0);
-	}
+	if ((f = fopen(file, "w")) == NULL)
+		return(0);
 	fprintf(f, "alg:%d\n", alg);
 	fprintf(f, "H");
 	for (i = 0; i < sizeof(s->H)/sizeof(s->H[0]); i++)
@@ -735,6 +734,10 @@ SHA *s;
 	fprintf(f, "lenhl:%lu\n", s->lenhl);
 	fprintf(f, "lenlh:%lu\n", s->lenlh);
 	fprintf(f, "lenll:%lu\n", s->lenll);
+	if (alg == SHA1 || alg == SHA256) {
+		fclose(f);
+		return(1);
+	}
 
 #ifdef SHA_384_512
 
@@ -749,6 +752,7 @@ SHA *s;
 	return(1);
 }
 
+
 #ifdef SHA_384_512
 
 static unsigned long long hex2ull(s)
@@ -758,88 +762,97 @@ char *s;
 	unsigned long long u = 0ULL;
 
 	str[1] = '\0';
-	while ((str[0] = *s++) != 0)
+	while ((str[0] = *s++) != '\0')
 		u = (u << 4) + strtoul(str, NULL, 16);
 	return(u);
 }
 
 #endif
 
+
+static int match(f, tag)
+FILE *f;
+char *tag;
+{
+	static char line[1024];
+
+	if (fgets(line, sizeof(line), f) == NULL)
+		return(0);
+	return(strcmp(strtok(line, ":\n"), tag) == 0);
+}
+
 SHA *shaload(file)
 char *file;
 {
 	int i;
+	int alg;
 	SHA *s;
 	FILE *f;
-	static char line[1024];
 
 	if ((f = fopen(file, "r")) == NULL)
 		return(NULL);
-	fgets(line, sizeof(line), f);
-	if (strcmp(strtok(line, ":\n"), "alg") != 0) {
+	if (!match(f, "alg")) {
 		fclose(f);
 		return(NULL);
 	}
-	if ((s = shaopen(atoi(strtok(NULL, ":\n")))) == NULL) {
+	alg = atoi(strtok(NULL, ":\n"));
+	if ((s = shaopen(alg)) == NULL) {
 		fclose(f);
 		return(NULL);
 	}
-	fgets(line, sizeof(line), f);
-	if (strcmp(strtok(line, ":\n"), "H") != 0) {
+	if (!match(f, "H")) {
 		fclose(f);
 		shaclose(s);
 		return(NULL);
 	}
 	for (i = 0; i < sizeof(s->H)/sizeof(s->H[0]); i++)
 		s->H[i] = strtoul(strtok(NULL, ":\n"), NULL, 16);
-	fgets(line, sizeof(line), f);
-	if (strcmp(strtok(line, ":\n"), "block") != 0) {
+	if (!match(f, "block")) {
 		fclose(f);
 		shaclose(s);
 		return(NULL);
 	}
 	for (i = 0; i < sizeof(s->block); i++)
 		s->block[i] = strtoul(strtok(NULL, ":\n"), NULL, 16);
-	fgets(line, sizeof(line), f);
-	if (strcmp(strtok(line, ":\n"), "blockcnt") != 0) {
+	if (!match(f, "blockcnt")) {
 		fclose(f);
 		shaclose(s);
 		return(NULL);
 	}
 	s->blockcnt = strtoul(strtok(NULL, ":\n"), NULL, 10);
-	fgets(line, sizeof(line), f);
-	if (strcmp(strtok(line, ":\n"), "lenhh") != 0) {
+	if (!match(f, "lenhh")) {
 		fclose(f);
 		shaclose(s);
 		return(NULL);
 	}
 	s->lenhh = strtoul(strtok(NULL, ":\n"), NULL, 10);
-	fgets(line, sizeof(line), f);
-	if (strcmp(strtok(line, ":\n"), "lenhl") != 0) {
+	if (!match(f, "lenhl")) {
 		fclose(f);
 		shaclose(s);
 		return(NULL);
 	}
 	s->lenhl = strtoul(strtok(NULL, ":\n"), NULL, 10);
-	fgets(line, sizeof(line), f);
-	if (strcmp(strtok(line, ":\n"), "lenlh") != 0) {
+	if (!match(f, "lenlh")) {
 		fclose(f);
 		shaclose(s);
 		return(NULL);
 	}
 	s->lenlh = strtoul(strtok(NULL, ":\n"), NULL, 10);
-	fgets(line, sizeof(line), f);
-	if (strcmp(strtok(line, ":\n"), "lenll") != 0) {
+	if (!match(f, "lenll")) {
 		fclose(f);
 		shaclose(s);
 		return(NULL);
 	}
 	s->lenll = strtoul(strtok(NULL, ":\n"), NULL, 10);
+	if (alg == SHA1 || alg == SHA256) {
+		fclose(f);
+		return(s);
+	}
+
 
 #ifdef SHA_384_512
 
-	fgets(line, sizeof(line), f);
-	if (strcmp(strtok(line, ":\n"), "HQ") != 0) {
+	if (!match(f, "HQ")) {
 		fclose(f);
 		shaclose(s);
 		return(NULL);
@@ -849,6 +862,7 @@ char *file;
 		s->HQ[i] = hex2ull(strtok(NULL, ":\n"));
 
 #endif
+
 
 	fclose(f);
 	return(s);
@@ -897,7 +911,7 @@ unsigned char *bitstr;
 unsigned long bitcnt;
 {
 	SHA *s;
-	static char hex[SHA_MAX_HEX_LEN + 1];
+	static char hex[SHA_MAX_HEX_LEN+1];
 
 	hex[0] = '\0';
 	if ((s = shacomp(SHA1, bitstr, bitcnt)) != NULL) {
@@ -912,7 +926,7 @@ unsigned char *bitstr;
 unsigned long bitcnt;
 {
 	SHA *s;
-	static char base64[SHA_MAX_BASE64_LEN + 1];
+	static char base64[SHA_MAX_BASE64_LEN+1];
 
 	base64[0] = '\0';
 	if ((s = shacomp(SHA1, bitstr, bitcnt)) != NULL) {
@@ -942,7 +956,7 @@ unsigned char *bitstr;
 unsigned long bitcnt;
 {
 	SHA *s;
-	static char hex[SHA_MAX_HEX_LEN + 1];
+	static char hex[SHA_MAX_HEX_LEN+1];
 
 	hex[0] = '\0';
 	if ((s = shacomp(SHA256, bitstr, bitcnt)) != NULL) {
@@ -957,7 +971,7 @@ unsigned char *bitstr;
 unsigned long bitcnt;
 {
 	SHA *s;
-	static char base64[SHA_MAX_BASE64_LEN + 1];
+	static char base64[SHA_MAX_BASE64_LEN+1];
 
 	base64[0] = '\0';
 	if ((s = shacomp(SHA256, bitstr, bitcnt)) != NULL) {
@@ -989,7 +1003,7 @@ unsigned char *bitstr;
 unsigned long bitcnt;
 {
 	SHA *s;
-	static char hex[SHA_MAX_HEX_LEN + 1];
+	static char hex[SHA_MAX_HEX_LEN+1];
 
 	hex[0] = '\0';
 	if ((s = shacomp(SHA384, bitstr, bitcnt)) != NULL) {
@@ -1004,7 +1018,7 @@ unsigned char *bitstr;
 unsigned long bitcnt;
 {
 	SHA *s;
-	static char base64[SHA_MAX_BASE64_LEN + 1];
+	static char base64[SHA_MAX_BASE64_LEN+1];
 
 	base64[0] = '\0';
 	if ((s = shacomp(SHA384, bitstr, bitcnt)) != NULL) {
@@ -1034,7 +1048,7 @@ unsigned char *bitstr;
 unsigned long bitcnt;
 {
 	SHA *s;
-	static char hex[SHA_MAX_HEX_LEN + 1];
+	static char hex[SHA_MAX_HEX_LEN+1];
 
 	hex[0] = '\0';
 	if ((s = shacomp(SHA512, bitstr, bitcnt)) != NULL) {
@@ -1049,7 +1063,7 @@ unsigned char *bitstr;
 unsigned long bitcnt;
 {
 	SHA *s;
-	static char base64[SHA_MAX_BASE64_LEN + 1];
+	static char base64[SHA_MAX_BASE64_LEN+1];
 
 	base64[0] = '\0';
 	if ((s = shacomp(SHA512, bitstr, bitcnt)) != NULL) {

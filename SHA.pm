@@ -17,6 +17,14 @@ our @ISA = qw(Exporter);
 # will save memory.
 
 our %EXPORT_TAGS = ( 'all' => [ qw(
+	hmac1base64
+	hmac1hex
+	hmac256base64
+	hmac256hex
+	hmac384base64
+	hmac384hex
+	hmac512base64
+	hmac512hex
 	sha1base64
 	sha1hex
 	sha256base64
@@ -42,7 +50,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '1.01';
+our $VERSION = '2.0';
 
 require XSLoader;
 XSLoader::load('Digest::SHA', $VERSION);
@@ -54,7 +62,7 @@ __END__
 
 =head1 NAME
 
-Digest::SHA - Perl extension for SHA-1/256/384/512
+Digest::SHA - Perl extension for SHA-1/256/384/512 and HMAC-SHA
 
 =head1 SYNOPSIS
 
@@ -82,13 +90,21 @@ Digest::SHA - Perl extension for SHA-1/256/384/512
 
   shaclose($state);
 
+  # HMAC-SHA keyed hash
+  use Digest::SHA qw(hmac1hex hmac1base64 hmac256hex ... );
+
+  $digest = hmac1hex($data, $data_length_in_bits, $key, $key_length);
+  $digest = hmac1base64($data, $data_length_in_bits, $key, $key_length);
+  ...
 
 =head1 ABSTRACT
 
 Digest::SHA provides a Perl interface to all algorithms defined in
-the NIST Secure Hash Standard (FIPS PUB 180-2).  The routines are
-general-purpose, allowing digests to be calculated for bit-strings
-as well as byte-strings.  The underlying code is written in C.
+the NIST Secure Hash Standard (FIPS PUB 180-2).  The module also
+includes support for computing keyed SHA hashes using the HMAC
+algorithm described in FIPS PUB 198.  The routines are general-purpose,
+allowing digests to be calculated for bit-strings as well as
+byte-strings.  The underlying code is written in C.
 
 =head1 DESCRIPTION
 
@@ -127,6 +143,20 @@ repeated 148 times, followed by the fragment "11".  Here's how to
 calculate its SHA-1 digest:
 
 	$digest = sha1hex(pack("B*", ("110"x148)."11"), 446);
+
+Finally, when calculating keyed-hashes using the HMAC-SHA functions,
+it's important to note that the data length is in B<bits>, whereas
+the key length is in B<bytes>.  This irregularity is due to the
+way SHA and HMAC define their parameters: SHA allows general
+bit-string data inputs, whereas HMAC recognizes only byte-oriented
+keys.
+
+So, to compute the HMAC-SHA-1 digest of "hello world" using the
+same data as the key, the code would go something like this:
+
+	$data = "hello world";
+	$len = length($data);
+        $digest = hmac1hex($data, 8*$len, $data, $len);
 
 =head1 EXPORT
 
@@ -247,6 +277,52 @@ or initialize it beforehand by calling "shaopen()".
 Frees all memory allocated during the previous "shaopen()",
 "shadup()", or "shaload()" call.
 
+=item I<HMAC-SHA Functions>
+
+=item B<hmac1hex($data, $data_length_in_bits, $key, $key_length)>
+
+Returns the HMAC-SHA-1 digest of $data/$key, encoded as a 40-character
+hexadecimal string.
+
+=item B<hmac1base64($data, $data_length_in_bits, $key, $key_length)>
+
+Returns the HMAC-SHA-1 digest of $data/$key, encoded as a Base64
+string.
+
+=item B<hmac256hex($data, $data_length_in_bits, $key, $key_length)>
+
+Returns the HMAC-SHA-256 digest of $data/$key, encoded as a
+64-character hexadecimal string.
+
+=item B<hmac256base64($data, $data_length_in_bits, $key, $key_length)>
+
+Returns the HMAC-SHA-256 digest of $data/$key, encoded as a Base64
+string.
+
+=item B<hmac384hex($data, $data_length_in_bits, $key, $key_length)>
+
+Returns the HMAC-SHA-384 digest of $data/$key, encoded as a
+96-character hexadecimal string.  This function will be undefined
+if your C compiler lacks support for 64-bit integral types.
+
+=item B<hmac384base64($data, $data_length_in_bits, $key, $key_length)>
+
+Returns the HMAC-SHA-384 digest of $data/$key, encoded as a Base64
+string.  This function will be undefined if your C compiler lacks
+support for 64-bit integral types.
+
+=item B<hmac512hex($data, $data_length_in_bits, $key, $key_length)>
+
+Returns the HMAC-SHA-512 digest of $data/$key, encoded as a
+128-character hexadecimal string.  This function will be undefined
+if your C compiler lacks support for 64-bit integral types.
+
+=item B<hmac512base64($data, $data_length_in_bits, $key, $key_length)>
+
+Returns the HMAC-SHA-512 digest of $data/$key, encoded as a Base64
+string.  This function will be undefined if your C compiler lacks
+support for 64-bit integral types.
+
 =back
 
 =head1 SEE ALSO
@@ -256,6 +332,10 @@ L<Digest::SHA1>
 The Secure Hash Standard (FIPS PUB 180-2) can be found at:
 
 http://csrc.nist.gov/publications/fips/fips180-2/fips180-2.pdf
+
+The Keyed-Hash Message Authentication Code (HMAC):
+
+http://csrc.nist.gov/publications/fips/fips198/fips-198a.pdf
 
 =head1 AUTHOR
 

@@ -5,11 +5,75 @@
 #include "ppport.h"
 
 #include <src/sha.c>
+#include <src/hmac.c>
 
 
 MODULE = Digest::SHA		PACKAGE = Digest::SHA		
 
+PROTOTYPES: ENABLE
+
 #include <src/sha.h>
+#include <src/hmac.h>
+
+char *
+hmac1hex(bitstr, bitcnt, key, keylen)
+	unsigned char *	bitstr
+	unsigned long	bitcnt
+	unsigned char *	key
+	unsigned int	keylen
+
+char *
+hmac1base64(bitstr, bitcnt, key, keylen)
+	unsigned char *	bitstr
+	unsigned long	bitcnt
+	unsigned char *	key
+	unsigned int	keylen
+
+char *
+hmac256hex(bitstr, bitcnt, key, keylen)
+	unsigned char *	bitstr
+	unsigned long	bitcnt
+	unsigned char *	key
+	unsigned int	keylen
+
+char *
+hmac256base64(bitstr, bitcnt, key, keylen)
+	unsigned char *	bitstr
+	unsigned long	bitcnt
+	unsigned char *	key
+	unsigned int	keylen
+
+#ifdef SHA_384_512
+
+char *
+hmac384hex(bitstr, bitcnt, key, keylen)
+	unsigned char *	bitstr
+	unsigned long	bitcnt
+	unsigned char *	key
+	unsigned int	keylen
+
+char *
+hmac384base64(bitstr, bitcnt, key, keylen)
+	unsigned char *	bitstr
+	unsigned long	bitcnt
+	unsigned char *	key
+	unsigned int	keylen
+
+char *
+hmac512hex(bitstr, bitcnt, key, keylen)
+	unsigned char *	bitstr
+	unsigned long	bitcnt
+	unsigned char *	key
+	unsigned int	keylen
+
+char *
+hmac512base64(bitstr, bitcnt, key, keylen)
+	unsigned char *	bitstr
+	unsigned long	bitcnt
+	unsigned char *	key
+	unsigned int	keylen
+
+#endif
 
 char *
 sha1base64(bitstr, bitcnt)

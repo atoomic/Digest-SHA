@@ -6,6 +6,8 @@ README
 SHA.pm
 SHA.xs
 typemap
+src/hmac.c
+src/hmac.h
 src/sha.c
 src/sha.h
 t/1-exist.t
@@ -22,6 +24,8 @@ t/3-gillogly-hard.t
 t/4-bitstr-increasing.t
 t/4-bitstr-large.t
 t/4-bitstr-random.t
+t/5-fips198-hmac-sha-1.t
+t/6-rfc2202-hmac-sha-1.t
 t/gillogly/state.011
 t/gillogly/state.110
 t/nist/COPYRIGHT
