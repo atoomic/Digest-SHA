@@ -1,4 +1,4 @@
-Digest::SHA version 5.25
+Digest::SHA version 5.26
 ========================
 
 Digest::SHA is a complete implementation of the NIST Secure Hash
@@ -11,10 +11,8 @@ Digest::SHA is written in C for speed.  If your platform lacks a
 C compiler, you can install the functionally-equivalent (but much
 slower) Digest::SHA::PurePerl module.
 
-Please refer to the tests subdirectory (t/*.t) for an extensive
-set of SHA vectors compiled from various sources.  Of particular
-interest are the NIST vectors, which examine a large variety of
-bit-strings and byte-strings.
+The tests subdirectory (t/*.t) contains an extensive set of SHA
+vectors compiled from various sources.
 
 INSTALLATION
 
