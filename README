@@ -1,56 +1,63 @@
-Digest::SHA version 4.0.0
-=========================
+Digest::SHA version 3.1
+=======================
 
-The Digest::SHA module provides a Perl interface to all varieties
-of the Secure Hash Algorithm, namely, SHA-1, SHA-256, SHA-384, and
-SHA-512.  Fuctions are also included to compute keyed-hashes using
-the HMAC algorithm.
+The  Digest::SHA module provides a Perl interface to all varieties  of
+the  Secure  Hash Algorithm specified in the current NIST Secure  Hash
+Standard  (FIPS PUB 180-2). In other words, the module supports SHA-1,
+SHA-256,  SHA-384, and SHA-512. Fuctions are also included to  compute
+keyed SHA hashes using the HMAC algorithm.
 
-The inteface conforms to all requirements, styles, and conventions
-specified in the CPAN Digest:: module, including the option to
-calculate digests for messages that aren't aligned on byte boundaries.
-Also provided are methods to save and subsequently retrieve
-intermediate SHA states to and from persistent storage.
+The  inteface conforms to the conventions and guidelines specified  in
+the  CPAN  Digest:: module, and provides many additional functions  to
+handle  bit-oriented  data and the persistent storage of  intermediate
+SHA states. The core of Digest::SHA is written in C for speed.
 
-The underlying C code is designed to be portable, and requires no
-special libraries beyond those found with typical compilers.
-However, if your compiler doesn't recognize the "long long" type,
-the functions associated with the SHA-384 and SHA-512 transforms
-will return null values.
+Whereas  most message digest packages are restricted to  byte-oriented
+data, the full SHA standard calls for bit-oriented inputs as well. The
+Digest::SHA  module  accepts  both types of input, and  allows  digest
+calculations to be performed directly, or iteratively in stages.
 
-As of Version 4.0.0, the Digest::SHA module is beginning the process
-of deprecating the old "shaopen()/shawrite()/shaclose()" interface
-in favor of the more streamlined OO style.  The old functions are
-still available, and can be conveniently accessed by inserting
+The  underlying  C  code is designed to be portable, and  requires  no
+special  libraries beyond those found with typical compilers. However,
+if  your compiler can't handle 64-bit integral types (i.e. long long),
+the  functions associated with the SHA-384 and SHA-512 transforms will
+return null values.
 
-	use Digest::SHA ':legacy';
+Prior  to  version  2.2, the SHA algorithm code mapped as  closely  as
+possible  to  the NIST specification in the interest  of  establishing
+correctness. Subsequent versions of this module have begun to focus on
+performance optimization, particularly with regard to the heavily-used
+SHA-1  transform.  Informal benchmarks indicate that the  version  2.2
+code  is  roughly  20-30%  faster  than  its  predecessor  for   SHA-1
+operations.   The   goal  is  to  achieve  the  fastest   possible   C
+implementation  without  any  sacrifice  in  portability.  The  author
+welcomes any comments or suggestions for further enhancements.
 
-in your code.  However, continued use of these functions is discouraged.
-
-The tests subdirectory (t/*.t) contains an extensive set of SHA
-vectors compiled from various sources.  Of particular interest are
-the NIST vectors, which examine a large variety of bit-strings and
-byte-strings (see the "t/nist/COPYRIGHT" file for details).  Also
-useful are the bit-vectors supplied by Jim Gillogly and Francois
-Grieu, which check the behavior of implementations for input strings
+The  tests  subdirectory  (t/*.t)  contains an extensive  set  of  SHA
+vectors  compiled from various sources. Of particular interest are the
+NIST  vectors,  which  examine  a large  variety  of  bit-strings  and
+byte-strings  (see  the  "t/nist/COPYRIGHT" file  for  details).  Also
+useful  are  the  bit-vectors supplied by Jim  Gillogly  and  Francois
+Grieu,  which check the behavior of implementations for input  strings
 that exceed 2^32 bits in length.
 
 INSTALLATION
 
-To install this module type the following:
+To install this module, type the following:
 
-   perl Makefile.PL
-   make
-   make test
-   make install
+    perl Makefile.PL
+    make
+    make test
+    make install
 
-DEPENDENCIES
+DEPENDENCY
 
-   None.
+    Digest::base
 
-COPYRIGHT AND LICENCE
+COPYRIGHT AND LICENSE
 
-Copyright (C) 2003 Mark Shelor
+Copyright (C) 2003 Mark Shelor, Julius C. Duque
 
-This library is free software; you can redistribute it and/or modify
+This  library is free software; you can redistribute it and/or  modify
 it under the same terms as Perl itself.
+

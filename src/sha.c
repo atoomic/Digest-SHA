@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 4.0.0
- * Sat Nov 29 23:18:45 MST 2003
+ * Version: 3.0
+ * Wed Nov 26 05:02:34 MST 2003
  *
  */
 
@@ -617,10 +617,8 @@ char *file;
 int shaclose(s)
 SHA *s;
 {
-	if (s != NULL) {
-		memset(s, 0, sizeof(SHA));
-		free(s);
-	}
+	memset(s, 0, sizeof(SHA));
+	free(s);
 	return(0);
 }
 

@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 4.0.0
- * Sat Nov 29 23:18:45 MST 2003
+ * Version: 3.0
+ * Wed Nov 26 05:02:34 MST 2003
  *
  */
 
@@ -99,10 +99,8 @@ int hmacclose(h)
 HMAC *h;
 {
 	shaclose(h->osha);
-	if (h != NULL) {
-		memset(h, 0, sizeof(HMAC));
-		free(h);
-	}
+	memset(h, 0, sizeof(HMAC));
+	free(h);
 	return(0);
 }
 

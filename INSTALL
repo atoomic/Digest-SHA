@@ -1,0 +1,9 @@
+INSTALLATION
+
+To install Digest::SHA, type the following:
+
+     perl Makefile.PL
+     make
+     make test
+     make install
+

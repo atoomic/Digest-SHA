@@ -1,0 +1,17 @@
+#!/usr/local/bin/perl
+
+# Copyright (C) 2003 Julius C. Duque
+
+use diagnostics;
+use strict;
+use warnings;
+use Digest::SHA;
+
+chomp $ARGV[0];
+open INFILE, $ARGV[0];
+my $context = new Digest::SHA 1;
+$context->addfile(*INFILE);
+my $digest = $context->hexdigest;
+print "$digest  $ARGV[0]\n";
+close INFILE;
+

@@ -1,0 +1,16 @@
+To use the Perl script, "hashfile", type:
+
+        ./hashfile <file>
+
+where <file> is the file you want to hash, e.g.,
+
+        ./hashfile README
+
+Only one file can be hashed, though.
+
+The Perl script, "strings", hashes different strings using the different
+flavors of SHA. The use of the method hashsize() is also illustrated.
+
+AUTHOR:
+Julius C. Duque <{jcduque}{at}{lycos}{dot}{com}>
+
