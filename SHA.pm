@@ -41,7 +41,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw();
 
-our $VERSION = '4.0.6';
+our $VERSION = '4.0.7';
 
 require XSLoader;
 XSLoader::load('Digest::SHA', $VERSION);
@@ -59,7 +59,7 @@ sub new {
 			sharewind($class->[0]);
 			return($class);
 		}
-		shaclose($class->[0]);
+		shaclose($class->[0]) if $class->[0];
 		$class->[0] = shaopen($alg) || return;
 		return($class);
 	}
@@ -72,7 +72,7 @@ sub new {
 
 sub DESTROY {
 	my $self = shift;
-	shaclose($self->[0]);
+	shaclose($self->[0]) if $self->[0];
 }
 
 sub clone {
@@ -117,7 +117,7 @@ sub load {
 	my $class = shift;
 	my $file = shift || "";
 	if (ref($class)) {	# instance method
-		shaclose($class->[0]);
+		shaclose($class->[0]) if $class->[0];
 		$class->[0] = shaload($file) || return;
 		return($class);
 	}
@@ -220,13 +220,24 @@ a portable, human-readable text-file describing the current state
 of computation.  You can subsequently retrieve the file with
 I<load()> to resume where the calculation left off.
 
-As a temporary convenience, the Digest::SHA module offers self-contained
-routines to calculate keyed hashes using the HMAC-SHA-1/256/384/512
-algorithms.  These services exist in functional form only, and
-closely mimic the style and behavior of the I<sha()>, I<sha_hex()>,
-and I<sha_base64()> functions.  It's expected that they'll move to
-an appropriate Digest::HMAC module once the related OO methods are
-developed and tested.
+If you're curious about what a state description looks like, just
+run the following two-liner:
+
+	use Digest::SHA;
+	Digest::SHA->new(256)->add("COL Bat Guano" x 1964)->dump;
+
+As a temporary convenience, the Digest::SHA module offers routines
+to calculate keyed hashes using the HMAC-SHA-1/256/384/512 algorithms.
+These services exist in functional form only, and mimic the style
+and behavior of the I<sha()>, I<sha_hex()>, and I<sha_base64()>
+functions.  It's expected that they'll move to an appropriate
+Digest::HMAC module once the related OO methods are developed and
+tested.
+
+	# test vector from draft-ietf-ipsec-ciph-sha-256-01.txt
+
+	use Digest::SHA qw(hmac_sha256_hex);
+	print hmac_sha256_hex("Hi There", chr(0x0b) x 32), "\n";
 
 =head1 EXPORT
 

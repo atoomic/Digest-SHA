@@ -1,4 +1,4 @@
-Digest::SHA version 4.0.6
+Digest::SHA version 4.0.7
 =========================
 
 The Digest::SHA module provides an easy way to compute message
@@ -18,7 +18,7 @@ However, if your compiler doesn't recognize the "long long" type,
 the routines associated with SHA-384 and SHA-512 will return null
 values.
 
-Version 4.0.6 focuses on further performance enhancements.  All
+Version 4.0.7 focuses on further performance enhancements.  All
 time-critical functions and methods have been rewritten in XS.
 Digest::SHA now compares favorably with other CPAN SHA modules in
 terms of performance.  Its speed on big-endian platforms is often
