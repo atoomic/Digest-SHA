@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use integer;
 
-our $VERSION = '5.01';
+our $VERSION = '5.02';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -146,7 +146,8 @@ Digest::SHA - Perl extension for SHA-1/224/256/384/512
  # OO style
  use Digest::SHA;
 
- $sha = Digest::SHA->new($alg);		# alg = 1, 224, 256, 384, 512
+ $mod = "Digest::SHA";
+ $sha = $mod->new($alg);		# alg = 1, 224, 256, 384, 512
 
  $sha->add($data);
  $sha->addfile(*FILE);
@@ -154,6 +155,12 @@ Digest::SHA - Perl extension for SHA-1/224/256/384/512
  $digest = $sha->digest;
  $digest = $sha->hexdigest;
  $digest = $sha->b64digest;
+
+ $sha->add_bits($bits);			# bitwise inputs
+ $sha->add_bits($data, $nbits);
+
+ $sha->dump($filename);			# save/restore SHA states
+ $sha->load($filename);
 
 =head1 SYNOPSIS (HMAC-SHA)
 
@@ -207,8 +214,10 @@ the 446-bit message consisting of the bit-string "110" repeated
 148 times, followed by "11".  Here's how to calculate its SHA-1
 digest:
 
+	use Digest::SHA;
+	$mod = "Digest::SHA";
 	$bits = "110" x 148 . "11";
-	$digest = Digest::SHA->new(1)->add_bits($bits)->hexdigest;
+	$digest = $mod->new(1)->add_bits($bits)->hexdigest;
 
 Note that for larger bit-strings, it's more efficient to use the
 two-argument version I<add_bits($data, $nbits)>, where I<$data> is
@@ -223,7 +232,9 @@ I<load()> to resume where the calculation left off.
 If you're curious about what a state description looks like, just
 run the following:
 
-	Digest::SHA->new(256)->add("COL Bat Guano" x 1964)->dump;
+	use Digest::SHA;
+	$mod = "Digest::SHA";
+	$mod->new(256)->add("COL Bat Guano" x 1964)->dump;
 
 As an added convenience, the Digest::SHA module offers routines to
 calculate keyed hashes using the HMAC-SHA-1/224/256/384/512
@@ -233,6 +244,7 @@ I<sha_base64()> functions.
 
 	# test vector from draft-ietf-ipsec-ciph-sha-256-01.txt
 
+	use Digest::SHA qw(hmac_sha256_hex);
 	print hmac_sha256_hex("Hi There", chr(0x0b) x 32), "\n";
 
 =head1 EXPORT
@@ -474,7 +486,7 @@ in the list.
 
 =head1 SEE ALSO
 
-L<Digest>, L<Digest::SHA1>, L<Digest::SHA2>
+L<Digest>, L<Digest::SHA::PurePerl>
 
 The Secure Hash Standard (FIPS PUB 180-2) can be found at:
 
@@ -486,9 +498,9 @@ L<http://csrc.nist.gov/publications/fips/fips198/fips-198a.pdf>
 
 =head1 AUTHOR
 
-Mark Shelor, E<lt>mshelor@comcast.netE<gt>
+Mark Shelor, E<lt>mshelor@cpan.orgE<gt>
 
-The author is particularly grateful to Gisle Ass, Julius Duque,
+The author is particularly grateful to Gisle Aas, Julius Duque,
 Jeffrey Friedl, Robert Gilmour, Brian Gladman, Andy Lester, Alex
 Muntada, Chris Skiscim, and Martin Thurn for their valuable comments,
 suggestions, and technical support.

@@ -1,5 +1,14 @@
 Revision history for Perl extension Digest::SHA.
 
+5.02  Thu Jul 29 02:48:00 MST 2004
+	- updated documentation and "dump-load.t" test script
+		-- to be consistent with Digest::SHA::PurePerl
+	- included a SIGNATURE file
+		-- for stronger authentication of module contents
+			-- ref. Module::Signature on CPAN
+	- corrected embarrassing misspelling in docs
+		-- apologies to Gisle Aas
+
 5.01  Fri May 21 13:08:12 MST 2004
 	- check for undefined SHA handle when calling "shaclose()"
 		-- prevents intermittent cleanup errors during 

@@ -15,7 +15,7 @@ WriteMakefile(
 	'NAME'		=> 'Digest::SHA',
 	'VERSION_FROM'	=> 'SHA.pm',
 	'PREREQ_PM'	=> {},
-	'AUTHOR'	=> 'Mark Shelor <mshelor@comcast.net>',
+	'AUTHOR'	=> 'Mark Shelor <mshelor@cpan.org>',
 	'LIBS'		=> [''],
 	'DEFINE'	=> $define,
 	'INC'		=> '-I.',

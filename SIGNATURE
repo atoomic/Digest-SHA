@@ -1,0 +1,73 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.41.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It would check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 8fc714520fa3372e1a47842aa2fec408a59ab437 Changes
+SHA1 0c936705f17a244c4b74fb10803ac00ad552ba0c MANIFEST
+SHA1 9bb6e28a9f2442c482943ca04778cdf428cddb8d META.yml
+SHA1 5bd77f41b24a86ad5adba808e71f5f246a4974b0 Makefile.PL
+SHA1 6cb8bd8169a121edfdb42bf040a6e41172d73139 README
+SHA1 24991eb0a9cb02b1952c59caa9b0b84ca4b71099 SHA.pm
+SHA1 51d3d1db41241cdf960bb3d5c81efa9eac13b197 SHA.xs
+SHA1 0389154c992f23bfc99b36f187500c4d2e47ac95 ppport.h
+SHA1 0fd7507fef416d4f906b43e65bb89cf06b42046b src/hmac.c
+SHA1 23a1298f7cfbeded931b2035ab3f746f3e14e9cb src/hmac.h
+SHA1 7589c6ce33e74a58ded932d69756659e91723fdb src/hmacxtra.c
+SHA1 84f778d1157662db3be6aaeb2436c9677c290c5b src/sha.c
+SHA1 fae42613ed57a36e32319bfac4d74e8881f28223 src/sha.h
+SHA1 cb9056db285eeca643b3f53e80690e8306a448a1 src/sha64bit.c
+SHA1 286ffee4d9d5d10558f12ccd2edbefa838ded409 src/sha64bit.h
+SHA1 329ac17325437c725331fbf84ae0c9484f50041a src/shaxtra.c
+SHA1 a746bfa6b879304ad9d4a4ad5ba93a31db5a13cb t/1-exist.t
+SHA1 c80264027fa9ff63bfb5712cce63e631d2fab910 t/1-hello-world.t
+SHA1 4af1367a8590af743057075d21616639e24cdfe4 t/2-nist-sha-1.t
+SHA1 e623edb94e6a7a782bad3e17a64f6b0bfd37257e t/2-nist-sha-224.t
+SHA1 7d5981a9ad192268d4815e21b1e31891b1043375 t/2-nist-sha-256.t
+SHA1 918a8e95e3e7224b8af932bb08695c359636ed99 t/2-nist-sha-384.t
+SHA1 a1c40a7aa01ec529c2be0f8122f1c4533e041515 t/2-nist-sha-512.t
+SHA1 5a2fc9053ff7df81ae7a12d11709d8b0d380714a t/2-nist-sha-base64.t
+SHA1 e6adb9114917d9911c402f7587ed9bdf1642acaf t/2-nist-sha-oo.t
+SHA1 aa3927cc45784a43e7e378cb0782da402d942ca3 t/2-nist-vectors-bit.t
+SHA1 69fb021785f2520a76afd4a40fd67f5cdb6373a3 t/2-nist-vectors-byte.t
+SHA1 5efb4861870c07d5b52402a54148f6c1c20da813 t/3-gillogly-easy.t
+SHA1 84e78f69393cf9a28e1363ea7991b95bb7a1c325 t/3-gillogly-hard.t
+SHA1 97e25f4939ee815f77ca5d01921b7e3b2145d4ed t/4-bitstr-increasing.t
+SHA1 7d0e85bc97ffab13282e8e60a6ce3801a7876cd5 t/4-bitstr-large.t
+SHA1 c28ce25d2301a6dc322e127a41eebb2816286d57 t/4-bitstr-random.t
+SHA1 a02016cd70bf7ad57ac3605ae8052ee341134c63 t/5-hmac-fips198.t
+SHA1 a0f5f2c0fae0f1b1dfa4843fcd8fbe66bba19db8 t/5-hmac-rfc2202.t
+SHA1 97854e283d08ab022f51c3681f10e673cc88c903 t/5-hmac-sha-256.t
+SHA1 a049c2bb007b5c86bbbaa2b3c949c6c19604a802 t/6-dump-load.t
+SHA1 6228a85f4d019149250d359b9a1713e75e0c5b35 t/7-ireland.t
+SHA1 d6bd2384003f9f5b3c43aaa0a9fb74838d41b30c t/gillogly/state.011
+SHA1 4237f086f98425c77f486f1bc1fac882eb4cfd84 t/gillogly/state.110
+SHA1 246ea517f3af7d53a3e4d72e0ea63dfd1e2e0427 t/nist/COPYRIGHT
+SHA1 573d7d4bba50c5cecb4a86f1ffff14d764a31ecb t/nist/Readme.txt
+SHA1 c742ad5b130441f095f4bd38b48c747ef57d494a t/nist/bit-hashes.sha1
+SHA1 b457265171086ae325aa620c98f26d109fa4c4f8 t/nist/bit-messages.sha1
+SHA1 244e5aa5951fb44aba97344f8efbadcb4bf25eda t/nist/byte-hashes.sha1
+SHA1 1f073727b2884f30cadc091341ddba75153d4611 t/nist/byte-messages.sha1
+SHA1 6cf53c0bdf33425b7b58e685b8651fc062ff71e2 t/state/state.1
+SHA1 ecf1aa855d9a0a6bc3291feadf2fa77f3bc4da7f t/state/state.256
+SHA1 2130ee8086bc7bf41fc329e9d87a81e2d98b68c8 t/state/state.384
+SHA1 69cd49d84cb11c83ef8e6eb36f6a472edb37079d t/state/state.512
+SHA1 e93dd71c67ba56e170516c16eeeb7659a41f91fd typemap
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.2.4 (Darwin)
+
+iD8DBQFBCMhkBwNg/wr1Y/4RAsbYAJ92K70T0s7o7P0hXlvL4Z34QdZRqQCgmYf3
+/V2Kz4SZp+eTapDRAzrSvcQ=
+=oAYa
+-----END PGP SIGNATURE-----

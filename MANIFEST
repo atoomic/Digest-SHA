@@ -6,6 +6,7 @@ ppport.h
 README
 SHA.pm
 SHA.xs
+SIGNATURE
 typemap
 src/hmac.c
 src/hmac.h
