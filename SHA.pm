@@ -48,7 +48,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw();
 
-our $VERSION = '2.1';
+our $VERSION = '2.2';
 
 require XSLoader;
 XSLoader::load('Digest::SHA', $VERSION);
@@ -233,6 +233,25 @@ sub hmac512base64 {
 	return(c_hmac512base64($data, $dlen, $key, $klen));
 }
 
+sub shadump {
+	my($file, $state) = @_;
+
+	if (!defined($state)) {
+		$state = $file;
+		$file = "";
+	}
+	c_shadump($file, $state);
+}
+
+sub shaload {
+	my($file) = @_;
+
+	if (!defined($file)) {
+		$file = "";
+	}
+	c_shaload($file);
+}
+
 1;
 __END__
 
@@ -248,8 +267,8 @@ Digest::SHA - Perl extension for SHA-1/256/384/512 and HMAC-SHA
   $digest = sha1hex($data);			# byte-oriented data
   $digest = sha1hex($data, $data_len_in_bits);	# bit-oriented
 
-  $digest = sha1base64($data);
-  $digest = sha1base64($data, $data_len_in_bits);
+  $digest = sha384base64($data);
+  $digest = sha512base64($data, $data_len_in_bits);
   ...
 
   # Iterative computation
@@ -286,13 +305,25 @@ byte-strings.  The underlying code is written in C.
 
 =head1 DESCRIPTION
 
+Digest::SHA endeavors to provide a complete and portable implementation
+of the NIST Secure Hash Standard.  It differs from the majority of
+existing SHA packages which usually omit support for bit-string
+inputs, and often don't include the entire range of transforms
+specified by NIST.
+
+The module attempts to be as fast and efficient as possible, with
+the goal of combining Perl's ease-of-use with C's performance
+advantages.  For added convenience, the package also includes a
+Perl script to perform myriad SHA operations through the command
+line.  Just type I<shasum --help> for details.
+
 Digest::SHA offers two ways to calculate digests: all-at-once, or
 in stages.  The first is simpler, and often requires only one line
 of Perl.  The second is more general, allowing input to be processed
 in chunks.
 
 To illustrate the difference, the following program calculates the
-SHA-256 digest of "hello world" using the two different methods:
+SHA-256 digest of I<hello world> using the two different methods:
 
 	use Digest::SHA ':all';
 
@@ -355,43 +386,43 @@ require 64-bit operations.
 
 =item B<sha1hex($data [ , $data_len_in_bits ] )>
 
-Returns the SHA-1 digest of $data, encoded as a 40-character
+Returns the SHA-1 digest of I<$data>, encoded as a 40-character
 hexadecimal string.
 
 =item B<sha1base64($data [ , $data_len_in_bits ] )>
 
-Returns the SHA-1 digest of $data, encoded as a Base64 string.
+Returns the SHA-1 digest of I<$data>, encoded as a Base64 string.
 
 =item B<sha256hex($data [ , $data_len_in_bits ] )>
 
-Returns the SHA-256 digest of $data, encoded as a 64-character
+Returns the SHA-256 digest of I<$data>, encoded as a 64-character
 hexadecimal string.
 
 =item B<sha256base64($data [ , $data_len_in_bits ] )>
 
-Returns the SHA-256 digest of $data, encoded as a Base64 string.
+Returns the SHA-256 digest of I<$data>, encoded as a Base64 string.
 
 =item B<sha384hex($data [ , $data_len_in_bits ] )>
 
-Returns the SHA-384 digest of $data, encoded as a 96-character
+Returns the SHA-384 digest of I<$data>, encoded as a 96-character
 hexadecimal string.  This function will be undefined if your C
 compiler lacks support for 64-bit integral types.
 
 =item B<sha384base64($data [ , $data_len_in_bits ] )>
 
-Returns the SHA-384 digest of $data, encoded as a Base64 string.
+Returns the SHA-384 digest of I<$data>, encoded as a Base64 string.
 This function will be undefined if your C compiler lacks support
 for 64-bit integral types.
 
 =item B<sha512hex($data [ , $data_len_in_bits ] )>
 
-Returns the SHA-512 digest of $data, encoded as a 128-character
+Returns the SHA-512 digest of I<$data>, encoded as a 128-character
 hexadecimal string.  This function will be undefined if your C
 compiler lacks support for 64-bit integral types.
 
 =item B<sha512base64($data [ , $data_len_in_bits ] )>
 
-Returns the SHA-512 digest of $data, encoded as a Base64 string.
+Returns the SHA-512 digest of I<$data>, encoded as a Base64 string.
 This function will be undefined if your C compiler lacks support
 for 64-bit integral types.
 
@@ -400,7 +431,7 @@ for 64-bit integral types.
 =item B<shaopen($alg)>
 
 Begins the iterative calculation of a SHA digest, returning a state
-variable for use by subsequent iterative "sha...()" functions.
+variable for use by subsequent iterative I<sha...()> functions.
 The $alg argument determines which SHA transform will be used (e.g.
 $alg = 256 corresponds to SHA-256).  This function will return a
 NULL value for $alg = 384 or $alg = 512 if your C compiler lacks
@@ -408,20 +439,20 @@ support for 64-bit integral types.
 
 =item B<shawrite($data, [ $data_len_in_bits, ] $state)>
 
-Updates the SHA state by feeding in $data.  The caller invokes this
-function repeatedly until all data has been processed.  The value
-of $data_len_in_bits B<must not> exceed 2^32-1 for each individual
-call of "shawrite()".  However, per the NIST standard, the total
-accumulated length of the data stream may be as large as 2^64-1
-for SHA-1 and SHA-256, or 2^128-1 for SHA-384 and SHA-512.
+Updates the SHA state by feeding in I<$data>.  The caller invokes
+this function repeatedly until all data has been processed.  The
+value of I<$data_len_in_bits> B<must not> exceed 2^32-1 for each
+individual call of I<shawrite()>.  However, per the NIST standard,
+the total accumulated length of the data stream may be as large as
+2^64-1 for SHA-1 and SHA-256, or 2^128-1 for SHA-384 and SHA-512.
 
 =item B<shafinish($state)>
 
 Finalizes the SHA calculation by padding and transforming the final
 block(s), and updating the state.  It is necessary to call this
 function before attempting to access the final digest value through
-"shahex()" or "shabase64()".  However, calling them beforehand may
-be useful to folks who are interested in examining SHA's internal
+I<shahex()> or I<shabase64()>.  However, calling them beforehand
+may be useful to folks who are interested in examining SHA's internal
 state at various stages of the digest computation.
 
 =item B<shahex($state)>
@@ -436,72 +467,75 @@ Returns the digest value, encoded as a Base64 string.
 
 Returns a duplicate copy of the current state.
 
-=item B<shadump($filename, $state)>
+=item B<shadump( [ $filename, ] $state)>
 
 Provides persistent storage of intermediate SHA states by writing
-the contents of the $state structure to disk.  In combination with
-"shaload()" and "shadup()", this routine can help to speed up SHA
-calculations for data sets that share identical headers.  See the
-"gillogly-hard" script in the "t/" subdirectory for a simple
-illustration.
+the contents of the I<$state> structure to disk.  If I<$filename>
+is missing, or equal to the empty string, the state information
+will be written to stdout.  In combination with I<shaload()> and
+I<shadup()>, this routine can help to speed up SHA calculations
+for data sets that share identical headers.  See the I<gillogly-hard>
+script in the I<t/> subdirectory for a simple illustration.
 
-=item B<shaload($filename)>
+=item B<shaload( [ $filename ] )>
 
 Retrieves the contents of an intermediate SHA state that was
-previously stored to disk by "shadump()".  The "shaload()" routine
-returns a fresh copy of this state, so it's not necessary to create
-or initialize it beforehand by calling "shaopen()".
+previously stored to disk by I<shadump()>.  If I<$filename> is
+missing, or equal to the empty string, the state information will
+be read from stdin.  The I<shaload()> routine returns a fresh copy
+of this state, so it's not necessary to create or initialize it
+beforehand by calling I<shaopen()>.
 
 =item B<shaclose($state)>
 
-Frees all memory allocated during the previous "shaopen()",
-"shadup()", or "shaload()" call.
+Frees all memory allocated during the previous I<shaopen()>,
+I<shadup()>, or I<shaload()> call.
 
 =item I<HMAC-SHA Functions>
 
 =item B<hmac1hex($data, [ $data_len_in_bits, ] $key)>
 
-Returns the HMAC-SHA-1 digest of $data/$key, encoded as a 40-character
-hexadecimal string.
+Returns the HMAC-SHA-1 digest of I<$data/$key>, encoded as a
+40-character hexadecimal string.
 
 =item B<hmac1base64($data, [ $data_len_in_bits, ] $key)>
 
-Returns the HMAC-SHA-1 digest of $data/$key, encoded as a Base64
+Returns the HMAC-SHA-1 digest of I<$data/$key>, encoded as a Base64
 string.
 
 =item B<hmac256hex($data, [ $data_len_in_bits, ] $key)>
 
-Returns the HMAC-SHA-256 digest of $data/$key, encoded as a
+Returns the HMAC-SHA-256 digest of I<$data/$key>, encoded as a
 64-character hexadecimal string.
 
 =item B<hmac256base64($data, [ $data_len_in_bits, ] $key)>
 
-Returns the HMAC-SHA-256 digest of $data/$key, encoded as a Base64
-string.
+Returns the HMAC-SHA-256 digest of I<$data/$key>, encoded as a
+Base64 string.
 
 =item B<hmac384hex($data, [ $data_len_in_bits, ] $key)>
 
-Returns the HMAC-SHA-384 digest of $data/$key, encoded as a
+Returns the HMAC-SHA-384 digest of I<$data/$key>, encoded as a
 96-character hexadecimal string.  This function will be undefined
 if your C compiler lacks support for 64-bit integral types.
 
 =item B<hmac384base64($data, [ $data_len_in_bits, ] $key)>
 
-Returns the HMAC-SHA-384 digest of $data/$key, encoded as a Base64
-string.  This function will be undefined if your C compiler lacks
-support for 64-bit integral types.
+Returns the HMAC-SHA-384 digest of I<$data/$key>, encoded as a
+Base64 string.  This function will be undefined if your C compiler
+lacks support for 64-bit integral types.
 
 =item B<hmac512hex($data, [ $data_len_in_bits, ] $key)>
 
-Returns the HMAC-SHA-512 digest of $data/$key, encoded as a
+Returns the HMAC-SHA-512 digest of I<$data/$key>, encoded as a
 128-character hexadecimal string.  This function will be undefined
 if your C compiler lacks support for 64-bit integral types.
 
 =item B<hmac512base64($data, [ $data_len_in_bits, ] $key)>
 
-Returns the HMAC-SHA-512 digest of $data/$key, encoded as a Base64
-string.  This function will be undefined if your C compiler lacks
-support for 64-bit integral types.
+Returns the HMAC-SHA-512 digest of I<$data/$key>, encoded as a
+Base64 string.  This function will be undefined if your C compiler
+lacks support for 64-bit integral types.
 
 =back
 

@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 2.1
- * Sun Nov  9 03:39:01 MST 2003
+ * Version: 2.2
+ * Sun Nov 16 01:54:00 MST 2003
  *
  */
 
@@ -20,9 +20,9 @@
 #define ROTR(x, n)	( ( (x) >> (n) ) | ( (x) << (32 - (n)) ) )
 #define ROTL(x, n)	( ( (x) << (n) ) | ( (x) >> (32 - (n)) ) )
 
-#define Ch(x, y, z)	( ( (x) & (y) ) ^ ( ~(x) & (z) ) )
+#define Ch(x, y, z)	( (z) ^ ( (x) & ( (y) ^ (z) ) ) )
 #define Parity(x, y, z)	( (x) ^ (y) ^ (z) )
-#define Maj(x, y, z)	( ( (x) & (y) ) ^ ( (x) & (z) ) ^ ( (y) & (z) ) )
+#define Maj(x, y, z)	( ( (x) & (y) ) | ( (z) & ( (x) | (y) ) ) )
 
 #define SIGMA0(x)	( ROTR(x,  2) ^ ROTR(x, 13) ^ ROTR(x, 22) )
 #define SIGMA1(x)	( ROTR(x,  6) ^ ROTR(x, 11) ^ ROTR(x, 25) )
@@ -33,29 +33,10 @@
 #define CLRBIT(str, pos)	str[(pos) >> 3] &= ~(0x01 << (7 - (pos) % 8))
 #define BYTECNT(bitcnt)		(1 + (((bitcnt) - 1) >> 3))
 
-static unsigned long K1[80] =
-{
-	0x5a827999UL, 0x5a827999UL, 0x5a827999UL, 0x5a827999UL,
-	0x5a827999UL, 0x5a827999UL, 0x5a827999UL, 0x5a827999UL,
-	0x5a827999UL, 0x5a827999UL, 0x5a827999UL, 0x5a827999UL,
-	0x5a827999UL, 0x5a827999UL, 0x5a827999UL, 0x5a827999UL,
-	0x5a827999UL, 0x5a827999UL, 0x5a827999UL, 0x5a827999UL,
-	0x6ed9eba1UL, 0x6ed9eba1UL, 0x6ed9eba1UL, 0x6ed9eba1UL,
-	0x6ed9eba1UL, 0x6ed9eba1UL, 0x6ed9eba1UL, 0x6ed9eba1UL,
-	0x6ed9eba1UL, 0x6ed9eba1UL, 0x6ed9eba1UL, 0x6ed9eba1UL,
-	0x6ed9eba1UL, 0x6ed9eba1UL, 0x6ed9eba1UL, 0x6ed9eba1UL,
-	0x6ed9eba1UL, 0x6ed9eba1UL, 0x6ed9eba1UL, 0x6ed9eba1UL,
-	0x8f1bbcdcUL, 0x8f1bbcdcUL, 0x8f1bbcdcUL, 0x8f1bbcdcUL,
-	0x8f1bbcdcUL, 0x8f1bbcdcUL, 0x8f1bbcdcUL, 0x8f1bbcdcUL,
-	0x8f1bbcdcUL, 0x8f1bbcdcUL, 0x8f1bbcdcUL, 0x8f1bbcdcUL,
-	0x8f1bbcdcUL, 0x8f1bbcdcUL, 0x8f1bbcdcUL, 0x8f1bbcdcUL,
-	0x8f1bbcdcUL, 0x8f1bbcdcUL, 0x8f1bbcdcUL, 0x8f1bbcdcUL,
-	0xca62c1d6UL, 0xca62c1d6UL, 0xca62c1d6UL, 0xca62c1d6UL,
-	0xca62c1d6UL, 0xca62c1d6UL, 0xca62c1d6UL, 0xca62c1d6UL,
-	0xca62c1d6UL, 0xca62c1d6UL, 0xca62c1d6UL, 0xca62c1d6UL,
-	0xca62c1d6UL, 0xca62c1d6UL, 0xca62c1d6UL, 0xca62c1d6UL,
-	0xca62c1d6UL, 0xca62c1d6UL, 0xca62c1d6UL, 0xca62c1d6UL
-};
+#define K11	0x5a827999UL
+#define K12	0x6ed9eba1UL
+#define K13	0x8f1bbcdcUL
+#define K14	0xca62c1d6UL
 
 static unsigned long K256[64] =
 {
@@ -89,6 +70,10 @@ static unsigned long H0256[8] =
 	0x510e527fUL, 0x9b05688cUL, 0x1f83d9abUL, 0x5be0cd19UL
 };
 
+#ifdef SHA_BIG_ENDIAN
+	#define ul2mem(mem, ul) memcpy(mem, &(ul), 4)
+#else
+
 static void ul2mem(mem, ul)		/* endian-neutral */
 unsigned char *mem;
 unsigned long ul;
@@ -99,39 +84,123 @@ unsigned long ul;
 		*mem++ = SHR(ul, 24 - i * 8) & 0xff;
 }
 
+#endif
+
 static void sha1(p, block)
 SHA *p;
 unsigned char *block;
 {
+	unsigned long a, b, c, d, e;
+	static unsigned long W[16];
+
+#ifdef SHA_BIG_ENDIAN
+	memcpy(W, block, 64);
+#else
+
 	int t;
 	unsigned long *q;
-	unsigned long a, b, c, d, e, T;
-	static unsigned long W[80];
-
 	for (t = 0, q = W; t < 16; t++, q++) {
 		*q = *block++; *q = (*q << 8) + *block++;
 		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
 	}
-	for (t = 16; t < 80; t++)
-		W[t] = ROTL(W[t-3] ^ W[t-8] ^ W[t-14] ^ W[t-16], 1);
-	a = p->H[0]; b = p->H[1]; c = p->H[2]; d = p->H[3]; e = p->H[4];
-	for (t = 0; t < 20; t++) {
-		T = ROTL(a, 5) + Ch(b, c, d) + e + K1[t] + W[t];
-		e = d; d = c; c = ROTL(b, 30); b = a; a = T;
-	}
-	for (t = 20; t < 40; t++) {
-		T = ROTL(a, 5) + Parity(b, c, d) + e + K1[t] + W[t];
-		e = d; d = c; c = ROTL(b, 30); b = a; a = T;
-	}
-	for (t = 40; t < 60; t++) {
-		T = ROTL(a, 5) + Maj(b, c, d) + e + K1[t] + W[t];
-		e = d; d = c; c = ROTL(b, 30); b = a; a = T;
-	}
-	for (t = 60; t < 80; t++) {
-		T = ROTL(a, 5) + Parity(b, c, d) + e + K1[t] + W[t];
-		e = d; d = c; c = ROTL(b, 30); b = a; a = T;
-	}
-	p->H[0] += a; p->H[1] += b; p->H[2] += c; p->H[3] += d; p->H[4] += e;
+
+#endif
+
+/*
+ * Use SHA-1 "alternate" method from FIPS PUB 180-2 (ref. 6.1.3)
+ *
+ * To improve performance, unroll the loop and consolidate
+ * assignments by changing the roles of the variables "a"
+ * through "e" at each step.  Note that the variable "T" is
+ * no longer needed.
+ *
+ */
+
+#define Pa Parity
+#define Ma Maj
+
+a = p->H[0]; b = p->H[1]; c = p->H[2]; d = p->H[3]; e = p->H[4];
+e+=ROTL(a,5)+Ch(b,c,d)+K11+W[0];b=ROTL(b,30);
+d+=ROTL(e,5)+Ch(a,b,c)+K11+W[1];a=ROTL(a,30);
+c+=ROTL(d,5)+Ch(e,a,b)+K11+W[2];e=ROTL(e,30);
+b+=ROTL(c,5)+Ch(d,e,a)+K11+W[3];d=ROTL(d,30);
+a+=ROTL(b,5)+Ch(c,d,e)+K11+W[4];c=ROTL(c,30);
+e+=ROTL(a,5)+Ch(b,c,d)+K11+W[5];b=ROTL(b,30);
+d+=ROTL(e,5)+Ch(a,b,c)+K11+W[6];a=ROTL(a,30);
+c+=ROTL(d,5)+Ch(e,a,b)+K11+W[7];e=ROTL(e,30);
+b+=ROTL(c,5)+Ch(d,e,a)+K11+W[8];d=ROTL(d,30);
+a+=ROTL(b,5)+Ch(c,d,e)+K11+W[9];c=ROTL(c,30);
+e+=ROTL(a,5)+Ch(b,c,d)+K11+W[10];b=ROTL(b,30);
+d+=ROTL(e,5)+Ch(a,b,c)+K11+W[11];a=ROTL(a,30);
+c+=ROTL(d,5)+Ch(e,a,b)+K11+W[12];e=ROTL(e,30);
+b+=ROTL(c,5)+Ch(d,e,a)+K11+W[13];d=ROTL(d,30);
+a+=ROTL(b,5)+Ch(c,d,e)+K11+W[14];c=ROTL(c,30);
+e+=ROTL(a,5)+Ch(b,c,d)+K11+W[15];b=ROTL(b,30);
+d+=ROTL(e,5)+Ch(a,b,c)+K11+(W[0]=ROTL(W[13]^W[8]^W[2]^W[0],1));a=ROTL(a,30);
+c+=ROTL(d,5)+Ch(e,a,b)+K11+(W[1]=ROTL(W[14]^W[9]^W[3]^W[1],1));e=ROTL(e,30);
+b+=ROTL(c,5)+Ch(d,e,a)+K11+(W[2]=ROTL(W[15]^W[10]^W[4]^W[2],1));d=ROTL(d,30);
+a+=ROTL(b,5)+Ch(c,d,e)+K11+(W[3]=ROTL(W[0]^W[11]^W[5]^W[3],1));c=ROTL(c,30);
+e+=ROTL(a,5)+Pa(b,c,d)+K12+(W[4]=ROTL(W[1]^W[12]^W[6]^W[4],1));b=ROTL(b,30);
+d+=ROTL(e,5)+Pa(a,b,c)+K12+(W[5]=ROTL(W[2]^W[13]^W[7]^W[5],1));a=ROTL(a,30);
+c+=ROTL(d,5)+Pa(e,a,b)+K12+(W[6]=ROTL(W[3]^W[14]^W[8]^W[6],1));e=ROTL(e,30);
+b+=ROTL(c,5)+Pa(d,e,a)+K12+(W[7]=ROTL(W[4]^W[15]^W[9]^W[7],1));d=ROTL(d,30);
+a+=ROTL(b,5)+Pa(c,d,e)+K12+(W[8]=ROTL(W[5]^W[0]^W[10]^W[8],1));c=ROTL(c,30);
+e+=ROTL(a,5)+Pa(b,c,d)+K12+(W[9]=ROTL(W[6]^W[1]^W[11]^W[9],1));b=ROTL(b,30);
+d+=ROTL(e,5)+Pa(a,b,c)+K12+(W[10]=ROTL(W[7]^W[2]^W[12]^W[10],1));a=ROTL(a,30);
+c+=ROTL(d,5)+Pa(e,a,b)+K12+(W[11]=ROTL(W[8]^W[3]^W[13]^W[11],1));e=ROTL(e,30);
+b+=ROTL(c,5)+Pa(d,e,a)+K12+(W[12]=ROTL(W[9]^W[4]^W[14]^W[12],1));d=ROTL(d,30);
+a+=ROTL(b,5)+Pa(c,d,e)+K12+(W[13]=ROTL(W[10]^W[5]^W[15]^W[13],1));c=ROTL(c,30);
+e+=ROTL(a,5)+Pa(b,c,d)+K12+(W[14]=ROTL(W[11]^W[6]^W[0]^W[14],1));b=ROTL(b,30);
+d+=ROTL(e,5)+Pa(a,b,c)+K12+(W[15]=ROTL(W[12]^W[7]^W[1]^W[15],1));a=ROTL(a,30);
+c+=ROTL(d,5)+Pa(e,a,b)+K12+(W[0]=ROTL(W[13]^W[8]^W[2]^W[0],1));e=ROTL(e,30);
+b+=ROTL(c,5)+Pa(d,e,a)+K12+(W[1]=ROTL(W[14]^W[9]^W[3]^W[1],1));d=ROTL(d,30);
+a+=ROTL(b,5)+Pa(c,d,e)+K12+(W[2]=ROTL(W[15]^W[10]^W[4]^W[2],1));c=ROTL(c,30);
+e+=ROTL(a,5)+Pa(b,c,d)+K12+(W[3]=ROTL(W[0]^W[11]^W[5]^W[3],1));b=ROTL(b,30);
+d+=ROTL(e,5)+Pa(a,b,c)+K12+(W[4]=ROTL(W[1]^W[12]^W[6]^W[4],1));a=ROTL(a,30);
+c+=ROTL(d,5)+Pa(e,a,b)+K12+(W[5]=ROTL(W[2]^W[13]^W[7]^W[5],1));e=ROTL(e,30);
+b+=ROTL(c,5)+Pa(d,e,a)+K12+(W[6]=ROTL(W[3]^W[14]^W[8]^W[6],1));d=ROTL(d,30);
+a+=ROTL(b,5)+Pa(c,d,e)+K12+(W[7]=ROTL(W[4]^W[15]^W[9]^W[7],1));c=ROTL(c,30);
+e+=ROTL(a,5)+Ma(b,c,d)+K13+(W[8]=ROTL(W[5]^W[0]^W[10]^W[8],1));b=ROTL(b,30);
+d+=ROTL(e,5)+Ma(a,b,c)+K13+(W[9]=ROTL(W[6]^W[1]^W[11]^W[9],1));a=ROTL(a,30);
+c+=ROTL(d,5)+Ma(e,a,b)+K13+(W[10]=ROTL(W[7]^W[2]^W[12]^W[10],1));e=ROTL(e,30);
+b+=ROTL(c,5)+Ma(d,e,a)+K13+(W[11]=ROTL(W[8]^W[3]^W[13]^W[11],1));d=ROTL(d,30);
+a+=ROTL(b,5)+Ma(c,d,e)+K13+(W[12]=ROTL(W[9]^W[4]^W[14]^W[12],1));c=ROTL(c,30);
+e+=ROTL(a,5)+Ma(b,c,d)+K13+(W[13]=ROTL(W[10]^W[5]^W[15]^W[13],1));b=ROTL(b,30);
+d+=ROTL(e,5)+Ma(a,b,c)+K13+(W[14]=ROTL(W[11]^W[6]^W[0]^W[14],1));a=ROTL(a,30);
+c+=ROTL(d,5)+Ma(e,a,b)+K13+(W[15]=ROTL(W[12]^W[7]^W[1]^W[15],1));e=ROTL(e,30);
+b+=ROTL(c,5)+Ma(d,e,a)+K13+(W[0]=ROTL(W[13]^W[8]^W[2]^W[0],1));d=ROTL(d,30);
+a+=ROTL(b,5)+Ma(c,d,e)+K13+(W[1]=ROTL(W[14]^W[9]^W[3]^W[1],1));c=ROTL(c,30);
+e+=ROTL(a,5)+Ma(b,c,d)+K13+(W[2]=ROTL(W[15]^W[10]^W[4]^W[2],1));b=ROTL(b,30);
+d+=ROTL(e,5)+Ma(a,b,c)+K13+(W[3]=ROTL(W[0]^W[11]^W[5]^W[3],1));a=ROTL(a,30);
+c+=ROTL(d,5)+Ma(e,a,b)+K13+(W[4]=ROTL(W[1]^W[12]^W[6]^W[4],1));e=ROTL(e,30);
+b+=ROTL(c,5)+Ma(d,e,a)+K13+(W[5]=ROTL(W[2]^W[13]^W[7]^W[5],1));d=ROTL(d,30);
+a+=ROTL(b,5)+Ma(c,d,e)+K13+(W[6]=ROTL(W[3]^W[14]^W[8]^W[6],1));c=ROTL(c,30);
+e+=ROTL(a,5)+Ma(b,c,d)+K13+(W[7]=ROTL(W[4]^W[15]^W[9]^W[7],1));b=ROTL(b,30);
+d+=ROTL(e,5)+Ma(a,b,c)+K13+(W[8]=ROTL(W[5]^W[0]^W[10]^W[8],1));a=ROTL(a,30);
+c+=ROTL(d,5)+Ma(e,a,b)+K13+(W[9]=ROTL(W[6]^W[1]^W[11]^W[9],1));e=ROTL(e,30);
+b+=ROTL(c,5)+Ma(d,e,a)+K13+(W[10]=ROTL(W[7]^W[2]^W[12]^W[10],1));d=ROTL(d,30);
+a+=ROTL(b,5)+Ma(c,d,e)+K13+(W[11]=ROTL(W[8]^W[3]^W[13]^W[11],1));c=ROTL(c,30);
+e+=ROTL(a,5)+Pa(b,c,d)+K14+(W[12]=ROTL(W[9]^W[4]^W[14]^W[12],1));b=ROTL(b,30);
+d+=ROTL(e,5)+Pa(a,b,c)+K14+(W[13]=ROTL(W[10]^W[5]^W[15]^W[13],1));a=ROTL(a,30);
+c+=ROTL(d,5)+Pa(e,a,b)+K14+(W[14]=ROTL(W[11]^W[6]^W[0]^W[14],1));e=ROTL(e,30);
+b+=ROTL(c,5)+Pa(d,e,a)+K14+(W[15]=ROTL(W[12]^W[7]^W[1]^W[15],1));d=ROTL(d,30);
+a+=ROTL(b,5)+Pa(c,d,e)+K14+(W[0]=ROTL(W[13]^W[8]^W[2]^W[0],1));c=ROTL(c,30);
+e+=ROTL(a,5)+Pa(b,c,d)+K14+(W[1]=ROTL(W[14]^W[9]^W[3]^W[1],1));b=ROTL(b,30);
+d+=ROTL(e,5)+Pa(a,b,c)+K14+(W[2]=ROTL(W[15]^W[10]^W[4]^W[2],1));a=ROTL(a,30);
+c+=ROTL(d,5)+Pa(e,a,b)+K14+(W[3]=ROTL(W[0]^W[11]^W[5]^W[3],1));e=ROTL(e,30);
+b+=ROTL(c,5)+Pa(d,e,a)+K14+(W[4]=ROTL(W[1]^W[12]^W[6]^W[4],1));d=ROTL(d,30);
+a+=ROTL(b,5)+Pa(c,d,e)+K14+(W[5]=ROTL(W[2]^W[13]^W[7]^W[5],1));c=ROTL(c,30);
+e+=ROTL(a,5)+Pa(b,c,d)+K14+(W[6]=ROTL(W[3]^W[14]^W[8]^W[6],1));b=ROTL(b,30);
+d+=ROTL(e,5)+Pa(a,b,c)+K14+(W[7]=ROTL(W[4]^W[15]^W[9]^W[7],1));a=ROTL(a,30);
+c+=ROTL(d,5)+Pa(e,a,b)+K14+(W[8]=ROTL(W[5]^W[0]^W[10]^W[8],1));e=ROTL(e,30);
+b+=ROTL(c,5)+Pa(d,e,a)+K14+(W[9]=ROTL(W[6]^W[1]^W[11]^W[9],1));d=ROTL(d,30);
+a+=ROTL(b,5)+Pa(c,d,e)+K14+(W[10]=ROTL(W[7]^W[2]^W[12]^W[10],1));c=ROTL(c,30);
+e+=ROTL(a,5)+Pa(b,c,d)+K14+(W[11]=ROTL(W[8]^W[3]^W[13]^W[11],1));b=ROTL(b,30);
+d+=ROTL(e,5)+Pa(a,b,c)+K14+(W[12]=ROTL(W[9]^W[4]^W[14]^W[12],1));a=ROTL(a,30);
+c+=ROTL(d,5)+Pa(e,a,b)+K14+(W[13]=ROTL(W[10]^W[5]^W[15]^W[13],1));e=ROTL(e,30);
+b+=ROTL(c,5)+Pa(d,e,a)+K14+(W[14]=ROTL(W[11]^W[6]^W[0]^W[14],1));d=ROTL(d,30);
+a+=ROTL(b,5)+Pa(c,d,e)+K14+(W[15]=ROTL(W[12]^W[7]^W[1]^W[15],1));c=ROTL(c,30);
+p->H[0] += a; p->H[1] += b; p->H[2] += c; p->H[3] += d; p->H[4] += e;
 }
 
 static void sha256(p, block)
@@ -139,14 +208,21 @@ SHA *p;
 unsigned char *block;
 {
 	int t;
-	unsigned long *q;
 	unsigned long a, b, c, d, e, f, g, h, T1, T2;
 	static unsigned long W[64];
 
+#ifdef SHA_BIG_ENDIAN
+	memcpy(W, block, 64);
+#else
+
+	unsigned long *q;
 	for (t = 0, q = W; t < 16; t++, q++) {
 		*q = *block++; *q = (*q << 8) + *block++;
 		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
 	}
+
+#endif
+
 	for (t = 16; t < 64; t++)
 		W[t] = sigma1(W[t-2]) + W[t-7] + sigma0(W[t-15]) + W[t-16];
 	a = p->H[0]; b = p->H[1]; c = p->H[2]; d = p->H[3];
@@ -214,6 +290,9 @@ static unsigned long long HQ0512[8] =
 	0x1f83d9abfb41bd6bULL, 0x5be0cd19137e2179ULL
 };
 
+#ifdef SHA_BIG_ENDIAN
+#define ull2mem(mem, ull) memcpy(mem, &(ull), 8)
+#else
 static void ull2mem(mem, ull)		/* endian-neutral */
 unsigned char *mem;
 unsigned long long ull;
@@ -223,6 +302,7 @@ unsigned long long ull;
 	for (i = 0; i < 8; i++)
 		*mem++ = SHR(ull, 56 - i * 8) & 0xff;
 }
+#endif
 
 /* strtoull() not always present, so cook up an alternative*/
 static unsigned long long hex2ull(s)
@@ -241,16 +321,20 @@ SHA *p;
 unsigned char *block;
 {
 	int t;
-	unsigned long long *q;
 	unsigned long long a, b, c, d, e, f, g, h, T1, T2;
 	static unsigned long long W[80];
 
+#ifdef SHA_BIG_ENDIAN
+	memcpy(W, block, 128);
+#else
+	unsigned long long *q;
 	for (t = 0, q = W; t < 16; t++, q++) {
 		*q = *block++; *q = (*q << 8) + *block++;
 		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
 		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
 		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
 	}
+#endif
 	for (t = 16; t < 80; t++)
 		W[t] = sigmaQ1(W[t-2]) + W[t-7] + sigmaQ0(W[t-15]) + W[t-16];
 	a = p->HQ[0]; b = p->HQ[1]; c = p->HQ[2]; d = p->HQ[3];
@@ -439,19 +523,17 @@ unsigned char *bitstr;
 unsigned long bitcnt;
 SHA *s;
 {
-	unsigned long prevll = s->lenll;
-	unsigned long prevlh = s->lenlh;
-	unsigned long prevhl = s->lenhl;
-
 	if (bitcnt == 0)
 		return(0);
 	s->lenll += bitcnt;
-	if (s->lenll < prevll)
+	if (s->lenll < bitcnt) {
 		s->lenlh++;
-	if (s->lenlh < prevlh)
-		s->lenhl++;
-	if (s->lenhl < prevhl)
-		s->lenhh++;
+		if (s->lenlh == 0) {
+			s->lenhl++;
+			if (s->lenhl == 0)
+				s->lenhh++;
+		}
+	}
 	if (s->blockcnt == 0)
 		return(shadirect(bitstr, bitcnt, s));
 	else if (s->blockcnt % 8 == 0)
@@ -539,7 +621,9 @@ SHA *s;
 	int i;
 	FILE *f;
 
-	if ((f = fopen(file, "w")) == NULL)
+	if (file == NULL || strlen(file) == 0)
+		f = stdout;
+	else if ((f = fopen(file, "w")) == NULL)
 		return(0);
 	fprintf(f, "alg:%d\n", s->alg);
 	fprintf(f, "H");
@@ -556,7 +640,8 @@ SHA *s;
 	fprintf(f, "lenlh:%lu\n", s->lenlh);
 	fprintf(f, "lenll:%lu\n", s->lenll);
 	if (s->alg == SHA1 || s->alg == SHA256) {
-		fclose(f);
+		if (f != stdout)
+			fclose(f);
 		return(1);
 	}
 
@@ -569,7 +654,8 @@ SHA *s;
 
 #endif
 
-	fclose(f);
+	if (f != stdout)
+		fclose(f);
 	return(1);
 }
 
@@ -627,7 +713,7 @@ static SHA *closeall(f, s)
 FILE *f;
 SHA *s;
 {
-	if (f != NULL)
+	if (f != NULL && f != stdin)
 		fclose(f);
 	if (s != NULL)
 		shaclose(s);
@@ -641,7 +727,9 @@ char *file;
 	SHA *s;
 	FILE *f;
 
-	if ((f = fopen(file, "r")) == NULL)
+	if (file == NULL || strlen(file) == 0)
+		f = stdin;
+	else if ((f = fopen(file, "r")) == NULL)
 		return(NULL);
 	if (!loadval(f, "alg", TYPE_I, &alg, 1, 10))
 		return(closeall(f, NULL));
@@ -662,7 +750,8 @@ char *file;
 	if (!loadval(f, "lenll", TYPE_L, &s->lenll, 1, 10))
 		return(closeall(f, s));
 	if (alg == SHA1 || alg == SHA256) {
-		fclose(f);
+		if (f != stdin)
+			fclose(f);
 		return(s);
 	}
 
@@ -671,7 +760,8 @@ char *file;
 		return(closeall(f, s));
 #endif
 
-	fclose(f);
+	if (f != stdin)
+		fclose(f);
 	return(s);
 }
 

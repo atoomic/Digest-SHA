@@ -1,4 +1,4 @@
-Digest/SHA version 2.1
+Digest/SHA version 2.2
 ======================
 
 The Digest::SHA module provides a Perl interface to all varieties
@@ -19,10 +19,15 @@ special libraries beyond those found with typical compilers.
 However, if your compiler can't handle 64-bit integral types (i.e.
 long long), the package will omit support for SHA-384 and SHA-512.
 
-The SHA algorithm code maps as closely as possible to the NIST
-specification in the interest of achieving correctness.  Later
-versions of this module will focus on additional performance
-optimizations.
+Prior to version 2.2, the SHA algorithm code mapped as closely as
+possible to the NIST specification in the interest of establishing
+correctness.  Subsequent versions of this module have begun to
+focus on performance optimization, particularly with regard to the
+heavily-used SHA-1 transform.  Informal benchmarks indicate that
+the version 2.2 code is roughly 20-30% faster than its predecessor
+for SHA-1 operations.  The goal is to achieve the fastest possible
+C implementation without any sacrifice in portability.  The author
+welcomes any comments or suggestions for further enhancements.
 
 The tests subdirectory (t/*.t) contains an extensive set of SHA
 vectors compiled from various sources.  Of particular interest are

@@ -26,6 +26,9 @@
 #define sha384base64 c_sha384base64
 #define sha512base64 c_sha512base64
 
+#define shadump c_shadump
+#define shaload c_shaload
+
 #include <src/sha.c>
 #include <src/hmac.c>
 
@@ -150,7 +153,7 @@ shaclose(s)
 	SHA *	s
 
 int
-shadump(file, s)
+c_shadump(file, s)
 	char *	file
 	SHA *	s
 
@@ -167,7 +170,7 @@ shahex(s)
 	SHA *	s
 
 SHA *
-shaload(file)
+c_shaload(file)
 	char *	file
 
 SHA *

@@ -37,3 +37,10 @@ Revision history for Perl extension Digest::SHA.
 			-- changes will not affect existing client code
 	- streamlined underlying C code for easier maintenance
 	- provided additional tests for persistent data
+
+2.2   Sun Nov 16 01:54:00 MST 2003
+	- optimized the performance of the SHA-1 transform
+		-- around 20-30% faster than previous version
+		-- achieved by loop unrolling and assignment consolidation
+	- enhanced shaload/shadump to allow interaction with stdin/stdout
+		-- "$filename" argument now optional
