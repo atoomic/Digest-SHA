@@ -4,11 +4,11 @@
  * aren't present.
  *
  * They are appropriately redefined in `sha64bit.c` if the compiler
- * supports long long's (i.e. when SHA_384_512 is defined).
+ * provides a 64-bit type (i.e. when SHA_384_512 is defined).
  */
 
 #define sha_384_512		0
-#define loadull(pval, p)	return(0)
+#define load64(pval, p)		return(0)
 #define digcpy64(s)		return
 #define sha512			NULL
 #define H0384			H01

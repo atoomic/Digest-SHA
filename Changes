@@ -1,5 +1,13 @@
 Revision history for Perl extension Digest::SHA.
 
+4.3.0 Sat Feb  7 02:58:00 MST 2004
+	- included SHA-384/512 support if using Microsoft C/C++
+		-- uses MSVC's __int64 in place of "long long"
+	- enhanced portability and efficiency on diverse platforms
+		-- automatically sets up optimal types for 32/64-bit ops
+	- improved test scripts for better reporting
+		-- many thanks to Alex Muntada for helpful suggestions
+
 4.2.2 Sat Jan 31 17:10:20 MST 2004
 	- repaired 32-bit SHA operations for 8-byte longs
 

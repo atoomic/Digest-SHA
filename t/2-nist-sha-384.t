@@ -1,4 +1,4 @@
-use Test::More qw(no_plan);
+use Test::More;
 use strict;
 use integer;
 use Digest::SHA qw(sha384_hex);
@@ -23,13 +23,10 @@ my @name = (
 
 my $skip = sha384_hex("") ? 0 : 1;
 
-for (my $i = 0; $i < @vecs; $i++) {
-	SKIP: {
-		skip("64-bit operations not supported", 1) if $skip;
-		is(
-			sha384_hex($vecs[$i]),
-			$sha384rsp[$i],
-			$name[$i]
-		);
+if ($skip) { plan skip_all => "64-bit operations not supported" }
+else {
+	plan tests => scalar(@vecs);
+	for (my $i = 0; $i < @vecs; $i++) {
+		is(sha384_hex($vecs[$i]), $sha384rsp[$i], $name[$i] );
 	}
 }

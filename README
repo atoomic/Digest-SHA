@@ -1,4 +1,4 @@
-Digest::SHA version 4.2.2
+Digest::SHA version 4.3.0
 =========================
 
 The Digest::SHA module provides an easy way to compute message
@@ -15,9 +15,9 @@ ability to:
 	- store and retrieve intermediate SHA states
 
 The underlying C code is portable, and requires no special libraries.
-However, if your compiler doesn't recognize the "long long" type,
-the routines associated with SHA-384 and SHA-512 will return null
-values.
+However, unless your compiler recognizes the "long long" type, or
+the "__int64" type used by Microsoft C/C++, the routines associated
+with SHA-384 and SHA-512 will return null values.
 
 This module inherits from Digest::base if the latter is installed
 on your platform.  If the base class is not present, Digest::SHA

@@ -9,47 +9,13 @@ use integer;
 
 use File::Basename qw(dirname);
 use File::Spec;
+use Digest::SHA;
 
-# extract bit messages
-
-my $i;
-my @msgs;
 my @hashes;
-my @cnts;
-my $bitstr;
-my $bitval;
-my $line;
-
-my $file;
-my $datafile;
 
 BEGIN {
-	$file = dirname($0) . "/nist/bit-messages.sha1";
-	$datafile = File::Spec->canonpath($file);
-	open(F, $datafile);
-	binmode(F);
-	while (<F>) {
-		last if (/Type 3/);
-		$_ = substr($_, 0, length($_) - 2);
-		next unless (/^[0-9^ ]/);
-		$line .= $_;
-		if (/\^$/) {
-			$line = substr($line, 0, length($line) - 1);
-			@cnts = split(' ', $line);
-			$bitstr = "";
-			$bitval = $cnts[1];
-			for ($i = 0; $i < $cnts[0]; $i++) {
-				$bitstr .= $bitval x $cnts[$i+2];
-				$bitval = $bitval eq "1" ? "0" : "1";
-			}
-			push(@msgs, $bitstr);
-			$line = "";
-		}
-	}
-	close(F);
-
-	$file = dirname($0) . "/nist/bit-hashes.sha1";
-	$datafile = File::Spec->canonpath($file);
+	my $file = dirname($0) . "/nist/bit-hashes.sha1";
+	my $datafile = File::Spec->canonpath($file);
 	open(F, $datafile);
 	binmode(F);
 	while (<F>) {
@@ -63,14 +29,57 @@ BEGIN {
 	close(F);
 }
 
-use Test::More tests => scalar(@msgs);
-use Digest::SHA;
+use Test::More tests => scalar(@hashes);
 
-my $ctx = Digest::SHA->new(1);
-for (my $i = 0; $i < @msgs; $i++) {
-	is(
-		uc($ctx->add_bits($msgs[$i])->hexdigest),
-		$hashes[$i],
-		$hashes[$i]
-	);
+sub doType3 {
+	my $hash;
+	my $str = pack("B*", shift);
+	my $ctx = Digest::SHA->new(1);
+	for (my $j = 0; $j <= 99; $j++) {
+		for (my $i = 1; $i <= 50000; $i++) {
+			$str .= chr(0x00) x (int($j/4)+3);
+			$str .= pack("N", $i);
+			$str = $ctx->add($str)->digest;
+		}
+		is(uc(unpack("H*", $str)), $hash = shift(@hashes), $hash);
+	}
 }
+
+my @msgs;
+my @cnts;
+my $bitstr;
+my $bitval;
+my $line;
+my $hash;
+my $type3 = 0;
+my $ctx = Digest::SHA->new(1);
+
+my $file = dirname($0) . "/nist/bit-messages.sha1";
+my $datafile = File::Spec->canonpath($file);
+open(F, $datafile);
+binmode(F);
+while (<F>) {
+	$type3 = 1 if (/Type 3/);
+	$type3 = 0 if (/^<D/);
+	$_ = substr($_, 0, length($_) - 2);
+	next unless (/^[0-9^ ]/);
+	$line .= $_;
+	if (/\^$/) {
+		$line = substr($line, 0, length($line) - 1);
+		@cnts = split(' ', $line);
+		$bitstr = "";
+		$bitval = $cnts[1];
+		for (my $i = 0; $i < $cnts[0]; $i++) {
+			$bitstr .= $bitval x $cnts[$i+2];
+			$bitval = $bitval eq "1" ? "0" : "1";
+		}
+		is (
+			uc($ctx->add_bits($bitstr)->hexdigest),
+			$hash = shift(@hashes),
+			$hash
+		) unless $type3;
+		doType3($bitstr) if ($type3);
+		$line = "";
+	}
+}
+close(F);

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use integer;
 
-our $VERSION = '4.2.2';
+our $VERSION = '4.3.0';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -244,10 +244,11 @@ None by default.
 
 =over 4
 
-Provided your C compiler supports the "long long" type, all of
-these functions will be available for use.  Otherwise, you won't
-be able to perform the SHA-384 and SHA-512 transforms, both of
-which require portable 64-bit operations.
+Provided your C compiler supports a native 64-bit type (e.g. the
+I<long long> of C99, or the I<__int64> type used by Microsoft
+C/C++), all of these functions will be available for use.  Otherwise,
+you won't be able to perform the SHA-384 and SHA-512 transforms,
+both of which require portable 64-bit operations.
 
 =back
 
@@ -492,9 +493,9 @@ http://csrc.nist.gov/publications/fips/fips198/fips-198a.pdf
 
 Mark Shelor, E<lt>mshelor@comcast.netE<gt>
 
-The author extends special thanks to Jeffrey Friedl, Chris Skiscim,
-Gisle Ass, Julius Duque, Robert Gilmour, and Brian Gladman for
-their many valuable suggestions.
+The author is particularly grateful to Gisle Ass, Julius Duque,
+Jeffrey Friedl, Robert Gilmour, Brian Gladman, Alex Muntada, and
+Chris Skiscim for their valuable comments and suggestions.
 
 =head1 COPYRIGHT AND LICENSE
 

@@ -1,130 +1,123 @@
 #ifdef SHA_384_512
 
 #undef sha_384_512
-#undef loadull
+#undef load64
 #undef digcpy64
 #undef sha512
 #undef H0384
 #undef H0512
 
-#define sha_384_512		1
+#define sha_384_512	1
 
-#define loadull(pval, p)				\
-	*((unsigned long long *) pval) = hex2ull(p);	\
-	pval = (unsigned long long *) pval + 1
+#define W64		SHA64		/* useful abbreviations */
+#define C64		SHA64_CONST
+#define SR64		SHA64_SHR
+#define SL64		SHA64_SHL
 
-#define LO64(x)		((x) & 0xffffffffffffffffULL)
-#define SHRQ(x, n)	(LO64(x) >> (n))
-#define SHLQ(x, n)	LO64((x) << (n))
-#define ROTRQ(x, n)	(SHRQ(x, n) | SHLQ(x, 64-(n)))
+#define load64(pval, p) *((W64 *) pval) = strto64(p); pval = (W64 *) pval + 1
+
+#define ROTRQ(x, n)	(SR64(x, n) | SL64(x, 64-(n)))
 #define SIGMAQ0(x)	(ROTRQ(x, 28) ^ ROTRQ(x, 34) ^ ROTRQ(x, 39))
 #define SIGMAQ1(x)	(ROTRQ(x, 14) ^ ROTRQ(x, 18) ^ ROTRQ(x, 41))
-#define sigmaQ0(x)	(ROTRQ(x,  1) ^ ROTRQ(x,  8) ^  SHRQ(x,  7))
-#define sigmaQ1(x)	(ROTRQ(x, 19) ^ ROTRQ(x, 61) ^  SHRQ(x,  6))
+#define sigmaQ0(x)	(ROTRQ(x,  1) ^ ROTRQ(x,  8) ^ SR64(x,  7))
+#define sigmaQ1(x)	(ROTRQ(x, 19) ^ ROTRQ(x, 61) ^ SR64(x,  6))
 
-#define SHA_64		unsigned long long
-
-static unsigned long long K512[80] =
+static W64 K512[80] =			/* SHA-384/512 constants */
 {
-	0x428a2f98d728ae22ULL, 0x7137449123ef65cdULL, 0xb5c0fbcfec4d3b2fULL,
-	0xe9b5dba58189dbbcULL, 0x3956c25bf348b538ULL, 0x59f111f1b605d019ULL,
-	0x923f82a4af194f9bULL, 0xab1c5ed5da6d8118ULL, 0xd807aa98a3030242ULL,
-	0x12835b0145706fbeULL, 0x243185be4ee4b28cULL, 0x550c7dc3d5ffb4e2ULL,
-	0x72be5d74f27b896fULL, 0x80deb1fe3b1696b1ULL, 0x9bdc06a725c71235ULL,
-	0xc19bf174cf692694ULL, 0xe49b69c19ef14ad2ULL, 0xefbe4786384f25e3ULL,
-	0x0fc19dc68b8cd5b5ULL, 0x240ca1cc77ac9c65ULL, 0x2de92c6f592b0275ULL,
-	0x4a7484aa6ea6e483ULL, 0x5cb0a9dcbd41fbd4ULL, 0x76f988da831153b5ULL,
-	0x983e5152ee66dfabULL, 0xa831c66d2db43210ULL, 0xb00327c898fb213fULL,
-	0xbf597fc7beef0ee4ULL, 0xc6e00bf33da88fc2ULL, 0xd5a79147930aa725ULL,
-	0x06ca6351e003826fULL, 0x142929670a0e6e70ULL, 0x27b70a8546d22ffcULL,
-	0x2e1b21385c26c926ULL, 0x4d2c6dfc5ac42aedULL, 0x53380d139d95b3dfULL,
-	0x650a73548baf63deULL, 0x766a0abb3c77b2a8ULL, 0x81c2c92e47edaee6ULL,
-	0x92722c851482353bULL, 0xa2bfe8a14cf10364ULL, 0xa81a664bbc423001ULL,
-	0xc24b8b70d0f89791ULL, 0xc76c51a30654be30ULL, 0xd192e819d6ef5218ULL,
-	0xd69906245565a910ULL, 0xf40e35855771202aULL, 0x106aa07032bbd1b8ULL,
-	0x19a4c116b8d2d0c8ULL, 0x1e376c085141ab53ULL, 0x2748774cdf8eeb99ULL,
-	0x34b0bcb5e19b48a8ULL, 0x391c0cb3c5c95a63ULL, 0x4ed8aa4ae3418acbULL,
-	0x5b9cca4f7763e373ULL, 0x682e6ff3d6b2b8a3ULL, 0x748f82ee5defb2fcULL,
-	0x78a5636f43172f60ULL, 0x84c87814a1f0ab72ULL, 0x8cc702081a6439ecULL,
-	0x90befffa23631e28ULL, 0xa4506cebde82bde9ULL, 0xbef9a3f7b2c67915ULL,
-	0xc67178f2e372532bULL, 0xca273eceea26619cULL, 0xd186b8c721c0c207ULL,
-	0xeada7dd6cde0eb1eULL, 0xf57d4f7fee6ed178ULL, 0x06f067aa72176fbaULL,
-	0x0a637dc5a2c898a6ULL, 0x113f9804bef90daeULL, 0x1b710b35131c471bULL,
-	0x28db77f523047d84ULL, 0x32caab7b40c72493ULL, 0x3c9ebe0a15c9bebcULL,
-	0x431d67c49c100d4cULL, 0x4cc5d4becb3e42b6ULL, 0x597f299cfc657e2aULL,
-	0x5fcb6fab3ad6faecULL, 0x6c44198c4a475817ULL
+C64(0x428a2f98d728ae22), C64(0x7137449123ef65cd), C64(0xb5c0fbcfec4d3b2f),
+C64(0xe9b5dba58189dbbc), C64(0x3956c25bf348b538), C64(0x59f111f1b605d019),
+C64(0x923f82a4af194f9b), C64(0xab1c5ed5da6d8118), C64(0xd807aa98a3030242),
+C64(0x12835b0145706fbe), C64(0x243185be4ee4b28c), C64(0x550c7dc3d5ffb4e2),
+C64(0x72be5d74f27b896f), C64(0x80deb1fe3b1696b1), C64(0x9bdc06a725c71235),
+C64(0xc19bf174cf692694), C64(0xe49b69c19ef14ad2), C64(0xefbe4786384f25e3),
+C64(0x0fc19dc68b8cd5b5), C64(0x240ca1cc77ac9c65), C64(0x2de92c6f592b0275),
+C64(0x4a7484aa6ea6e483), C64(0x5cb0a9dcbd41fbd4), C64(0x76f988da831153b5),
+C64(0x983e5152ee66dfab), C64(0xa831c66d2db43210), C64(0xb00327c898fb213f),
+C64(0xbf597fc7beef0ee4), C64(0xc6e00bf33da88fc2), C64(0xd5a79147930aa725),
+C64(0x06ca6351e003826f), C64(0x142929670a0e6e70), C64(0x27b70a8546d22ffc),
+C64(0x2e1b21385c26c926), C64(0x4d2c6dfc5ac42aed), C64(0x53380d139d95b3df),
+C64(0x650a73548baf63de), C64(0x766a0abb3c77b2a8), C64(0x81c2c92e47edaee6),
+C64(0x92722c851482353b), C64(0xa2bfe8a14cf10364), C64(0xa81a664bbc423001),
+C64(0xc24b8b70d0f89791), C64(0xc76c51a30654be30), C64(0xd192e819d6ef5218),
+C64(0xd69906245565a910), C64(0xf40e35855771202a), C64(0x106aa07032bbd1b8),
+C64(0x19a4c116b8d2d0c8), C64(0x1e376c085141ab53), C64(0x2748774cdf8eeb99),
+C64(0x34b0bcb5e19b48a8), C64(0x391c0cb3c5c95a63), C64(0x4ed8aa4ae3418acb),
+C64(0x5b9cca4f7763e373), C64(0x682e6ff3d6b2b8a3), C64(0x748f82ee5defb2fc),
+C64(0x78a5636f43172f60), C64(0x84c87814a1f0ab72), C64(0x8cc702081a6439ec),
+C64(0x90befffa23631e28), C64(0xa4506cebde82bde9), C64(0xbef9a3f7b2c67915),
+C64(0xc67178f2e372532b), C64(0xca273eceea26619c), C64(0xd186b8c721c0c207),
+C64(0xeada7dd6cde0eb1e), C64(0xf57d4f7fee6ed178), C64(0x06f067aa72176fba),
+C64(0x0a637dc5a2c898a6), C64(0x113f9804bef90dae), C64(0x1b710b35131c471b),
+C64(0x28db77f523047d84), C64(0x32caab7b40c72493), C64(0x3c9ebe0a15c9bebc),
+C64(0x431d67c49c100d4c), C64(0x4cc5d4becb3e42b6), C64(0x597f299cfc657e2a),
+C64(0x5fcb6fab3ad6faec), C64(0x6c44198c4a475817)
 };
 
-static unsigned long long H0384[8] =
+static W64 H0384[8] =		/* SHA-384 initial hash value */
 {
-	0xcbbb9d5dc1059ed8ULL, 0x629a292a367cd507ULL, 0x9159015a3070dd17ULL,
-	0x152fecd8f70e5939ULL, 0x67332667ffc00b31ULL, 0x8eb44a8768581511ULL,
-	0xdb0c2e0d64f98fa7ULL, 0x47b5481dbefa4fa4ULL
+C64(0xcbbb9d5dc1059ed8), C64(0x629a292a367cd507), C64(0x9159015a3070dd17),
+C64(0x152fecd8f70e5939), C64(0x67332667ffc00b31), C64(0x8eb44a8768581511),
+C64(0xdb0c2e0d64f98fa7), C64(0x47b5481dbefa4fa4)
 };
 
-static unsigned long long H0512[8] =
+static W64 H0512[8] =		/* SHA-512 initial hash value */
 {
-	0x6a09e667f3bcc908ULL, 0xbb67ae8584caa73bULL, 0x3c6ef372fe94f82bULL,
-	0xa54ff53a5f1d36f1ULL, 0x510e527fade682d1ULL, 0x9b05688c2b3e6c1fULL,
-	0x1f83d9abfb41bd6bULL, 0x5be0cd19137e2179ULL
+C64(0x6a09e667f3bcc908), C64(0xbb67ae8584caa73b), C64(0x3c6ef372fe94f82b),
+C64(0xa54ff53a5f1d36f1), C64(0x510e527fade682d1), C64(0x9b05688c2b3e6c1f),
+C64(0x1f83d9abfb41bd6b), C64(0x5be0cd19137e2179)
 };
 
-static void ull2mem(mem, ull)		/* endian-neutral */
+/* w64mem: writes 64-bit word to memory in big-endian order */
+static void w64mem(mem, w64)
 unsigned char *mem;
-unsigned long long ull;
+W64 w64;
 {
 	int i;
 
 	for (i = 0; i < 8; i++)
-		*mem++ = SHRQ(ull, 56 - i * 8) & 0xff;
+		*mem++ = (unsigned char) (SR64(w64, 56 - i * 8) & 0xff);
 }
 
-/* strtoull() not always present, so cook up an alternative*/
-static unsigned long long hex2ull(s)
+/* strto64: converts hex string to a 64-bit word */
+static W64 strto64(s)
 char *s;
 {
 	char str[2] = {0, 0};
-	unsigned long long u = 0ULL;
+	W64 u = C64(0);
 
 	while ((str[0] = *s++) != '\0')
 		u = (u << 4) + strtoul(str, NULL, 16);
 	return(u);
 }
 
+/* digcpy64: writes current state to digest buffer */
 static void digcpy64(s)
 SHA *s;
 {
 	unsigned int i;
-	unsigned long long *p = (unsigned long long *) s->H;
+	W64 *p = (W64 *) s->H;
 
 	for (i = 0; i < 8; i++)
-		ull2mem(s->digest + i * 8, *p++);
+		w64mem(s->digest + i * 8, *p++);
 }
 
-static void sha512(s, block)
+static void sha512(s, block)	/* SHA-384/512 transform */
 SHA *s;
 unsigned char *block;
 {
+	W64 a, b, c, d, e, f, g, h, T1, T2;
+	SHA_MYSTERY W64 W[80];
+	W64 *H = (W64 *) s->H;
 	int t;
-	unsigned long long a, b, c, d, e, f, g, h, T1, T2;
-	static unsigned long long W[80];
-	unsigned long long *q = W;
-	unsigned long long *H = (unsigned long long *) s->H;
 
-	if (sha_big_endian_32)
-		memcpy(W, block, 128);
-	else for (t = 0; t < 16; t++, block += 8) *q++ =
-		(SHA_64) block[0] << 56 | (SHA_64) block[1] << 48 |
-		(SHA_64) block[2] << 40 | (SHA_64) block[3] << 32 |
-		(SHA_64) block[4] << 24 | (SHA_64) block[5] << 16 |
-		(SHA_64) block[6] <<  8 | (SHA_64) block[7];
+	SHA64_SCHED(W, block);
 	for (t = 16; t < 80; t++)
 		W[t] = sigmaQ1(W[t-2]) + W[t-7] + sigmaQ0(W[t-15]) + W[t-16];
 	a = H[0]; b = H[1]; c = H[2]; d = H[3];
 	e = H[4]; f = H[5]; g = H[6]; h = H[7];
 	for (t = 0; t < 80; t++) {
 		T1 = h + SIGMAQ1(e) + Ch(e, f, g) + K512[t] + W[t];
-		T2 = SIGMAQ0(a) + Maj(a, b, c);
+		T2 = SIGMAQ0(a) + Ma(a, b, c);
 		h = g; g = f; f = e; e = d + T1;
 		d = c; c = b; b = a; a = T1 + T2;
 	}

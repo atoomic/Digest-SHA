@@ -3,10 +3,10 @@
  *
  * Ref: NIST FIPS PUB 180-2 Secure Hash Standard
  *
- * Copyright (C) 2003 Mark Shelor, All Rights Reserved
+ * Copyright (C) 2003-2004 Mark Shelor, All Rights Reserved
  *
- * Version: 4.2.2
- * Sat Jan 31 17:10:20 MST 2004
+ * Version: 4.3.0
+ * Sat Feb  7 02:58:00 MST 2004
  *
  */
 
@@ -15,9 +15,86 @@
 
 #include <limits.h>
 
-#if defined(ULONG_LONG_MAX) && !defined(NO_SHA_384_512)
+#define SHA32_MAX	4294967295U
+#define SHA64_MAX	18446744073709551615U
+
+#define SHA32_SHR(x, n)	((x) >> (n))
+#define SHA32_SHL(x, n)	((x) << (n))
+
+#define SHA64_SHR(x, n)	((x) >> (n))
+#define SHA64_SHL(x, n)	((x) << (n))
+
+#define SHA32_ALIGNED
+#define SHA64_ALIGNED
+
+#if UINT_MAX == SHA32_MAX
+	#define SHA32	unsigned int
+	#define SHA32_CONST(c)	c ## U
+#elif ULONG_MAX == SHA32_MAX
+	#define SHA32	unsigned long
+	#define SHA32_CONST(c)	c ## UL
+#else
+	#undef  SHA32_ALIGNED
+	#undef  SHA32_SHR
+	#define SHA32_SHR(x, n)	(((x) & SHA32_MAX) >> (n))
+	#define SHA32	unsigned long
+	#define SHA32_CONST(c)	c ## UL
+#endif
+
+#if ULONG_MAX > SHA32_MAX && ULONG_MAX == SHA64_MAX
+	#define SHA64	unsigned long
+	#define SHA64_CONST(c)	c ## UL
+#elif defined(ULONG_LONG_MAX) && ULONG_LONG_MAX == SHA64_MAX
+	#define SHA64	unsigned long long
+	#define SHA64_CONST(c)	c ## ULL
+#elif defined(ULONG_LONG_MAX) && ULONG_LONG_MAX != SHA64_MAX
+	#undef  SHA64_ALIGNED
+	#undef  SHA64_SHR
+	#define SHA64_SHR(x, n)	(((x) & SHA64_MAX) >> (n))
+	#define SHA64	unsigned long long
+	#define SHA64_CONST(c)	c ## ULL
+#elif defined(_MSC_VER)
+	#define SHA64	unsigned __int64
+	#define SHA64_CONST(c)	(SHA64) c
+#endif
+
+#if defined(SHA64) && !defined(NO_SHA_384_512)
 	#define SHA_384_512
 #endif
+
+#if defined(BYTEORDER) && (BYTEORDER == 0x4321 || BYTEORDER == 0x87654321)
+	#if defined(SHA32_ALIGNED)
+		#define SHA32_SCHED(W, b)	memcpy(W, b, 64)
+	#endif
+	#if defined(SHA64) && defined(SHA64_ALIGNED)
+		#define SHA64_SCHED(W, b)	memcpy(W, b, 128)
+	#endif
+#endif
+
+#if !defined(SHA32_SCHED)
+	#define SHA32_SCHED(W, b) { int t; SHA32 *q = W;		\
+		for (t = 0; t < 16; t++, b += 4) *q++ =			\
+			(SHA32) b[0] << 24 | (SHA32) b[1] << 16 |	\
+			(SHA32) b[2] <<  8 | (SHA32) b[3]; }
+#endif
+
+#if defined(SHA64) && !defined(SHA64_SCHED)
+	#define SHA64_SCHED(W, b) { int t; SHA64 *q = W;		\
+		for (t = 0; t < 16; t++, b += 8) *q++ =			\
+			(SHA64) b[0] << 56 | (SHA64) b[1] << 48 |	\
+			(SHA64) b[2] << 40 | (SHA64) b[3] << 32 |	\
+			(SHA64) b[4] << 24 | (SHA64) b[5] << 16 |	\
+			(SHA64) b[6] <<  8 | (SHA64) b[7]; }
+#endif
+
+
+/* SHA_MYSTERY: static arrays improve performance on Intel/Linux */
+#if defined(BYTEORDER) && (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678)
+	#define SHA_MYSTERY	static
+#else
+	#define SHA_MYSTERY
+#endif
+
 
 /* Configure memory management and I/O for Perl or standalone C */
 
@@ -47,12 +124,6 @@
 	#define SHA_IO_getc		fgetc
 #endif
 
-#if defined(BYTEORDER) && (BYTEORDER == 0x4321)
-	#define sha_big_endian_32 1
-#else
-	#define sha_big_endian_32 0
-#endif
-
 #define SHA1	1
 #define SHA224	224
 #define SHA256	256
@@ -79,11 +150,11 @@
 typedef struct {
 	int alg;
 	void (*sha)();
-	unsigned long H[SHA_MAX_DIGEST_BITS/32];
+	SHA32 H[SHA_MAX_DIGEST_BITS/32];
 	unsigned char block[SHA_MAX_BLOCK_BITS/8];
 	unsigned int blockcnt;
 	unsigned int blocksize;
-	unsigned long lenhh, lenhl, lenlh, lenll;
+	SHA32 lenhh, lenhl, lenlh, lenll;
 	unsigned char digest[SHA_MAX_DIGEST_BITS/8];
 	int digestlen;
 	char hex[SHA_MAX_HEX_LEN+1];

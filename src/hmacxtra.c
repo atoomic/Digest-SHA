@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "hmac.h"
 
 static unsigned char *hmaccomp(alg, fmt, bitstr, bitcnt, key, keylen)

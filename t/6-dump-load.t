@@ -1,4 +1,4 @@
-use Test::More qw(no_plan);
+use Test::More tests => 4;
 use strict;
 use integer;
 use Digest::SHA qw(sha384_hex sha512_hex);

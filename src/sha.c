@@ -3,10 +3,10 @@
  *
  * Ref: NIST FIPS PUB 180-2 Secure Hash Standard
  *
- * Copyright (C) 2003 Mark Shelor, All Rights Reserved
+ * Copyright (C) 2003-2004 Mark Shelor, All Rights Reserved
  *
- * Version: 4.2.2
- * Sat Jan 31 17:10:20 MST 2004
+ * Version: 4.3.0
+ * Sat Feb  7 02:58:00 MST 2004
  *
  */
 
@@ -17,77 +17,76 @@
 #include "sha.h"
 #include "sha64bit.h"
 
-#define LO32(x)		((x) & 0xffffffffUL)
-#define SHR(x, n)	(LO32(x) >> (n))
-#define SHL(x, n)	LO32((x) << (n))
-#define ROTR(x, n)	(SHR(x, n) | SHL(x, 32-(n)))
-#define ROTL(x, n)	(SHL(x, n) | SHR(x, 32-(n)))
+#define W32	SHA32			/* useful abbreviations */
+#define C32	SHA32_CONST
+#define SR32	SHA32_SHR
+#define SL32	SHA32_SHL
 
-#define Ch(x, y, z)		((z) ^ ((x) & ((y) ^ (z))))
-#define Parity(x, y, z)		((x) ^ (y) ^ (z))
-#define Maj(x, y, z)		(((x) & (y)) | ((z) & ((x) | (y))))
+#define ROTR(x, n)	(SR32(x, n) | SL32(x, 32-(n)))
+#define ROTL(x, n)	(SL32(x, n) | SR32(x, 32-(n)))
+
+#define Ch(x, y, z)	((z) ^ ((x) & ((y) ^ (z))))
+#define Pa(x, y, z)	((x) ^ (y) ^ (z))
+#define Ma(x, y, z)	(((x) & (y)) | ((z) & ((x) | (y))))
 
 #define SIGMA0(x)	(ROTR(x,  2) ^ ROTR(x, 13) ^ ROTR(x, 22))
 #define SIGMA1(x)	(ROTR(x,  6) ^ ROTR(x, 11) ^ ROTR(x, 25))
-#define sigma0(x)	(ROTR(x,  7) ^ ROTR(x, 18) ^  SHR(x,  3))
-#define sigma1(x)	(ROTR(x, 17) ^ ROTR(x, 19) ^  SHR(x, 10))
+#define sigma0(x)	(ROTR(x,  7) ^ ROTR(x, 18) ^ SR32(x,  3))
+#define sigma1(x)	(ROTR(x, 17) ^ ROTR(x, 19) ^ SR32(x, 10))
 
-#define K00	0x5a827999UL		/* SHA-1 constants */
-#define K20	0x6ed9eba1UL
-#define K40	0x8f1bbcdcUL
-#define K60	0xca62c1d6UL
+#define K1	C32(0x5a827999)		/* SHA-1 constants */
+#define K2	C32(0x6ed9eba1)
+#define K3	C32(0x8f1bbcdc)
+#define K4	C32(0xca62c1d6)
 
-static unsigned long K256[64] =		/* SHA-224/256 constants */
+static W32 K256[64] =			/* SHA-224/256 constants */
 {
-	0x428a2f98UL, 0x71374491UL, 0xb5c0fbcfUL, 0xe9b5dba5UL,
-	0x3956c25bUL, 0x59f111f1UL, 0x923f82a4UL, 0xab1c5ed5UL,
-	0xd807aa98UL, 0x12835b01UL, 0x243185beUL, 0x550c7dc3UL,
-	0x72be5d74UL, 0x80deb1feUL, 0x9bdc06a7UL, 0xc19bf174UL,
-	0xe49b69c1UL, 0xefbe4786UL, 0x0fc19dc6UL, 0x240ca1ccUL,
-	0x2de92c6fUL, 0x4a7484aaUL, 0x5cb0a9dcUL, 0x76f988daUL,
-	0x983e5152UL, 0xa831c66dUL, 0xb00327c8UL, 0xbf597fc7UL,
-	0xc6e00bf3UL, 0xd5a79147UL, 0x06ca6351UL, 0x14292967UL,
-	0x27b70a85UL, 0x2e1b2138UL, 0x4d2c6dfcUL, 0x53380d13UL,
-	0x650a7354UL, 0x766a0abbUL, 0x81c2c92eUL, 0x92722c85UL,
-	0xa2bfe8a1UL, 0xa81a664bUL, 0xc24b8b70UL, 0xc76c51a3UL,
-	0xd192e819UL, 0xd6990624UL, 0xf40e3585UL, 0x106aa070UL,
-	0x19a4c116UL, 0x1e376c08UL, 0x2748774cUL, 0x34b0bcb5UL,
-	0x391c0cb3UL, 0x4ed8aa4aUL, 0x5b9cca4fUL, 0x682e6ff3UL,
-	0x748f82eeUL, 0x78a5636fUL, 0x84c87814UL, 0x8cc70208UL,
-	0x90befffaUL, 0xa4506cebUL, 0xbef9a3f7UL, 0xc67178f2UL
+	C32(0x428a2f98), C32(0x71374491), C32(0xb5c0fbcf), C32(0xe9b5dba5),
+	C32(0x3956c25b), C32(0x59f111f1), C32(0x923f82a4), C32(0xab1c5ed5),
+	C32(0xd807aa98), C32(0x12835b01), C32(0x243185be), C32(0x550c7dc3),
+	C32(0x72be5d74), C32(0x80deb1fe), C32(0x9bdc06a7), C32(0xc19bf174),
+	C32(0xe49b69c1), C32(0xefbe4786), C32(0x0fc19dc6), C32(0x240ca1cc),
+	C32(0x2de92c6f), C32(0x4a7484aa), C32(0x5cb0a9dc), C32(0x76f988da),
+	C32(0x983e5152), C32(0xa831c66d), C32(0xb00327c8), C32(0xbf597fc7),
+	C32(0xc6e00bf3), C32(0xd5a79147), C32(0x06ca6351), C32(0x14292967),
+	C32(0x27b70a85), C32(0x2e1b2138), C32(0x4d2c6dfc), C32(0x53380d13),
+	C32(0x650a7354), C32(0x766a0abb), C32(0x81c2c92e), C32(0x92722c85),
+	C32(0xa2bfe8a1), C32(0xa81a664b), C32(0xc24b8b70), C32(0xc76c51a3),
+	C32(0xd192e819), C32(0xd6990624), C32(0xf40e3585), C32(0x106aa070),
+	C32(0x19a4c116), C32(0x1e376c08), C32(0x2748774c), C32(0x34b0bcb5),
+	C32(0x391c0cb3), C32(0x4ed8aa4a), C32(0x5b9cca4f), C32(0x682e6ff3),
+	C32(0x748f82ee), C32(0x78a5636f), C32(0x84c87814), C32(0x8cc70208),
+	C32(0x90befffa), C32(0xa4506ceb), C32(0xbef9a3f7), C32(0xc67178f2)
 };
 
-static unsigned long H01[5] =		/* SHA-1 initial hash value */
+static W32 H01[5] =			/* SHA-1 initial hash value */
 {
-	0x67452301UL, 0xefcdab89UL, 0x98badcfeUL,
-	0x10325476UL, 0xc3d2e1f0UL
+	C32(0x67452301), C32(0xefcdab89), C32(0x98badcfe),
+	C32(0x10325476), C32(0xc3d2e1f0)
 };
 
-static unsigned long H0224[8] =		/* SHA-224 initial hash value */
+static W32 H0224[8] =			/* SHA-224 initial hash value */
 {
-	0xc1059ed8UL, 0x367cd507UL, 0x3070dd17UL, 0xf70e5939UL,
-	0xffc00b31UL, 0x68581511UL, 0x64f98fa7UL, 0xbefa4fa4UL
+	C32(0xc1059ed8), C32(0x367cd507), C32(0x3070dd17), C32(0xf70e5939),
+	C32(0xffc00b31), C32(0x68581511), C32(0x64f98fa7), C32(0xbefa4fa4)
 };
 
-static unsigned long H0256[8] =		/* SHA-256 initial hash value */
+static W32 H0256[8] =			/* SHA-256 initial hash value */
 {
-	0x6a09e667UL, 0xbb67ae85UL, 0x3c6ef372UL, 0xa54ff53aUL,
-	0x510e527fUL, 0x9b05688cUL, 0x1f83d9abUL, 0x5be0cd19UL
+	C32(0x6a09e667), C32(0xbb67ae85), C32(0x3c6ef372), C32(0xa54ff53a),
+	C32(0x510e527f), C32(0x9b05688c), C32(0x1f83d9ab), C32(0x5be0cd19)
 };
 
-static void sha1(s, block)
+static void sha1(s, block)		/* SHA-1 transform */
 SHA *s;
 unsigned char *block;
 {
-	int t;
-	unsigned long a, b, c, d, e;
-	static unsigned long W[16];
-	unsigned long *q = W;
+	W32 a, b, c, d, e;
+	SHA_MYSTERY W32 W[16];
+	W32 *wp = W;
+	W32 *H = s->H;
 
-	if (sha_big_endian_32)
-		memcpy(W, block, 64);
-	else for (t = 0; t < 16; t++, block += 4)
-		*q++ = block[0]<<24|block[1]<<16|block[2]<<8|block[3];
+	SHA32_SCHED(W, block);
 
 /*
  * Use SHA-1 alternate method from FIPS PUB 180-2 (ref. 6.1.3)
@@ -97,112 +96,67 @@ unsigned char *block;
  * Note that the variable "T" is no longer needed.
  */
 
-#define MIX1(a,b,c,d,e,f,k,w)\
-	e+=ROTL(a,5)+f(b,c,d)+k+w;b=ROTL(b,30)
+#define M1(a, b, c, d, e, f, k, w)		\
+	e += ROTL(a, 5) + f(b, c, d) + k + w;	\
+	b =  ROTL(b, 30)
 
-#define ASG1(s)\
-	(W[s&15]=ROTL(W[(s+13)&15]^W[(s+8)&15]\
-	^W[(s+2)&15]^W[s&15],1))
+#define M11(f, k, w)	M1(a, b, c, d, e, f, k, w);
+#define M12(f, k, w)	M1(e, a, b, c, d, f, k, w);
+#define M13(f, k, w)	M1(d, e, a, b, c, f, k, w);
+#define M14(f, k, w)	M1(c, d, e, a, b, f, k, w);
+#define M15(f, k, w)	M1(b, c, d, e, a, f, k, w);
 
-	a = s->H[0]; b = s->H[1]; c = s->H[2];
-	d = s->H[3]; e = s->H[4];
-	MIX1(a, b, c, d, e, Ch, K00, W[0]);
-	MIX1(e, a, b, c, d, Ch, K00, W[1]);
-	MIX1(d, e, a, b, c, Ch, K00, W[2]);
-	MIX1(c, d, e, a, b, Ch, K00, W[3]);
-	MIX1(b, c, d, e, a, Ch, K00, W[4]);
-	MIX1(a, b, c, d, e, Ch, K00, W[5]);
-	MIX1(e, a, b, c, d, Ch, K00, W[6]);
-	MIX1(d, e, a, b, c, Ch, K00, W[7]);
-	MIX1(c, d, e, a, b, Ch, K00, W[8]);
-	MIX1(b, c, d, e, a, Ch, K00, W[9]);
-	MIX1(a, b, c, d, e, Ch, K00, W[10]);
-	MIX1(e, a, b, c, d, Ch, K00, W[11]);
-	MIX1(d, e, a, b, c, Ch, K00, W[12]);
-	MIX1(c, d, e, a, b, Ch, K00, W[13]);
-	MIX1(b, c, d, e, a, Ch, K00, W[14]);
-	MIX1(a, b, c, d, e, Ch, K00, W[15]);
-	MIX1(e, a, b, c, d, Ch, K00, ASG1(0));
-	MIX1(d, e, a, b, c, Ch, K00, ASG1(1));
-	MIX1(c, d, e, a, b, Ch, K00, ASG1(2));
-	MIX1(b, c, d, e, a, Ch, K00, ASG1(3));
-	MIX1(a, b, c, d, e, Parity, K20, ASG1(4));
-	MIX1(e, a, b, c, d, Parity, K20, ASG1(5));
-	MIX1(d, e, a, b, c, Parity, K20, ASG1(6));
-	MIX1(c, d, e, a, b, Parity, K20, ASG1(7));
-	MIX1(b, c, d, e, a, Parity, K20, ASG1(8));
-	MIX1(a, b, c, d, e, Parity, K20, ASG1(9));
-	MIX1(e, a, b, c, d, Parity, K20, ASG1(10));
-	MIX1(d, e, a, b, c, Parity, K20, ASG1(11));
-	MIX1(c, d, e, a, b, Parity, K20, ASG1(12));
-	MIX1(b, c, d, e, a, Parity, K20, ASG1(13));
-	MIX1(a, b, c, d, e, Parity, K20, ASG1(14));
-	MIX1(e, a, b, c, d, Parity, K20, ASG1(15));
-	MIX1(d, e, a, b, c, Parity, K20, ASG1(0));
-	MIX1(c, d, e, a, b, Parity, K20, ASG1(1));
-	MIX1(b, c, d, e, a, Parity, K20, ASG1(2));
-	MIX1(a, b, c, d, e, Parity, K20, ASG1(3));
-	MIX1(e, a, b, c, d, Parity, K20, ASG1(4));
-	MIX1(d, e, a, b, c, Parity, K20, ASG1(5));
-	MIX1(c, d, e, a, b, Parity, K20, ASG1(6));
-	MIX1(b, c, d, e, a, Parity, K20, ASG1(7));
-	MIX1(a, b, c, d, e, Maj, K40, ASG1(8));
-	MIX1(e, a, b, c, d, Maj, K40, ASG1(9));
-	MIX1(d, e, a, b, c, Maj, K40, ASG1(10));
-	MIX1(c, d, e, a, b, Maj, K40, ASG1(11));
-	MIX1(b, c, d, e, a, Maj, K40, ASG1(12));
-	MIX1(a, b, c, d, e, Maj, K40, ASG1(13));
-	MIX1(e, a, b, c, d, Maj, K40, ASG1(14));
-	MIX1(d, e, a, b, c, Maj, K40, ASG1(15));
-	MIX1(c, d, e, a, b, Maj, K40, ASG1(0));
-	MIX1(b, c, d, e, a, Maj, K40, ASG1(1));
-	MIX1(a, b, c, d, e, Maj, K40, ASG1(2));
-	MIX1(e, a, b, c, d, Maj, K40, ASG1(3));
-	MIX1(d, e, a, b, c, Maj, K40, ASG1(4));
-	MIX1(c, d, e, a, b, Maj, K40, ASG1(5));
-	MIX1(b, c, d, e, a, Maj, K40, ASG1(6));
-	MIX1(a, b, c, d, e, Maj, K40, ASG1(7));
-	MIX1(e, a, b, c, d, Maj, K40, ASG1(8));
-	MIX1(d, e, a, b, c, Maj, K40, ASG1(9));
-	MIX1(c, d, e, a, b, Maj, K40, ASG1(10));
-	MIX1(b, c, d, e, a, Maj, K40, ASG1(11));
-	MIX1(a, b, c, d, e, Parity, K60, ASG1(12));
-	MIX1(e, a, b, c, d, Parity, K60, ASG1(13));
-	MIX1(d, e, a, b, c, Parity, K60, ASG1(14));
-	MIX1(c, d, e, a, b, Parity, K60, ASG1(15));
-	MIX1(b, c, d, e, a, Parity, K60, ASG1(0));
-	MIX1(a, b, c, d, e, Parity, K60, ASG1(1));
-	MIX1(e, a, b, c, d, Parity, K60, ASG1(2));
-	MIX1(d, e, a, b, c, Parity, K60, ASG1(3));
-	MIX1(c, d, e, a, b, Parity, K60, ASG1(4));
-	MIX1(b, c, d, e, a, Parity, K60, ASG1(5));
-	MIX1(a, b, c, d, e, Parity, K60, ASG1(6));
-	MIX1(e, a, b, c, d, Parity, K60, ASG1(7));
-	MIX1(d, e, a, b, c, Parity, K60, ASG1(8));
-	MIX1(c, d, e, a, b, Parity, K60, ASG1(9));
-	MIX1(b, c, d, e, a, Parity, K60, ASG1(10));
-	MIX1(a, b, c, d, e, Parity, K60, ASG1(11));
-	MIX1(e, a, b, c, d, Parity, K60, ASG1(12));
-	MIX1(d, e, a, b, c, Parity, K60, ASG1(13));
-	MIX1(c, d, e, a, b, Parity, K60, ASG1(14));
-	MIX1(b, c, d, e, a, Parity, K60, ASG1(15));
-	s->H[0] += a; s->H[1] += b; s->H[2] += c;
-	s->H[3] += d; s->H[4] += e;
+#define W11(s)	W[(s+ 0) & 0xf]
+#define W12(s)	W[(s+13) & 0xf]
+#define W13(s)	W[(s+ 8) & 0xf]
+#define W14(s)	W[(s+ 2) & 0xf]
+
+#define A1(s)	(W11(s) = ROTL(W11(s) ^ W12(s) ^ W13(s) ^ W14(s), 1))
+
+	a = H[0]; b = H[1]; c = H[2]; d = H[3]; e = H[4];
+
+	M11(Ch, K1,  *wp++); M12(Ch, K1,  *wp++); M13(Ch, K1,  *wp++);
+	M14(Ch, K1,  *wp++); M15(Ch, K1,  *wp++); M11(Ch, K1,  *wp++);
+	M12(Ch, K1,  *wp++); M13(Ch, K1,  *wp++); M14(Ch, K1,  *wp++);
+	M15(Ch, K1,  *wp++); M11(Ch, K1,  *wp++); M12(Ch, K1,  *wp++);
+	M13(Ch, K1,  *wp++); M14(Ch, K1,  *wp++); M15(Ch, K1,  *wp++);
+	M11(Ch, K1,  *wp  ); M12(Ch, K1, A1( 0)); M13(Ch, K1, A1( 1));
+	M14(Ch, K1, A1( 2)); M15(Ch, K1, A1( 3)); M11(Pa, K2, A1( 4));
+	M12(Pa, K2, A1( 5)); M13(Pa, K2, A1( 6)); M14(Pa, K2, A1( 7));
+	M15(Pa, K2, A1( 8)); M11(Pa, K2, A1( 9)); M12(Pa, K2, A1(10));
+	M13(Pa, K2, A1(11)); M14(Pa, K2, A1(12)); M15(Pa, K2, A1(13));
+	M11(Pa, K2, A1(14)); M12(Pa, K2, A1(15)); M13(Pa, K2, A1( 0));
+	M14(Pa, K2, A1( 1)); M15(Pa, K2, A1( 2)); M11(Pa, K2, A1( 3));
+	M12(Pa, K2, A1( 4)); M13(Pa, K2, A1( 5)); M14(Pa, K2, A1( 6));
+	M15(Pa, K2, A1( 7)); M11(Ma, K3, A1( 8)); M12(Ma, K3, A1( 9));
+	M13(Ma, K3, A1(10)); M14(Ma, K3, A1(11)); M15(Ma, K3, A1(12));
+	M11(Ma, K3, A1(13)); M12(Ma, K3, A1(14)); M13(Ma, K3, A1(15));
+	M14(Ma, K3, A1( 0)); M15(Ma, K3, A1( 1)); M11(Ma, K3, A1( 2));
+	M12(Ma, K3, A1( 3)); M13(Ma, K3, A1( 4)); M14(Ma, K3, A1( 5));
+	M15(Ma, K3, A1( 6)); M11(Ma, K3, A1( 7)); M12(Ma, K3, A1( 8));
+	M13(Ma, K3, A1( 9)); M14(Ma, K3, A1(10)); M15(Ma, K3, A1(11));
+	M11(Pa, K4, A1(12)); M12(Pa, K4, A1(13)); M13(Pa, K4, A1(14));
+	M14(Pa, K4, A1(15)); M15(Pa, K4, A1( 0)); M11(Pa, K4, A1( 1));
+	M12(Pa, K4, A1( 2)); M13(Pa, K4, A1( 3)); M14(Pa, K4, A1( 4));
+	M15(Pa, K4, A1( 5)); M11(Pa, K4, A1( 6)); M12(Pa, K4, A1( 7));
+	M13(Pa, K4, A1( 8)); M14(Pa, K4, A1( 9)); M15(Pa, K4, A1(10));
+	M11(Pa, K4, A1(11)); M12(Pa, K4, A1(12)); M13(Pa, K4, A1(13));
+	M14(Pa, K4, A1(14)); M15(Pa, K4, A1(15));
+
+	H[0] += a; H[1] += b; H[2] += c; H[3] += d; H[4] += e;
 }
 
-static void sha256(s, block)
+static void sha256(s, block)		/* SHA-224/256 transform */
 SHA *s;
 unsigned char *block;
 {
-	int t;
-	unsigned long a, b, c, d, e, f, g, h, T1;
-	static unsigned long W[16];
-	unsigned long *q = W;
+	W32 a, b, c, d, e, f, g, h, T1;
+	SHA_MYSTERY W32 W[16];
+	W32 *kp = K256;
+	W32 *wp = W;
+	W32 *H = s->H;
 
-	if (sha_big_endian_32)
-		memcpy(W, block, 64);
-	else for (t = 0; t < 16; t++, block += 4)
-		*q++ = block[0]<<24|block[1]<<16|block[2]<<8|block[3];
+	SHA32_SCHED(W, block);
 
 /*
  * Use same technique as in sha1()
@@ -212,110 +166,78 @@ unsigned char *block;
  * Note that the variable "T2" is no longer needed.
  */
 
-#define MIX2(a,b,c,d,e,f,g,h,k,w)\
-	T1=h+SIGMA1(e)+Ch(e,f,g)+k+w;\
-	d+=T1; h=T1+SIGMA0(a)+Maj(a,b,c)
+#define M2(a, b, c, d, e, f, g, h, w)				\
+	T1 = h  + SIGMA1(e) + Ch(e, f, g) + (*kp++) + w;	\
+	h  = T1 + SIGMA0(a) + Ma(a, b, c); d += T1;
 
-#define ASG2(s)\
-	(W[s&15]+=sigma1(W[(s+14)&15])\
-	+W[(s+9)&15]+sigma0(W[(s+1)&15]))
+#define W21(s)	W[(s+ 0) & 0xf]
+#define W22(s)	W[(s+14) & 0xf]
+#define W23(s)	W[(s+ 9) & 0xf]
+#define W24(s)	W[(s+ 1) & 0xf]
 
-	a = s->H[0]; b = s->H[1]; c = s->H[2];
-	d = s->H[3]; e = s->H[4]; f = s->H[5];
-	g = s->H[6]; h = s->H[7];
-	MIX2(a, b, c, d, e, f, g, h, K256[0], W[0]);
-	MIX2(h, a, b, c, d, e, f, g, K256[1], W[1]);
-	MIX2(g, h, a, b, c, d, e, f, K256[2], W[2]);
-	MIX2(f, g, h, a, b, c, d, e, K256[3], W[3]);
-	MIX2(e, f, g, h, a, b, c, d, K256[4], W[4]);
-	MIX2(d, e, f, g, h, a, b, c, K256[5], W[5]);
-	MIX2(c, d, e, f, g, h, a, b, K256[6], W[6]);
-	MIX2(b, c, d, e, f, g, h, a, K256[7], W[7]);
-	MIX2(a, b, c, d, e, f, g, h, K256[8], W[8]);
-	MIX2(h, a, b, c, d, e, f, g, K256[9], W[9]);
-	MIX2(g, h, a, b, c, d, e, f, K256[10], W[10]);
-	MIX2(f, g, h, a, b, c, d, e, K256[11], W[11]);
-	MIX2(e, f, g, h, a, b, c, d, K256[12], W[12]);
-	MIX2(d, e, f, g, h, a, b, c, K256[13], W[13]);
-	MIX2(c, d, e, f, g, h, a, b, K256[14], W[14]);
-	MIX2(b, c, d, e, f, g, h, a, K256[15], W[15]);
-	MIX2(a, b, c, d, e, f, g, h, K256[16], ASG2(0));
-	MIX2(h, a, b, c, d, e, f, g, K256[17], ASG2(1));
-	MIX2(g, h, a, b, c, d, e, f, K256[18], ASG2(2));
-	MIX2(f, g, h, a, b, c, d, e, K256[19], ASG2(3));
-	MIX2(e, f, g, h, a, b, c, d, K256[20], ASG2(4));
-	MIX2(d, e, f, g, h, a, b, c, K256[21], ASG2(5));
-	MIX2(c, d, e, f, g, h, a, b, K256[22], ASG2(6));
-	MIX2(b, c, d, e, f, g, h, a, K256[23], ASG2(7));
-	MIX2(a, b, c, d, e, f, g, h, K256[24], ASG2(8));
-	MIX2(h, a, b, c, d, e, f, g, K256[25], ASG2(9));
-	MIX2(g, h, a, b, c, d, e, f, K256[26], ASG2(10));
-	MIX2(f, g, h, a, b, c, d, e, K256[27], ASG2(11));
-	MIX2(e, f, g, h, a, b, c, d, K256[28], ASG2(12));
-	MIX2(d, e, f, g, h, a, b, c, K256[29], ASG2(13));
-	MIX2(c, d, e, f, g, h, a, b, K256[30], ASG2(14));
-	MIX2(b, c, d, e, f, g, h, a, K256[31], ASG2(15));
-	MIX2(a, b, c, d, e, f, g, h, K256[32], ASG2(0));
-	MIX2(h, a, b, c, d, e, f, g, K256[33], ASG2(1));
-	MIX2(g, h, a, b, c, d, e, f, K256[34], ASG2(2));
-	MIX2(f, g, h, a, b, c, d, e, K256[35], ASG2(3));
-	MIX2(e, f, g, h, a, b, c, d, K256[36], ASG2(4));
-	MIX2(d, e, f, g, h, a, b, c, K256[37], ASG2(5));
-	MIX2(c, d, e, f, g, h, a, b, K256[38], ASG2(6));
-	MIX2(b, c, d, e, f, g, h, a, K256[39], ASG2(7));
-	MIX2(a, b, c, d, e, f, g, h, K256[40], ASG2(8));
-	MIX2(h, a, b, c, d, e, f, g, K256[41], ASG2(9));
-	MIX2(g, h, a, b, c, d, e, f, K256[42], ASG2(10));
-	MIX2(f, g, h, a, b, c, d, e, K256[43], ASG2(11));
-	MIX2(e, f, g, h, a, b, c, d, K256[44], ASG2(12));
-	MIX2(d, e, f, g, h, a, b, c, K256[45], ASG2(13));
-	MIX2(c, d, e, f, g, h, a, b, K256[46], ASG2(14));
-	MIX2(b, c, d, e, f, g, h, a, K256[47], ASG2(15));
-	MIX2(a, b, c, d, e, f, g, h, K256[48], ASG2(0));
-	MIX2(h, a, b, c, d, e, f, g, K256[49], ASG2(1));
-	MIX2(g, h, a, b, c, d, e, f, K256[50], ASG2(2));
-	MIX2(f, g, h, a, b, c, d, e, K256[51], ASG2(3));
-	MIX2(e, f, g, h, a, b, c, d, K256[52], ASG2(4));
-	MIX2(d, e, f, g, h, a, b, c, K256[53], ASG2(5));
-	MIX2(c, d, e, f, g, h, a, b, K256[54], ASG2(6));
-	MIX2(b, c, d, e, f, g, h, a, K256[55], ASG2(7));
-	MIX2(a, b, c, d, e, f, g, h, K256[56], ASG2(8));
-	MIX2(h, a, b, c, d, e, f, g, K256[57], ASG2(9));
-	MIX2(g, h, a, b, c, d, e, f, K256[58], ASG2(10));
-	MIX2(f, g, h, a, b, c, d, e, K256[59], ASG2(11));
-	MIX2(e, f, g, h, a, b, c, d, K256[60], ASG2(12));
-	MIX2(d, e, f, g, h, a, b, c, K256[61], ASG2(13));
-	MIX2(c, d, e, f, g, h, a, b, K256[62], ASG2(14));
-	MIX2(b, c, d, e, f, g, h, a, K256[63], ASG2(15));
-	s->H[0] += a; s->H[1] += b; s->H[2] += c;
-	s->H[3] += d; s->H[4] += e; s->H[5] += f;
-	s->H[6] += g; s->H[7] += h;
+#define A2(s)	(W21(s) += sigma1(W22(s)) + W23(s) + sigma0(W24(s)))
+
+#define M21(w)	M2(a, b, c, d, e, f, g, h, w)
+#define M22(w)	M2(h, a, b, c, d, e, f, g, w)
+#define M23(w)	M2(g, h, a, b, c, d, e, f, w)
+#define M24(w)	M2(f, g, h, a, b, c, d, e, w)
+#define M25(w)	M2(e, f, g, h, a, b, c, d, w)
+#define M26(w)	M2(d, e, f, g, h, a, b, c, w)
+#define M27(w)	M2(c, d, e, f, g, h, a, b, w)
+#define M28(w)	M2(b, c, d, e, f, g, h, a, w)
+
+	a = H[0]; b = H[1]; c = H[2]; d = H[3];
+	e = H[4]; f = H[5]; g = H[6]; h = H[7];
+
+	M21( *wp++); M22( *wp++); M23( *wp++); M24( *wp++);
+	M25( *wp++); M26( *wp++); M27( *wp++); M28( *wp++);
+	M21( *wp++); M22( *wp++); M23( *wp++); M24( *wp++);
+	M25( *wp++); M26( *wp++); M27( *wp++); M28( *wp  );
+	M21(A2( 0)); M22(A2( 1)); M23(A2( 2)); M24(A2( 3));
+	M25(A2( 4)); M26(A2( 5)); M27(A2( 6)); M28(A2( 7));
+	M21(A2( 8)); M22(A2( 9)); M23(A2(10)); M24(A2(11));
+	M25(A2(12)); M26(A2(13)); M27(A2(14)); M28(A2(15));
+	M21(A2( 0)); M22(A2( 1)); M23(A2( 2)); M24(A2( 3));
+	M25(A2( 4)); M26(A2( 5)); M27(A2( 6)); M28(A2( 7));
+	M21(A2( 8)); M22(A2( 9)); M23(A2(10)); M24(A2(11));
+	M25(A2(12)); M26(A2(13)); M27(A2(14)); M28(A2(15));
+	M21(A2( 0)); M22(A2( 1)); M23(A2( 2)); M24(A2( 3));
+	M25(A2( 4)); M26(A2( 5)); M27(A2( 6)); M28(A2( 7));
+	M21(A2( 8)); M22(A2( 9)); M23(A2(10)); M24(A2(11));
+	M25(A2(12)); M26(A2(13)); M27(A2(14)); M28(A2(15));
+
+	H[0] += a; H[1] += b; H[2] += c; H[3] += d;
+	H[4] += e; H[5] += f; H[6] += g; H[7] += h;
 }
 
 #include "sha64bit.c"
 
-static void ul2mem(mem, ul)
+
+/* w32mem: writes 32-bit word to memory in big-endian order */
+static void w32mem(mem, w32)
 unsigned char *mem;
-unsigned long ul;
+W32 w32;
 {
 	int i;
 
 	for (i = 0; i < 4; i++)
-		*mem++ = (unsigned char) (SHR(ul, 24 - i * 8) & 0xff);
+		*mem++ = (unsigned char) (SR32(w32, 24-i*8) & 0xff);
 }
 
 #define SETBIT(str, pos)  str[(pos) >> 3] |=  (0x01 << (7 - (pos) % 8))
 #define CLRBIT(str, pos)  str[(pos) >> 3] &= ~(0x01 << (7 - (pos) % 8))
 #define BYTECNT(bitcnt)   (1 + (((bitcnt) - 1) >> 3))
 
+
+/* pad: fills out remaining block(s) and computes final digest state */
 static void pad(s)
 SHA *s;
 {
 	unsigned int lenpos, lhpos, llpos;
 
 	lenpos = s->blocksize == SHA1_BLOCK_BITS ? 448 : 896;
-	lhpos = s->blocksize == SHA1_BLOCK_BITS ? 56 : 120;
-	llpos = s->blocksize == SHA1_BLOCK_BITS ? 60 : 124;
+	lhpos  = s->blocksize == SHA1_BLOCK_BITS ?  56 : 120;
+	llpos  = s->blocksize == SHA1_BLOCK_BITS ?  60 : 124;
 	SETBIT(s->block, s->blockcnt), s->blockcnt++;
 	while (s->blockcnt > lenpos)
 		if (s->blockcnt == s->blocksize)
@@ -325,14 +247,16 @@ SHA *s;
 	while (s->blockcnt < lenpos)
 		CLRBIT(s->block, s->blockcnt), s->blockcnt++;
 	if (s->blocksize != SHA1_BLOCK_BITS) {
-		ul2mem(s->block + 112, s->lenhh);
-		ul2mem(s->block + 116, s->lenhl);
+		w32mem(s->block + 112, s->lenhh);
+		w32mem(s->block + 116, s->lenhl);
 	}
-	ul2mem(s->block + lhpos, s->lenlh);
-	ul2mem(s->block + llpos, s->lenll);
+	w32mem(s->block + lhpos, s->lenlh);
+	w32mem(s->block + llpos, s->lenll);
 	s->sha(s, s->block), s->blockcnt = 0;
 }
 
+
+/* digcpy: writes current state to digest buffer */
 static void digcpy(s)
 SHA *s;
 {
@@ -340,11 +264,13 @@ SHA *s;
 
 	if (s->blocksize == SHA1_BLOCK_BITS)
 		for (i = 0; i < 16; i++)
-			ul2mem(s->digest + i * 4, s->H[i]);
+			w32mem(s->digest + i * 4, s->H[i]);
 	else
 		digcpy64(s);
 }
 
+
+/* sharewind: re-initializes the digest object */
 void sharewind(s)
 SHA *s;
 {
@@ -385,6 +311,8 @@ SHA *s;
 	}
 }
 
+
+/* shaopen: creates a new digest object */
 SHA *shaopen(alg)
 int alg;
 {
@@ -435,6 +363,8 @@ int alg;
 	return(s);
 }
 
+
+/* shadirect: updates state directly (w/o going through s->block) */
 static unsigned long shadirect(bitstr, bitcnt, s)
 unsigned char *bitstr;
 unsigned long bitcnt;
@@ -454,6 +384,8 @@ SHA *s;
 	return(savecnt);
 }
 
+
+/* shabytes: updates state for byte-aligned input data */
 static unsigned long shabytes(bitstr, bitcnt, s)
 unsigned char *bitstr;
 unsigned long bitcnt;
@@ -479,6 +411,8 @@ SHA *s;
 	return(savecnt);
 }
 
+
+/* shabits: updates state for bit-aligned input data */
 static unsigned long shabits(bitstr, bitcnt, s)
 unsigned char *bitstr;
 unsigned long bitcnt;
@@ -487,7 +421,7 @@ SHA *s;
 	unsigned int i;
 	unsigned int gap;
 	unsigned long numbits;
-	static unsigned char buf[1<<12];
+	SHA_MYSTERY unsigned char buf[1<<9];
 	unsigned int bufsize = sizeof(buf);
 	unsigned long bufbits = bufsize << 3;
 	unsigned int numbytes = BYTECNT(bitcnt);
@@ -517,6 +451,8 @@ SHA *s;
 	return(savecnt);
 }
 
+
+/* shawrite: triggers a state update using data in bitstr/bitcnt */
 unsigned long shawrite(bitstr, bitcnt, s)
 unsigned char *bitstr;
 unsigned long bitcnt;
@@ -524,15 +460,10 @@ SHA *s;
 {
 	if (bitcnt == 0)
 		return(0);
-	s->lenll += bitcnt;
-	if (s->lenll < bitcnt) {
-		s->lenlh++;
-		if (s->lenlh == 0) {
-			s->lenhl++;
-			if (s->lenhl == 0)
+	if ((s->lenll += bitcnt) < bitcnt)
+		if (++s->lenlh == 0)
+			if (++s->lenhl == 0)
 				s->lenhh++;
-		}
-	}
 	if (s->blockcnt == 0)
 		return(shadirect(bitstr, bitcnt, s));
 	else if (s->blockcnt % 8 == 0)
@@ -541,12 +472,16 @@ SHA *s;
 		return(shabits(bitstr, bitcnt, s));
 }
 
+
+/* shafinish: triggers padding of final block(s) */
 void shafinish(s)
 SHA *s;
 {
 	pad(s);
 }
 
+
+/* shadigest: returns pointer to current digest (binary) */
 unsigned char *shadigest(s)
 SHA *s;
 {
@@ -556,6 +491,8 @@ SHA *s;
 
 #define HEXLEN(bytecnt) ((bytecnt) << 1)
 
+
+/* shahex: returns pointer to current digest (hexadecimal) */
 char *shahex(s)
 SHA *s;
 {
@@ -570,53 +507,66 @@ SHA *s;
 	return(s->hex);
 }
 
-static char map[] =
+
+/* map: translation map for Base 64 encoding */
+static char map[] =		
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-static char *encbase64(b, n)	/* encodes 0..3 bytes into Base64 */
-unsigned char *b;
+
+/* encbase64: encodes input (0 to 3 bytes) into Base 64 */
+static void encbase64(in, n, out)
+unsigned char *in;
 int n;
+char *out;
 {
-	unsigned char in[3] = {0, 0, 0};
-	static char out[5];
+	unsigned char byte[3] = {0, 0, 0};
 
 	out[0] = '\0';
 	if (n < 1 || n > 3)
-		return(out);
-	memcpy(in, b, n);
-	out[0] = map[in[0] >> 2];
-	out[1] = map[((in[0] & 0x03) << 4) | (in[1] >> 4)];
-	out[2] = map[((in[1] & 0x0f) << 2) | (in[2] >> 6)];
-	out[3] = map[in[2] & 0x3f];
+		return;
+	memcpy(byte, in, n);
+	out[0] = map[byte[0] >> 2];
+	out[1] = map[((byte[0] & 0x03) << 4) | (byte[1] >> 4)];
+	out[2] = map[((byte[1] & 0x0f) << 2) | (byte[2] >> 6)];
+	out[3] = map[byte[2] & 0x3f];
 	out[n+1] = '\0';
-	return(out);
 }
 
 #define B64LEN(bytecnt) (((bytecnt) % 3 == 0) ? ((bytecnt) / 3) * 4 \
 	: ((bytecnt) / 3) * 4 + ((bytecnt) % 3) + 1)
 
+
+/* shabase64: returns pointer to current digest (Base 64) */
 char *shabase64(s)
 SHA *s;
 {
 	int n;
 	unsigned char *q;
+	char out[5];
 
 	digcpy(s);
 	s->base64[0] = '\0';
 	if (B64LEN(s->digestlen) >= sizeof(s->base64))
 		return(s->base64);
-	for (n = s->digestlen, q = s->digest; n > 3; n -= 3, q += 3)
-		strcat(s->base64, encbase64(q, 3));
-	strcat(s->base64, encbase64(q, n));
+	for (n = s->digestlen, q = s->digest; n > 3; n -= 3, q += 3) {
+		encbase64(q, 3, out);
+		strcat(s->base64, out);
+	}
+	encbase64(q, n, out);
+	strcat(s->base64, out);
 	return(s->base64);
 }
 
+
+/* shadsize: returns length of digest in bytes */
 int shadsize(s)
 SHA *s;
 {
 	return(s->digestlen);
 }
 
+
+/* shadup: duplicates current digest object */
 SHA *shadup(s)
 SHA *s;
 {
@@ -629,6 +579,8 @@ SHA *s;
 	return(p);
 }
 
+
+/* shadump: dumps digest object to a human-readable ASCII file */
 int shadump(file, s)
 char *file;
 SHA *s;
@@ -655,55 +607,45 @@ SHA *s;
 		SHA_IO_printf(f, ":%02x", s->block[i]);
 	SHA_IO_printf(f, "\n");
 	SHA_IO_printf(f, "blockcnt:%u\n", s->blockcnt);
-	SHA_IO_printf(f, "lenhh:%lu\n", s->lenhh);
-	SHA_IO_printf(f, "lenhl:%lu\n", s->lenhl);
-	SHA_IO_printf(f, "lenlh:%lu\n", s->lenlh);
-	SHA_IO_printf(f, "lenll:%lu\n", s->lenll);
+	SHA_IO_printf(f, "lenhh:%lu\n", (unsigned long) s->lenhh);
+	SHA_IO_printf(f, "lenhl:%lu\n", (unsigned long) s->lenhl);
+	SHA_IO_printf(f, "lenlh:%lu\n", (unsigned long) s->lenlh);
+	SHA_IO_printf(f, "lenll:%lu\n", (unsigned long) s->lenll);
 	if (f != SHA_IO_stdout())
 		SHA_IO_close(f);
 	return(1);
 }
 
-static char *fgetstr(s, n, f)
-char *s;
-unsigned int n;
+
+/* fgetstr: reads (and returns pointer to) next line of file */
+static char *fgetstr(line, maxsize, f)
+char *line;
+unsigned int maxsize;
 SHA_IO *f;
 {
-	char *b = s;
+	char *p = line;
 
-	if (SHA_IO_eof(f) || n == 0)
+	if (SHA_IO_eof(f) || maxsize == 0)
 		return(NULL);
-	for (;; n--) {
-		if (SHA_IO_eof(f) || n == 1) {
-			*s = '\0';
-			return(b);
-		}
-		if ((*s++ = SHA_IO_getc(f)) == '\n') {
-			*s = '\0';
-			return(b);
-		}
+	for (;; maxsize--) {
+		if (SHA_IO_eof(f) || maxsize == 1)
+			break;
+		if ((*p++ = SHA_IO_getc(f)) == '\n')
+			break;
 	}
+	*p = '\0';
+	return(line);
 }
 
-static int match(f, tag)
-SHA_IO *f;
-char *tag;
-{
-	static char line[1<<10];
 
-	while (fgetstr(line, sizeof(line), f) != NULL)
-		if (line[0] == '#' || isspace(line[0]))
-			continue;
-		else
-			return(strcmp(strtok(line, ":\n"), tag) == 0);
-	return(0);
-}
+/* types of values present in dump file */
+#define TYPE_C 1	/* character */
+#define TYPE_I 2	/* normal integer */
+#define TYPE_32 3	/* 32-bit value */
+#define TYPE_64 4	/* 64-bit state value */
 
-#define TYPE_C 1
-#define TYPE_I 2
-#define TYPE_L 3
-#define TYPE_LL 4
 
+/* loadval: checks next line in dump file against tag, and loads values */
 static int loadval(f, tag, type, pval, num, base)
 SHA_IO *f;
 char *tag;
@@ -714,10 +656,14 @@ int base;
 {
 	char *p;
 	unsigned char *pc = (unsigned char *) pval;
-	unsigned int  *pi = (unsigned int  *) pval;
-	unsigned long *pl = (unsigned long *) pval;
+	unsigned int *pi = (unsigned int *) pval;
+	W32 *pl = (W32 *) pval;
+	SHA_MYSTERY char line[1<<9];
 
-	if (!match(f, tag))
+	while (fgetstr(line, sizeof(line), f) != NULL)
+		if (!(line[0] == '#' || isspace(line[0])))
+			break;
+	if (strcmp(strtok(line, ":\n"), tag) != 0)
 		return(0);
 	while (num-- > 0) {
 		if ((p = strtok(NULL, ":\n")) == NULL)
@@ -726,16 +672,18 @@ int base;
 			*pc++ = (unsigned char) strtoul(p, NULL, base);
 		else if (type == TYPE_I)
 			*pi++ = (unsigned int) strtoul(p, NULL, base);
-		else if (type == TYPE_L)
+		else if (type == TYPE_32)
 			*pl++ = strtoul(p, NULL, base);
-		else if (type == TYPE_LL) {
-			loadull(pval, p);
+		else if (type == TYPE_64) {
+			load64(pval, p);
 		} else
 			return(0);
 	}
 	return(1);
 }
 
+
+/* closeall: closes dump file and de-allocates digest object */
 static SHA *closeall(f, s)
 SHA_IO *f;
 SHA *s;
@@ -747,6 +695,8 @@ SHA *s;
 	return(NULL);
 }
 
+
+/* shaload: creates digest object corresponding to contents of dump file */
 SHA *shaload(file)
 char *file;
 {
@@ -762,25 +712,27 @@ char *file;
 		return(closeall(f, NULL));
 	if ((s = shaopen(alg)) == NULL)
 		return(closeall(f, NULL));
-	if (!loadval(f, "H", alg<=SHA256 ? TYPE_L : TYPE_LL, s->H, 8, 16))
+	if (!loadval(f, "H", alg<=SHA256 ? TYPE_32 : TYPE_64, s->H, 8, 16))
 		return(closeall(f, s));
 	if (!loadval(f, "block", TYPE_C, s->block, s->blocksize>>3, 16))
 		return(closeall(f, s));
 	if (!loadval(f, "blockcnt", TYPE_I, &s->blockcnt, 1, 10))
 		return(closeall(f, s));
-	if (!loadval(f, "lenhh", TYPE_L, &s->lenhh, 1, 10))
+	if (!loadval(f, "lenhh", TYPE_32, &s->lenhh, 1, 10))
 		return(closeall(f, s));
-	if (!loadval(f, "lenhl", TYPE_L, &s->lenhl, 1, 10))
+	if (!loadval(f, "lenhl", TYPE_32, &s->lenhl, 1, 10))
 		return(closeall(f, s));
-	if (!loadval(f, "lenlh", TYPE_L, &s->lenlh, 1, 10))
+	if (!loadval(f, "lenlh", TYPE_32, &s->lenlh, 1, 10))
 		return(closeall(f, s));
-	if (!loadval(f, "lenll", TYPE_L, &s->lenll, 1, 10))
+	if (!loadval(f, "lenll", TYPE_32, &s->lenll, 1, 10))
 		return(closeall(f, s));
 	if (f != SHA_IO_stdin())
 		SHA_IO_close(f);
 	return(s);
 }
 
+
+/* shaclose: de-allocates digest object */
 int shaclose(s)
 SHA *s;
 {

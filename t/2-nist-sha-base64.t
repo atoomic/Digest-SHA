@@ -1,4 +1,4 @@
-use Test::More qw(no_plan);
+use Test::More;
 use strict;
 use integer;
 use Digest::SHA qw(sha1_base64 sha224_base64 sha256_base64 sha384_base64 sha512_base64);
@@ -16,12 +16,15 @@ my @vecs = (
 
 my $fcn;
 my $rsp;
+my $skip;
 
-(pop(@vecs) && pop(@vecs)) unless sha512_base64("");
-(pop(@vecs) && pop(@vecs)) unless sha384_base64("");
-
+plan tests => scalar(@vecs) / 2;
 while (@vecs) {
 	$fcn = shift(@vecs);
 	$rsp = shift(@vecs);
-	is(&$fcn($data), $rsp, $rsp);
+	$skip = &$fcn("") ? 0 : 1;
+	SKIP: {
+		skip("64-bit operations not supported", 1) if $skip;
+		is(&$fcn($data), $rsp, $rsp);
+	}
 }
