@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use integer;
 
-our $VERSION = '5.00';
+our $VERSION = '5.01';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -49,7 +49,7 @@ sub new {
 			sharewind($$class);
 			return($class);
 		}
-		shaclose($$class);
+		shaclose($$class) if $$class;
 		$$class = shaopen($alg) || return;
 		return($class);
 	}
@@ -62,7 +62,7 @@ sub new {
 
 sub DESTROY {
 	my $self = shift;
-	shaclose($$self);
+	shaclose($$self) if $$self;
 }
 
 sub clone {
@@ -116,7 +116,7 @@ sub load {
 	my $class = shift;
 	my $file = shift || "";
 	if (ref($class)) {	# instance method
-		shaclose($$class);
+		shaclose($$class) if $$class;
 		$$class = shaload($file) || return;
 		return($class);
 	}

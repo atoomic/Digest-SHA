@@ -1,5 +1,10 @@
 Revision history for Perl extension Digest::SHA.
 
+5.01  Fri May 21 13:08:12 MST 2004
+	- check for undefined SHA handle when calling "shaclose()"
+		-- prevents intermittent cleanup errors during 
+			global object destruction
+
 5.00  Fri May 14 04:45:00 MST 2004
 	- minor documentation fixes
 	- restored classical style of version numbering (X.YZ)

@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name: Digest-SHA
-version: 5.00
+version: 5.01
 author:
   - Mark Shelor, mshelor@comcast.net
 abstract: Perl extension for SHA-1/224/256/384/512
@@ -12,5 +12,5 @@ conflicts: {}
 provides:
   Digest::SHA:
     file: SHA.pm
-    version: 5.00
+    version: 5.01
 generated_by: Module::Build version 0.22
