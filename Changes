@@ -1,5 +1,18 @@
 Revision history for Perl extension Digest::SHA.
 
+4.3.1 Thu Mar  4 02:54:00 MST 2004
+	- removed unused functions from XS file
+		-- reduces size of compiled objects
+	- simplified implementation of Digest::SHA object
+		-- now a blessed SHAPtr ref instead of blessed array ref
+		-- results in slight speed-up of OO operations
+	- streamlined underlying C source
+		-- used macros to consolidate repetitive code
+	- rewrote test scripts to depend on Test rather than Test::More
+		-- allows module to be checked in minimal Perl environments
+	- added compilation option for thread-safety
+		-- overrides use of static arrays
+
 4.3.0 Sat Feb  7 02:58:00 MST 2004
 	- included SHA-384/512 support if using Microsoft C/C++
 		-- uses MSVC's __int64 in place of "long long"
@@ -38,7 +51,7 @@ Revision history for Perl extension Digest::SHA.
 
 4.0.8 Thu Dec 18 23:32:00 MST 2003
 	- inherits from Digest::base if installed
-		-- also checks for MIME::Base64 
+		-- also checks for MIME::Base64
 		-- still fully-functional if neither are installed
 	- added buffer overflow protection in underlying C code
 		-- ref. shahex() and shabase64() routines

@@ -1,7 +1,9 @@
-use Test::More tests => 1;
+use Test;
 use strict;
 use integer;
 use Digest::SHA;
+
+BEGIN { plan tests => 1 }
 
 my $i;
 my $bitstr = pack("B*", "11111111" x 10000);
@@ -13,7 +15,7 @@ for ($i = 0; $i < 99; $i++) {
 }
 $state->add_bits($bitstr, 79999);
 
-is(
+ok(
 	$state->hexdigest,
-	"559a512393dd212220ee080730d6f11644ba0222",
-	"updates with large bitstrings on non-byte-aligned boundaries");
+	"559a512393dd212220ee080730d6f11644ba0222"
+);

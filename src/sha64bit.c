@@ -14,7 +14,11 @@
 #define SR64		SHA64_SHR
 #define SL64		SHA64_SHL
 
-#define load64(pval, p) *((W64 *) pval) = strto64(p); pval = (W64 *) pval + 1
+#define load64(pval, p) 				\
+	do {						\
+		*((W64 *) pval) = strto64(p);		\
+		pval = (W64 *) pval + 1;		\
+	} while (0)
 
 #define ROTRQ(x, n)	(SR64(x, n) | SL64(x, 64-(n)))
 #define SIGMAQ0(x)	(ROTRQ(x, 28) ^ ROTRQ(x, 34) ^ ROTRQ(x, 39))
@@ -106,7 +110,7 @@ SHA *s;
 unsigned char *block;
 {
 	W64 a, b, c, d, e, f, g, h, T1, T2;
-	SHA_MYSTERY W64 W[80];
+	SHA_STO_CLASS W64 W[80];
 	W64 *H = (W64 *) s->H;
 	int t;
 

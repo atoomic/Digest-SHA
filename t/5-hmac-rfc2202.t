@@ -1,7 +1,9 @@
-use Test::More tests => 7;
+use Test;
 use strict;
 use integer;
 use Digest::SHA qw(hmac_sha1_hex);
+
+BEGIN { plan tests => 7 }
 
 my @vecs = (
 	"Hi There",
@@ -23,9 +25,6 @@ my @keys = (
 	chr(0xaa) x 80
 );
 
-my $i = 0x01;
-$keys[3] .= chr($i++) while (length($keys[3]) < 25);
-
 my @hmac1rsp = (
 	"b617318655057264e28bc0b6fb378c8ef146be00",
 	"effcdf6ae5eb2fa2d27416d5f184df9c259a7c79",
@@ -36,10 +35,12 @@ my @hmac1rsp = (
 	"e8e99d0f45237d786d6bbaa7965c7808bbff1a91"
 );
 
+my $i = 0x01;
+$keys[3] .= chr($i++) while (length($keys[3]) < 25);
+
 for ($i = 0; $i < @vecs; $i++) {
-	is(
+	ok(
 		hmac_sha1_hex($vecs[$i], $keys[$i]),
-		$hmac1rsp[$i],
 		$hmac1rsp[$i]
 	);
 }

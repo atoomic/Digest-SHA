@@ -1,7 +1,9 @@
-use Test::More tests => 1;
+use Test;
 use strict;
 use integer;
 use Digest::SHA;
+
+BEGIN { plan tests => 1 }
 
 my $i;
 my $bitstr = pack("B*", "1" x 3999);
@@ -14,8 +16,7 @@ for ($i = 0; $i <= 3999; $i++) {
 }
 $state->add_bits($bitstr, 2000);
 
-is(
+ok(
 	$state->hexdigest,
-	"559a512393dd212220ee080730d6f11644ba0222",
-	"updates with increasing bitstring lengths 0..3999"
+	"559a512393dd212220ee080730d6f11644ba0222"
 );

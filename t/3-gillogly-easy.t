@@ -2,7 +2,7 @@
 #
 # http://www.chiark.greenend.org.uk/pipermail/ukcrypto/1999-February/003538.html
 
-use Test::More tests => 12;
+use Test;
 use strict;
 use integer;
 use Digest::SHA;
@@ -29,6 +29,8 @@ use Digest::SHA;
 #	011#491     : 7C2C3D62 F6AEC28D 94CDF93F 02E739E7 490698A1
 #
 
+BEGIN { plan tests => 12 }
+
 my @vecs = (
 	"110",148,"11","ce7387ae577337be54ea94f82c842e8be76bc3e1",
 	"110",149,"","de244f063142cb2f4c903b7f7660577f9e0d8791",
@@ -52,9 +54,5 @@ for (my $i = 0; $i < @vecs/4; $i++) {
 	$bitstr = ($vecs[4*$i] x $vecs[4*$i+1]) . $vecs[4*$i+2];
 	$bitcnt = length($bitstr);
 	$bitstr = pack("B*", $bitstr);
-	is(
-		$ctx->add_bits($bitstr, $bitcnt)->hexdigest,
-		$vecs[4*$i+3],
-		"$vecs[4*$i] x " . "$vecs[4*$i+1] \. " . $vecs[4*$i+2]
-	);
+	ok($ctx->add_bits($bitstr, $bitcnt)->hexdigest, $vecs[4*$i+3]);
 }

@@ -1,7 +1,9 @@
 use ExtUtils::MakeMaker;
 
 my @defines = ('-DSHA_PERL_MODULE');
-push(@defines, '-DNO_SHA_384_512') if $ARGV[0] =~ /^no/i;
+
+# push(@defines, '-DNO_SHA_384_512');
+# push(@defines, '-DSHA_THREAD_SAFE');
 
 my $define = join(" ", @defines);
 

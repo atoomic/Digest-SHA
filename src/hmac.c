@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2004 Mark Shelor, All Rights Reserved
  *
- * Version: 4.3.0
- * Sat Feb  7 02:58:00 MST 2004
+ * Version: 4.3.1
+ * Thu Mar  4 02:54:00 MST 2004
  *
  */
 
@@ -16,6 +16,7 @@
 #include "hmac.h"
 #include "sha.h"
 
+/* hmacopen: creates a new HMAC-SHA digest object */
 HMAC *hmacopen(alg, key, keylen)
 int alg;
 unsigned char *key;
@@ -60,6 +61,7 @@ unsigned int keylen;
 	return(h);
 }
 
+/* hmacwrite: triggers a state update using data in bitstr/bitcnt */
 unsigned long hmacwrite(bitstr, bitcnt, h)
 unsigned char *bitstr;
 unsigned long bitcnt;
@@ -68,6 +70,7 @@ HMAC *h;
 	return(shawrite(bitstr, bitcnt, h->isha));
 }
 
+/* hmacfinish: computes final digest state */
 void hmacfinish(h)
 HMAC *h;
 {
@@ -77,24 +80,28 @@ HMAC *h;
 	shafinish(h->osha);
 }
 
+/* hmacdigest: returns pointer to digest (binary) */
 unsigned char *hmacdigest(h)
 HMAC *h;
 {
 	return(shadigest(h->osha));
 }
 
+/* hmachex: returns pointer to digest (hexadecimal) */
 char *hmachex(h)
 HMAC *h;
 {
 	return(shahex(h->osha));
 }
 
+/* hmacbase64: returns pointer to digest (Base 64) */
 char *hmacbase64(h)
 HMAC *h;
 {
 	return(shabase64(h->osha));
 }
 
+/* hmacclose: de-allocates digest object */
 int hmacclose(h)
 HMAC *h;
 {

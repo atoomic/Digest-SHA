@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2004 Mark Shelor, All Rights Reserved
  *
- * Version: 4.3.0
- * Sat Feb  7 02:58:00 MST 2004
+ * Version: 4.3.1
+ * Thu Mar  4 02:54:00 MST 2004
  *
  */
 
@@ -82,7 +82,7 @@ SHA *s;
 unsigned char *block;
 {
 	W32 a, b, c, d, e;
-	SHA_MYSTERY W32 W[16];
+	SHA_STO_CLASS W32 W[16];
 	W32 *wp = W;
 	W32 *H = s->H;
 
@@ -151,7 +151,7 @@ SHA *s;
 unsigned char *block;
 {
 	W32 a, b, c, d, e, f, g, h, T1;
-	SHA_MYSTERY W32 W[16];
+	SHA_STO_CLASS W32 W[16];
 	W32 *kp = K256;
 	W32 *wp = W;
 	W32 *H = s->H;
@@ -212,7 +212,6 @@ unsigned char *block;
 
 #include "sha64bit.c"
 
-
 /* w32mem: writes 32-bit word to memory in big-endian order */
 static void w32mem(mem, w32)
 unsigned char *mem;
@@ -228,34 +227,6 @@ W32 w32;
 #define CLRBIT(str, pos)  str[(pos) >> 3] &= ~(0x01 << (7 - (pos) % 8))
 #define BYTECNT(bitcnt)   (1 + (((bitcnt) - 1) >> 3))
 
-
-/* pad: fills out remaining block(s) and computes final digest state */
-static void pad(s)
-SHA *s;
-{
-	unsigned int lenpos, lhpos, llpos;
-
-	lenpos = s->blocksize == SHA1_BLOCK_BITS ? 448 : 896;
-	lhpos  = s->blocksize == SHA1_BLOCK_BITS ?  56 : 120;
-	llpos  = s->blocksize == SHA1_BLOCK_BITS ?  60 : 124;
-	SETBIT(s->block, s->blockcnt), s->blockcnt++;
-	while (s->blockcnt > lenpos)
-		if (s->blockcnt == s->blocksize)
-			s->sha(s, s->block), s->blockcnt = 0;
-		else
-			CLRBIT(s->block, s->blockcnt), s->blockcnt++;
-	while (s->blockcnt < lenpos)
-		CLRBIT(s->block, s->blockcnt), s->blockcnt++;
-	if (s->blocksize != SHA1_BLOCK_BITS) {
-		w32mem(s->block + 112, s->lenhh);
-		w32mem(s->block + 116, s->lenhl);
-	}
-	w32mem(s->block + lhpos, s->lenlh);
-	w32mem(s->block + llpos, s->lenll);
-	s->sha(s, s->block), s->blockcnt = 0;
-}
-
-
 /* digcpy: writes current state to digest buffer */
 static void digcpy(s)
 SHA *s;
@@ -269,6 +240,13 @@ SHA *s;
 		digcpy64(s);
 }
 
+#define SHA_INIT(alg, transform) 					\
+	do {								\
+		s->sha = sha ## transform;				\
+		memcpy(s->H, H0 ## alg, sizeof(H0 ## alg));		\
+		s->blocksize = SHA ## alg ## _BLOCK_BITS;		\
+		s->digestlen = SHA ## alg ## _DIGEST_BITS >> 3;		\
+	} while (0)
 
 /* sharewind: re-initializes the digest object */
 void sharewind(s)
@@ -279,38 +257,12 @@ SHA *s;
 	memset(s, 0, sizeof(SHA));
 	s->alg = alg;
 
-	if (alg == SHA1) {
-		s->sha = sha1;
-		memcpy(s->H, H01, sizeof(H01));
-		s->blocksize = SHA1_BLOCK_BITS;
-		s->digestlen = SHA1_DIGEST_BITS >> 3;
-	}
-	else if (alg == SHA224) {
-		s->sha = sha256;
-		memcpy(s->H, H0224, sizeof(H0224));
-		s->blocksize = SHA224_BLOCK_BITS;
-		s->digestlen = SHA224_DIGEST_BITS >> 3;
-	}
-	else if (alg == SHA256) {
-		s->sha = sha256;
-		memcpy(s->H, H0256, sizeof(H0256));
-		s->blocksize = SHA256_BLOCK_BITS;
-		s->digestlen = SHA256_DIGEST_BITS >> 3;
-	}
-	else if (alg == SHA384) {
-		s->sha = sha512;
-		memcpy(s->H, H0384, sizeof(H0384));
-		s->blocksize = SHA384_BLOCK_BITS;
-		s->digestlen = SHA384_DIGEST_BITS >> 3;
-	}
-	else if (alg == SHA512) {
-		s->sha = sha512;
-		memcpy(s->H, H0512, sizeof(H0512));
-		s->blocksize = SHA512_BLOCK_BITS;
-		s->digestlen = SHA512_DIGEST_BITS >> 3;
-	}
+	if      (alg == SHA1)   SHA_INIT(1, 1);
+	else if (alg == SHA224) SHA_INIT(224, 256);
+	else if (alg == SHA256) SHA_INIT(256, 256);
+	else if (alg == SHA384) SHA_INIT(384, 512);
+	else if (alg == SHA512) SHA_INIT(512, 512);
 }
-
 
 /* shaopen: creates a new digest object */
 SHA *shaopen(alg)
@@ -322,47 +274,15 @@ int alg;
 	if (s == NULL)
 		return(NULL);
 	s->alg = alg;
-	if (alg == SHA1) {
-		s->sha = sha1;
-		memcpy(s->H, H01, sizeof(H01));
-		s->blocksize = SHA1_BLOCK_BITS;
-		s->digestlen = SHA1_DIGEST_BITS >> 3;
-	}
-	else if (alg == SHA224) {
-		s->sha = sha256;
-		memcpy(s->H, H0224, sizeof(H0224));
-		s->blocksize = SHA224_BLOCK_BITS;
-		s->digestlen = SHA224_DIGEST_BITS >> 3;
-	}
-	else if (alg == SHA256) {
-		s->sha = sha256;
-		memcpy(s->H, H0256, sizeof(H0256));
-		s->blocksize = SHA256_BLOCK_BITS;
-		s->digestlen = SHA256_DIGEST_BITS >> 3;
-	}
-	else if (!sha_384_512) {
-		SHA_free(s);
-		return(NULL);
-	}
-	else if (alg == SHA384) {
-		s->sha = sha512;
-		memcpy(s->H, H0384, sizeof(H0384));
-		s->blocksize = SHA384_BLOCK_BITS;
-		s->digestlen = SHA384_DIGEST_BITS >> 3;
-	}
-	else if (alg == SHA512) {
-		s->sha = sha512;
-		memcpy(s->H, H0512, sizeof(H0512));
-		s->blocksize = SHA512_BLOCK_BITS;
-		s->digestlen = SHA512_DIGEST_BITS >> 3;
-	}
-	else {
-		SHA_free(s);
-		return(NULL);
-	}
+	if      (alg == SHA1)   SHA_INIT(1, 1);
+	else if (alg == SHA224) SHA_INIT(224, 256);
+	else if (alg == SHA256) SHA_INIT(256, 256);
+	else if (!sha_384_512)  { SHA_free(s); return(NULL); }
+	else if (alg == SHA384) SHA_INIT(384, 512);
+	else if (alg == SHA512) SHA_INIT(512, 512);
+	else                    { SHA_free(s); return(NULL); }
 	return(s);
 }
-
 
 /* shadirect: updates state directly (w/o going through s->block) */
 static unsigned long shadirect(bitstr, bitcnt, s)
@@ -383,7 +303,6 @@ SHA *s;
 	}
 	return(savecnt);
 }
-
 
 /* shabytes: updates state for byte-aligned input data */
 static unsigned long shabytes(bitstr, bitcnt, s)
@@ -411,7 +330,6 @@ SHA *s;
 	return(savecnt);
 }
 
-
 /* shabits: updates state for bit-aligned input data */
 static unsigned long shabits(bitstr, bitcnt, s)
 unsigned char *bitstr;
@@ -421,7 +339,7 @@ SHA *s;
 	unsigned int i;
 	unsigned int gap;
 	unsigned long numbits;
-	SHA_MYSTERY unsigned char buf[1<<9];
+	unsigned char buf[1<<9];
 	unsigned int bufsize = sizeof(buf);
 	unsigned long bufbits = bufsize << 3;
 	unsigned int numbytes = BYTECNT(bitcnt);
@@ -451,7 +369,6 @@ SHA *s;
 	return(savecnt);
 }
 
-
 /* shawrite: triggers a state update using data in bitstr/bitcnt */
 unsigned long shawrite(bitstr, bitcnt, s)
 unsigned char *bitstr;
@@ -460,9 +377,9 @@ SHA *s;
 {
 	if (bitcnt == 0)
 		return(0);
-	if ((s->lenll += bitcnt) < bitcnt)
-		if (++s->lenlh == 0)
-			if (++s->lenhl == 0)
+	if (SHA_LO32(s->lenll += bitcnt) < bitcnt)
+		if (SHA_LO32(++s->lenlh) == 0)
+			if (SHA_LO32(++s->lenhl) == 0)
 				s->lenhh++;
 	if (s->blockcnt == 0)
 		return(shadirect(bitstr, bitcnt, s));
@@ -472,14 +389,31 @@ SHA *s;
 		return(shabits(bitstr, bitcnt, s));
 }
 
-
-/* shafinish: triggers padding of final block(s) */
+/* shafinish: pads remaining block(s) and computes final digest state */
 void shafinish(s)
 SHA *s;
 {
-	pad(s);
-}
+	unsigned int lenpos, lhpos, llpos;
 
+	lenpos = s->blocksize == SHA1_BLOCK_BITS ? 448 : 896;
+	lhpos  = s->blocksize == SHA1_BLOCK_BITS ?  56 : 120;
+	llpos  = s->blocksize == SHA1_BLOCK_BITS ?  60 : 124;
+	SETBIT(s->block, s->blockcnt), s->blockcnt++;
+	while (s->blockcnt > lenpos)
+		if (s->blockcnt == s->blocksize)
+			s->sha(s, s->block), s->blockcnt = 0;
+		else
+			CLRBIT(s->block, s->blockcnt), s->blockcnt++;
+	while (s->blockcnt < lenpos)
+		CLRBIT(s->block, s->blockcnt), s->blockcnt++;
+	if (s->blocksize != SHA1_BLOCK_BITS) {
+		w32mem(s->block + 112, s->lenhh);
+		w32mem(s->block + 116, s->lenhl);
+	}
+	w32mem(s->block + lhpos, s->lenlh);
+	w32mem(s->block + llpos, s->lenll);
+	s->sha(s, s->block), s->blockcnt = 0;
+}
 
 /* shadigest: returns pointer to current digest (binary) */
 unsigned char *shadigest(s)
@@ -490,7 +424,6 @@ SHA *s;
 }
 
 #define HEXLEN(bytecnt) ((bytecnt) << 1)
-
 
 /* shahex: returns pointer to current digest (hexadecimal) */
 char *shahex(s)
@@ -507,11 +440,9 @@ SHA *s;
 	return(s->hex);
 }
 
-
 /* map: translation map for Base 64 encoding */
 static char map[] =		
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
 
 /* encbase64: encodes input (0 to 3 bytes) into Base 64 */
 static void encbase64(in, n, out)
@@ -535,7 +466,6 @@ char *out;
 #define B64LEN(bytecnt) (((bytecnt) % 3 == 0) ? ((bytecnt) / 3) * 4 \
 	: ((bytecnt) / 3) * 4 + ((bytecnt) % 3) + 1)
 
-
 /* shabase64: returns pointer to current digest (Base 64) */
 char *shabase64(s)
 SHA *s;
@@ -557,14 +487,12 @@ SHA *s;
 	return(s->base64);
 }
 
-
 /* shadsize: returns length of digest in bytes */
 int shadsize(s)
 SHA *s;
 {
 	return(s->digestlen);
 }
-
 
 /* shadup: duplicates current digest object */
 SHA *shadup(s)
@@ -578,7 +506,6 @@ SHA *s;
 	memcpy(p, s, sizeof(SHA));
 	return(p);
 }
-
 
 /* shadump: dumps digest object to a human-readable ASCII file */
 int shadump(file, s)
@@ -597,25 +524,25 @@ SHA *s;
 	SHA_IO_printf(f, "H");
 	p = shadigest(s);
 	if (s->alg <= SHA256) for (i = 0; i < 8; i++, p += 4)
-		SHA_IO_printf(f, ":%02x%02x%02x%02x", p[0],p[1],p[2],p[3]);
+		SHA_IO_printf(f, ":%02x%02x%02x%02x",
+			p[0], p[1], p[2], p[3]);
 	else for (i = 0; i < 8; i++, p += 8)
 		SHA_IO_printf(f, ":%02x%02x%02x%02x%02x%02x%02x%02x",
-			p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7]);
+			p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7]);
 	SHA_IO_printf(f, "\n");
 	SHA_IO_printf(f, "block");
 	for (i = 0; i < sizeof(s->block); i++)
 		SHA_IO_printf(f, ":%02x", s->block[i]);
 	SHA_IO_printf(f, "\n");
 	SHA_IO_printf(f, "blockcnt:%u\n", s->blockcnt);
-	SHA_IO_printf(f, "lenhh:%lu\n", (unsigned long) s->lenhh);
-	SHA_IO_printf(f, "lenhl:%lu\n", (unsigned long) s->lenhl);
-	SHA_IO_printf(f, "lenlh:%lu\n", (unsigned long) s->lenlh);
-	SHA_IO_printf(f, "lenll:%lu\n", (unsigned long) s->lenll);
+	SHA_IO_printf(f, "lenhh:%lu\n", (unsigned long) SHA_LO32(s->lenhh));
+	SHA_IO_printf(f, "lenhl:%lu\n", (unsigned long) SHA_LO32(s->lenhl));
+	SHA_IO_printf(f, "lenlh:%lu\n", (unsigned long) SHA_LO32(s->lenlh));
+	SHA_IO_printf(f, "lenll:%lu\n", (unsigned long) SHA_LO32(s->lenll));
 	if (f != SHA_IO_stdout())
 		SHA_IO_close(f);
 	return(1);
 }
-
 
 /* fgetstr: reads (and returns pointer to) next line of file */
 static char *fgetstr(line, maxsize, f)
@@ -637,51 +564,68 @@ SHA_IO *f;
 	return(line);
 }
 
+/* getval: null-terminates field value, and sets pointer to rest of line */
+static char *getval(line, pprest)
+char *line;
+char **pprest;
+{
+	char *p;
+
+	for (p = line; *p; p++) {
+		if (*p == ':' || *p == '\n') {
+			*p++ = '\0';
+			*pprest = p;
+			return(line);
+		}
+	}
+	return(NULL);
+}
 
 /* types of values present in dump file */
-#define TYPE_C 1	/* character */
-#define TYPE_I 2	/* normal integer */
-#define TYPE_32 3	/* 32-bit value */
-#define TYPE_64 4	/* 64-bit state value */
-
+#define TYPE_C 1		/* character */
+#define TYPE_I 2		/* normal integer */
+#define TYPE_32 3		/* 32-bit value */
+#define TYPE_64 4		/* 64-bit value */
 
 /* loadval: checks next line in dump file against tag, and loads values */
-static int loadval(f, tag, type, pval, num, base)
+static int loadval(f, tag, type, pval, rep, base)
 SHA_IO *f;
 char *tag;
 int type;
 void *pval;
-int num;
+int rep;
 int base;
 {
 	char *p;
+	char *pr;
 	unsigned char *pc = (unsigned char *) pval;
 	unsigned int *pi = (unsigned int *) pval;
-	W32 *pl = (W32 *) pval;
-	SHA_MYSTERY char line[1<<9];
+	W32 *p32 = (W32 *) pval;
+	char line[1<<9];
 
-	while (fgetstr(line, sizeof(line), f) != NULL)
-		if (!(line[0] == '#' || isspace(line[0])))
-			break;
-	if (strcmp(strtok(line, ":\n"), tag) != 0)
+	while ((p = fgetstr(line, sizeof(line), f)) != NULL) {
+		if (line[0] == '#' || isspace(line[0]))
+			continue;
+		break;
+	}
+	if (p == NULL || strcmp(getval(line, &pr), tag) != 0)
 		return(0);
-	while (num-- > 0) {
-		if ((p = strtok(NULL, ":\n")) == NULL)
+	while (rep-- > 0) {
+		if ((p = getval(pr, &pr)) == NULL)
 			return(0);
 		if (type == TYPE_C)
 			*pc++ = (unsigned char) strtoul(p, NULL, base);
 		else if (type == TYPE_I)
 			*pi++ = (unsigned int) strtoul(p, NULL, base);
 		else if (type == TYPE_32)
-			*pl++ = strtoul(p, NULL, base);
-		else if (type == TYPE_64) {
+			*p32++ = (W32) strtoul(p, NULL, base);
+		else if (type == TYPE_64)
 			load64(pval, p);
-		} else
+		else
 			return(0);
 	}
 	return(1);
 }
-
 
 /* closeall: closes dump file and de-allocates digest object */
 static SHA *closeall(f, s)
@@ -694,7 +638,6 @@ SHA *s;
 		shaclose(s);
 	return(NULL);
 }
-
 
 /* shaload: creates digest object corresponding to contents of dump file */
 SHA *shaload(file)
@@ -730,7 +673,6 @@ char *file;
 		SHA_IO_close(f);
 	return(s);
 }
-
 
 /* shaclose: de-allocates digest object */
 int shaclose(s)

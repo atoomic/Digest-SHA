@@ -1,7 +1,9 @@
-use Test::More tests => 1;
+use Test;
 use strict;
 use integer;
 use Digest::SHA;
+
+BEGIN { plan tests => 1 }
 
 my $reps = 8000000;
 my $bitstr = pack("B*", "11111111" x 127);
@@ -16,7 +18,7 @@ while ($reps > $maxbits) {
 }
 $state->add_bits($bitstr, $reps);
 
-is(
+ok(
 	$state->hexdigest,
-	"559a512393dd212220ee080730d6f11644ba0222",
-	"updates with random bitstring lengths");
+	"559a512393dd212220ee080730d6f11644ba0222"
+);

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use integer;
 
-our $VERSION = '4.3.0';
+our $VERSION = '4.3.1';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -46,30 +46,29 @@ sub new {
 	$alg =~ s/\D+//g if defined $alg;
 	if (ref($class)) {	# instance method
 		unless (defined($alg) && ($alg != $class->algorithm)) {
-			sharewind($class->[0]);
+			sharewind($$class);
 			return($class);
 		}
-		shaclose($class->[0]) if $class->[0];
-		$class->[0] = shaopen($alg) || return;
+		shaclose($$class);
+		$$class = shaopen($alg) || return;
 		return($class);
 	}
 	$alg = 1 unless defined $alg;
-	my $self = [];
-	$self->[0] = shaopen($alg) || return;
+	my $state = shaopen($alg) || return;
+	my $self = \$state;
 	bless($self, $class);
 	return($self);
 }
 
 sub DESTROY {
 	my $self = shift;
-	shaclose($self->[0]) if $self->[0];
-	$self->[0] = 0;
+	shaclose($$self);
 }
 
 sub clone {
 	my $self = shift;
-	my $copy = [];
-	$copy->[0] = shadup($self->[0]) || return;
+	my $state = shadup($$self) || return;
+	my $copy = \$state;
 	bless($copy, ref($self));
 	return($copy);
 }
@@ -82,7 +81,7 @@ sub add_bits {
 		$nbits = length($data);
 		$data = pack("B*", $data);
 	}
-	shawrite($data, $nbits, $self->[0]);
+	shawrite($data, $nbits, $$self);
 	return($self);
 }
 
@@ -109,7 +108,7 @@ sub dump {
 	my $self = shift;
 	my $file = shift || "";
 
-	shadump($file, $self->[0]) || return;
+	shadump($file, $$self) || return;
 	return($self);
 }
 
@@ -117,12 +116,12 @@ sub load {
 	my $class = shift;
 	my $file = shift || "";
 	if (ref($class)) {	# instance method
-		shaclose($class->[0]) if $class->[0];
-		$class->[0] = shaload($file) || return;
+		shaclose($$class);
+		$$class = shaload($file) || return;
 		return($class);
 	}
-	my $self = [];
-	$self->[0] = shaload($file) || return;
+	my $state = shaload($file) || return;
+	my $self = \$state;
 	bless($self, $class);
 	return($self);
 }

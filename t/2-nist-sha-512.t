@@ -1,7 +1,9 @@
-use Test::More;
+use Test;
 use strict;
 use integer;
 use Digest::SHA qw(sha512_hex);
+
+BEGIN { plan tests => 3 }
 
 my @vecs = (
 	"abc",
@@ -15,18 +17,8 @@ my @sha512rsp = (
 	"e718483d0ce769644e2e42c7bc15b4638e1f98b13b2044285632a803afa973ebde0ff244877ea60a4cb0432ce577c31beb009c5c2c49aa2e4eadb217ad8cc09b"
 );
 
-my @name = (
-	"SHA-512(abc)",
-	"SHA-512(abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijk...)",
-	"SHA-512('a' x 1000000)",
-);
-
 my $skip = sha512_hex("") ? 0 : 1;
 
-if ($skip) { plan skip_all => "64-bit operations not supported" }
-else {
-	plan tests => scalar(@vecs);
-	for (my $i = 0; $i < @vecs; $i++) {
-		is(sha512_hex($vecs[$i]), $sha512rsp[$i], $name[$i] );
-	}
+for (my $i = 0; $i < @vecs; $i++) {
+	skip($skip, sha512_hex($vecs[$i]), $sha512rsp[$i]);
 }

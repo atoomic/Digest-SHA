@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2004 Mark Shelor, All Rights Reserved
  *
- * Version: 4.3.0
- * Sat Feb  7 02:58:00 MST 2004
+ * Version: 4.3.1
+ * Thu Mar  4 02:54:00 MST 2004
  *
  */
 
@@ -27,7 +27,12 @@
 #define SHA32_ALIGNED
 #define SHA64_ALIGNED
 
-#if UINT_MAX == SHA32_MAX
+#define SHA_LO32(x)	(x)
+
+#if USHRT_MAX == SHA32_MAX
+	#define SHA32	unsigned short
+	#define SHA32_CONST(c)	c ## U
+#elif UINT_MAX == SHA32_MAX
 	#define SHA32	unsigned int
 	#define SHA32_CONST(c)	c ## U
 #elif ULONG_MAX == SHA32_MAX
@@ -35,19 +40,25 @@
 	#define SHA32_CONST(c)	c ## UL
 #else
 	#undef  SHA32_ALIGNED
+	#undef  SHA_LO32
+	#define SHA_LO32(x)	((x) & SHA32_MAX)
 	#undef  SHA32_SHR
-	#define SHA32_SHR(x, n)	(((x) & SHA32_MAX) >> (n))
+	#define SHA32_SHR(x, n)	(SHA_LO32(x) >> (n))
 	#define SHA32	unsigned long
 	#define SHA32_CONST(c)	c ## UL
+#endif
+
+#if defined(ULONG_LONG_MAX) && !defined(ULLONG_MAX)
+	#define ULLONG_MAX	ULONG_LONG_MAX
 #endif
 
 #if ULONG_MAX > SHA32_MAX && ULONG_MAX == SHA64_MAX
 	#define SHA64	unsigned long
 	#define SHA64_CONST(c)	c ## UL
-#elif defined(ULONG_LONG_MAX) && ULONG_LONG_MAX == SHA64_MAX
+#elif defined(ULLONG_MAX) && ULLONG_MAX == SHA64_MAX
 	#define SHA64	unsigned long long
 	#define SHA64_CONST(c)	c ## ULL
-#elif defined(ULONG_LONG_MAX) && ULONG_LONG_MAX != SHA64_MAX
+#elif defined(ULLONG_MAX) && ULLONG_MAX != SHA64_MAX
 	#undef  SHA64_ALIGNED
 	#undef  SHA64_SHR
 	#define SHA64_SHR(x, n)	(((x) & SHA64_MAX) >> (n))
@@ -87,17 +98,20 @@
 			(SHA64) b[6] <<  8 | (SHA64) b[7]; }
 #endif
 
-
-/* SHA_MYSTERY: static arrays improve performance on Intel/Linux */
+/* SHA_STO_CLASS: static arrays improve transform speed on Intel/Linux */
 #if defined(BYTEORDER) && (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678)
-	#define SHA_MYSTERY	static
+	#define SHA_STO_CLASS	static
 #else
-	#define SHA_MYSTERY
+	#define SHA_STO_CLASS	auto
 #endif
 
+/* Override use of static arrays if compiling for thread-safety */
+#ifdef SHA_THREAD_SAFE
+	#undef  SHA_STO_CLASS
+	#define SHA_STO_CLASS	auto
+#endif
 
 /* Configure memory management and I/O for Perl or standalone C */
-
 #ifdef SHA_PERL_MODULE
 	#define SHA_new			New
 	#define SHA_newz		Newz

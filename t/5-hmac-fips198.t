@@ -1,7 +1,9 @@
-use Test::More tests => 4;
+use Test;
 use strict;
 use integer;
 use Digest::SHA qw(hmac_sha1_hex);
+
+BEGIN { plan tests => 4 }
 
 my @vecs = (
 	"Sample #1",
@@ -31,17 +33,9 @@ my @hmac1rsp = (
 	"9ea886efe268dbecce420c7524df32e0751a2a26"
 );
 
-my @name = (
-	"HMAC-SHA-1(Sample #1)",
-	"HMAC-SHA-1(Sample #2)",
-	"HMAC-SHA-1(Sample #3)",
-	"HMAC-SHA-1(Sample #4)"
-);
-
 for ($i = 0; $i < @vecs; $i++) {
-	is(
+	ok(
 		hmac_sha1_hex($vecs[$i], $keys[$i]),
-		$hmac1rsp[$i],
-		$name[$i]
+		$hmac1rsp[$i]
 	);
 }

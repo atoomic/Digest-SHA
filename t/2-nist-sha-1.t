@@ -1,7 +1,9 @@
-use Test::More tests => 3;
+use Test;
 use strict;
 use integer;
 use Digest::SHA qw(sha1_hex);
+
+BEGIN { plan tests => 3 }
 
 my @vecs = (
 	"abc",
@@ -15,16 +17,6 @@ my @sha1rsp = (
 	"34aa973cd4c4daa4f61eeb2bdbad27316534016f"
 );
 
-my @name = (
-	"SHA-1(abc)",
-	"SHA-1(abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq)",
-	"SHA-1('a' x 1000000)",
-);
-
 for (my $i = 0; $i < @vecs; $i++) {
-	is(
-		sha1_hex($vecs[$i]),
-		$sha1rsp[$i],
-		$name[$i]
-	);
+	ok(sha1_hex($vecs[$i]), $sha1rsp[$i]);
 }

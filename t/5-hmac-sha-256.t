@@ -1,9 +1,11 @@
 # HMAC-SHA-256 test vectors from draft-ietf-ipsec-ciph-sha-256-01.txt
 
-use Test::More tests => 10;
+use Test;
 use strict;
 use integer;
 use Digest::SHA qw(hmac_sha256_hex);
+
+BEGIN { plan tests => 10 }
 
 my @data = (
 	"abc",
@@ -49,12 +51,11 @@ my @hmac256rsp = (
 
 # do the first one by hand to test multi-argument data feed
 
-is(hmac_sha256_hex("a", "b", "c", $k1), $hmac256rsp[0], $hmac256rsp[0]);
+ok(hmac_sha256_hex("a", "b", "c", $k1), $hmac256rsp[0]);
 
 for (my $i = 1; $i < @data; $i++) {
-	is(
+	ok(
 		hmac_sha256_hex($data[$i], $key[$i]),
-		$hmac256rsp[$i],
 		$hmac256rsp[$i]
 	);
 }

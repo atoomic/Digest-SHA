@@ -1,7 +1,9 @@
-use Test::More;
+use Test;
 use strict;
 use integer;
 use Digest::SHA qw(sha384_hex);
+
+BEGIN { plan tests => 3 }
 
 my @vecs = (
 	"abc",
@@ -15,18 +17,8 @@ my @sha384rsp = (
 	"9d0e1809716474cb086e834e310a4a1ced149e9c00f248527972cec5704c2a5b07b8b3dc38ecc4ebae97ddd87f3d8985"
 );
 
-my @name = (
-	"SHA-384(abc)",
-	"SHA-384(abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijk...)",
-	"SHA-384('a' x 1000000)",
-);
-
 my $skip = sha384_hex("") ? 0 : 1;
 
-if ($skip) { plan skip_all => "64-bit operations not supported" }
-else {
-	plan tests => scalar(@vecs);
-	for (my $i = 0; $i < @vecs; $i++) {
-		is(sha384_hex($vecs[$i]), $sha384rsp[$i], $name[$i] );
-	}
+for (my $i = 0; $i < @vecs; $i++) {
+	skip($skip, sha384_hex($vecs[$i]), $sha384rsp[$i]);
 }

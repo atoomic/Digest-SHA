@@ -8,10 +8,10 @@ SHA.xs
 typemap
 src/hmac.c
 src/hmac.h
-src/hmacxtra.c
+src/hmacxtra.c			Not used for Perl build
 src/sha.c
 src/sha.h
-src/shaxtra.c
+src/shaxtra.c			Not used for Perl build
 src/sha64bit.c
 src/sha64bit.h
 t/1-exist.t

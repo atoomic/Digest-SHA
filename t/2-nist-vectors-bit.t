@@ -4,6 +4,7 @@
 #
 # Uses files "nist/bit-messages.sha1" and "nist/bit-hashes.sha1"
 
+use Test;
 use strict;
 use integer;
 
@@ -27,9 +28,8 @@ BEGIN {
 		}
 	}
 	close(F);
+	plan tests => scalar(@hashes);
 }
-
-use Test::More tests => scalar(@hashes);
 
 sub doType3 {
 	my $hash;
@@ -41,7 +41,7 @@ sub doType3 {
 			$str .= pack("N", $i);
 			$str = $ctx->add($str)->digest;
 		}
-		is(uc(unpack("H*", $str)), $hash = shift(@hashes), $hash);
+		ok(uc(unpack("H*", $str)), $hash = shift(@hashes));
 	}
 }
 
@@ -73,10 +73,9 @@ while (<F>) {
 			$bitstr .= $bitval x $cnts[$i+2];
 			$bitval = $bitval eq "1" ? "0" : "1";
 		}
-		is (
+		ok(
 			uc($ctx->add_bits($bitstr)->hexdigest),
-			$hash = shift(@hashes),
-			$hash
+			$hash = shift(@hashes)
 		) unless $type3;
 		doType3($bitstr) if ($type3);
 		$line = "";

@@ -1,4 +1,4 @@
-use Test::More tests => 1;
+use Test;
 use strict;
 use File::Basename qw(dirname);
 use File::Spec;
@@ -8,6 +8,8 @@ use Digest::SHA;
 
 # Adapted from Julius Duque's original script (t/24-ireland.tmp)
 #	- modified to use state cache via dump()/load() methods
+
+BEGIN { plan tests => 1 }
 
 my $filename = dirname($0) . "/ireland.tmp";
 my $file = File::Spec->canonpath($filename);
@@ -24,7 +26,7 @@ unless ($ctx = Digest::SHA->load($file)) {
 	$ctx->dump($file);
 }
 $ctx->add("aa");
-is($ctx->hexdigest, $vec, 'SHA-256("a" x 536870912)');
+ok($ctx->hexdigest, $vec);
 
 unlink($file);
 

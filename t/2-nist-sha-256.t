@@ -1,7 +1,9 @@
-use Test::More tests => 3;
+use Test;
 use strict;
 use integer;
 use Digest::SHA qw(sha256_hex);
+
+BEGIN { plan tests => 3 }
 
 my @vecs = (
 	"abc",
@@ -15,16 +17,6 @@ my @sha256rsp = (
 	"cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0"
 );
 
-my @name = (
-	"SHA-256(abc)",
-	"SHA-256(abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq)",
-	"SHA-256('a' x 1000000)",
-);
-
 for (my $i = 0; $i < @vecs; $i++) {
-	is(
-		sha256_hex($vecs[$i]),
-		$sha256rsp[$i],
-		$name[$i]
-	);
+	ok(sha256_hex($vecs[$i]), $sha256rsp[$i]);
 }

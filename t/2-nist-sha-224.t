@@ -1,7 +1,9 @@
-use Test::More tests => 3;
+use Test;
 use strict;
 use integer;
 use Digest::SHA qw(sha224_hex);
+
+BEGIN { plan tests => 3 }
 
 my @vecs = (
 	"abc",
@@ -15,16 +17,6 @@ my @sha224rsp = (
 	"20794655980c91d8bbb4c1ea97618a4bf03f42581948b2ee4ee7ad67"
 );
 
-my @name = (
-	"SHA-224(abc)",
-	"SHA-224(abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq)",
-	"SHA-224('a' x 1000000)",
-);
-
 for (my $i = 0; $i < @vecs; $i++) {
-	is(
-		sha224_hex($vecs[$i]),
-		$sha224rsp[$i],
-		$name[$i]
-	);
+	ok(sha224_hex($vecs[$i]), $sha224rsp[$i]);
 }

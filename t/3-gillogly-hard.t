@@ -2,7 +2,7 @@
 #
 # http://www.chiark.greenend.org.uk/pipermail/ukcrypto/1999-February/003538.html
 
-use Test::More tests => 8;
+use Test;
 use strict;
 use integer;
 use File::Basename qw(dirname);
@@ -27,6 +27,8 @@ use Digest::SHA;
 #	011#1431655765    47D92F91 1FC7BB74 DE00ADFC 4E981A81 05556D52
 #	011#1431655765|0  A3D7438C 589B0B93 2AA91CC2 446F06DF 9ABC73F0
 #	011#1431655765|01 3EEE3E1E 28DEDE2C A444D68D A5675B2F AAAB3203
+
+BEGIN { plan tests => 8 }
 
 my @vecs110 = (	# 110 rep 1431655764
 	"11", "1eef5a18969255a3b1793a2a955c7ec28cd221a5",
@@ -98,20 +100,12 @@ my $state110 = state110();
 for ($i = 0; $i < @vecs110/2; $i++) {
 	my $state = $state110->clone;
 	$state->add_bits($vecs110[2*$i]);
-	is(
-		$state->hexdigest,
-		$vecs110[2*$i+1],
-		'110 x 1431655764 . ' . $vecs110[2*$i]
-	);
+	ok($state->hexdigest, $vecs110[2*$i+1]);
 }
 
 my $state011 = state011();
 for ($i = 0; $i < @vecs011/2; $i++) {
 	my $state = $state011->clone;
 	$state->add_bits($vecs011[2*$i]);
-	is(
-		$state->hexdigest,
-		$vecs011[2*$i+1],
-		'011 x 1431655764 . ' . $vecs011[2*$i]
-	);
+	ok($state->hexdigest, $vecs011[2*$i+1]);
 }

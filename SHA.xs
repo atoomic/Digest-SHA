@@ -17,52 +17,8 @@ PROTOTYPES: ENABLE
 #include <src/sha.h>
 #include <src/hmac.h>
 
-char *
-hmacbase64(h)
-	HMAC *	h
-
-int
-hmacclose(h)
-	HMAC *	h
-
-unsigned char *
-hmacdigest(h)
-	HMAC *	h
-
-void
-hmacfinish(h)
-	HMAC *	h
-
-char *
-hmachex(h)
-	HMAC *	h
-
-HMAC *
-hmacopen(alg, key, keylen)
-	int	alg
-	unsigned char *	key
-	unsigned int	keylen
-
-unsigned long
-hmacwrite(bitstr, bitcnt, h)
-	unsigned char *	bitstr
-	unsigned long	bitcnt
-	HMAC *	h
-
-char *
-shabase64(s)
-	SHA *	s
-
 int
 shaclose(s)
-	SHA *	s
-
-unsigned char *
-shadigest(s)
-	SHA *	s
-
-int
-shadsize(s)
 	SHA *	s
 
 int
@@ -72,14 +28,6 @@ shadump(file, s)
 
 SHA *
 shadup(s)
-	SHA *	s
-
-void
-shafinish(s)
-	SHA *	s
-
-char *
-shahex(s)
 	SHA *	s
 
 SHA *
@@ -128,13 +76,13 @@ PPCODE:
 	if ((state = shaopen(ix2alg[ix])) == NULL)
 		XSRETURN_UNDEF;
 	for (i = 0; i < items; i++) {
-		data = (unsigned char *)(SvPV(ST(i), len));
+		data = (unsigned char *) (SvPV(ST(i), len));
 		shawrite(data, len << 3, state);
 	}
 	shafinish(state);
 	len = 0;
 	if (ix % 3 == 0) {
-		result = shadigest(state);
+		result = (char *) shadigest(state);
 		len = shadsize(state);
 	}
 	else if (ix % 3 == 1)
@@ -171,17 +119,17 @@ PREINIT:
 	HMAC *state;
 	char *result;
 PPCODE:
-	key = (unsigned char *)(SvPV(ST(items-1), len));
+	key = (unsigned char *) (SvPV(ST(items-1), len));
 	if ((state = hmacopen(ix2alg[ix], key, len)) == NULL)
 		XSRETURN_UNDEF;
 	for (i = 0; i < items - 1; i++) {
-		data = (unsigned char *)(SvPV(ST(i), len));
+		data = (unsigned char *) (SvPV(ST(i), len));
 		hmacwrite(data, len << 3, state);
 	}
 	hmacfinish(state);
 	len = 0;
 	if (ix % 3 == 0) {
-		result = hmacdigest(state);
+		result = (char *) hmacdigest(state);
 		len = shadsize(state->osha);
 	}
 	else if (ix % 3 == 1)
@@ -202,7 +150,7 @@ PREINIT:
 	SHA *state;
 	int result;
 PPCODE:
-	state = (SHA *) (SvIV(SvRV(*av_fetch((AV *) SvRV(self), 0, 0))));
+	state = INT2PTR(SHA *, SvIV(SvRV(SvRV(self))));
 	result = shadsize(state) << 3;
 	if (ix == 1 && result == 160)
 		result = 1;
@@ -218,9 +166,9 @@ PREINIT:
 	STRLEN len;
 	SHA *state;
 PPCODE:
-	state = (SHA *) (SvIV(SvRV(*av_fetch((AV *) SvRV(self), 0, 0))));
+	state = INT2PTR(SHA *, SvIV(SvRV(SvRV(self))));
 	for (i = 1; i < items; i++) {
-		data = (unsigned char *)(SvPV(ST(i), len));
+		data = (unsigned char *) (SvPV(ST(i), len));
 		shawrite(data, len << 3, state);
 	}
 	XSRETURN(1);
@@ -237,11 +185,11 @@ PREINIT:
 	SHA *state;
 	char *result;
 PPCODE:
-	state = (SHA *) (SvIV(SvRV(*av_fetch((AV *) SvRV(self), 0, 0))));
+	state = INT2PTR(SHA *, SvIV(SvRV(SvRV(self))));
 	shafinish(state);
 	len = 0;
 	if (ix == 0) {
-		result = shadigest(state);
+		result = (char *) shadigest(state);
 		len = shadsize(state);
 	}
 	else if (ix == 1)

@@ -1,9 +1,11 @@
-use Test::More tests => 2;
+use Test;
 use strict;
 use integer;
 use File::Basename qw(dirname);
 use File::Spec;
 use Digest::SHA;
+
+BEGIN { plan tests => 2 }
 
 # test OO methods using first two SHA-256 vectors from NIST
 
@@ -23,11 +25,11 @@ my $ctx = Digest::SHA->new()->reset("SHA-256")->new();
 $ctx->add_bits("a", 5)->add_bits("001");
 
 my $rsp = shift(@vecs);
-is($ctx->clone->add("b", "c")->b64digest, $rsp, $rsp);
+ok($ctx->clone->add("b", "c")->b64digest, $rsp);
 
 $rsp = shift(@vecs);
 open(FILE, "<$file");
 binmode(FILE);
-is($ctx->addfile(*FILE)->hexdigest, $rsp, $rsp);
+ok($ctx->addfile(*FILE)->hexdigest, $rsp);
 close(FILE);
 unlink($file);

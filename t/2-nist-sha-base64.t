@@ -1,7 +1,9 @@
-use Test::More;
+use Test;
 use strict;
 use integer;
 use Digest::SHA qw(sha1_base64 sha224_base64 sha256_base64 sha384_base64 sha512_base64);
+
+BEGIN { plan tests => 5 }
 
 # Base64 digests of "abc" for SHA-1/224/256/384/512
 
@@ -18,13 +20,9 @@ my $fcn;
 my $rsp;
 my $skip;
 
-plan tests => scalar(@vecs) / 2;
 while (@vecs) {
 	$fcn = shift(@vecs);
 	$rsp = shift(@vecs);
 	$skip = &$fcn("") ? 0 : 1;
-	SKIP: {
-		skip("64-bit operations not supported", 1) if $skip;
-		is(&$fcn($data), $rsp, $rsp);
-	}
+	skip($skip, &$fcn($data), $rsp);
 }
