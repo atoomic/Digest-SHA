@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2004 Mark Shelor, All Rights Reserved
  *
- * Version: 5.02
- * Thu Jul 29 02:48:00 MST 2004
+ * Version: 5.03
+ * Sat Jul 31 00:00:48 MST 2004
  *
  */
 
@@ -37,7 +37,7 @@ unsigned int keylen;
 		SHA_free(h);
 		return(NULL);
 	}
-	if (keylen <= sizeof(h->key))
+	if (keylen <= h->osha->blocksize / 8)
 		memcpy(h->key, key, keylen);
 	else {
 		if ((h->ksha = shaopen(alg)) == NULL) {
@@ -51,12 +51,12 @@ unsigned int keylen;
 		memcpy(h->key, shadigest(h->ksha), h->ksha->digestlen);
 		shaclose(h->ksha);
 	}
-	for (i = 0; i < 64; i++)
+	for (i = 0; i < h->osha->blocksize / 8; i++)
 		h->key[i] ^= 0x5c;
-	shawrite(h->key, 512, h->osha);
-	for (i = 0; i < 64; i++)
+	shawrite(h->key, h->osha->blocksize, h->osha);
+	for (i = 0; i < h->isha->blocksize / 8; i++)
 		h->key[i] ^= (0x5c ^ 0x36);
-	shawrite(h->key, 512, h->isha);
+	shawrite(h->key, h->isha->blocksize, h->isha);
 	memset(h->key, 0, sizeof(h->key));
 	return(h);
 }

@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2004 Mark Shelor, All Rights Reserved
  *
- * Version: 5.02
- * Thu Jul 29 02:48:00 MST 2004
+ * Version: 5.03
+ * Sat Jul 31 00:00:48 MST 2004
  *
  */
 
@@ -15,13 +15,11 @@
 
 #include "sha.h"
 
-#define _HMAC_KEY_SIZE 64
-
 typedef struct {
 	SHA *ksha;
 	SHA *isha;
 	SHA *osha;
-	unsigned char key[_HMAC_KEY_SIZE];
+	unsigned char key[SHA_MAX_BLOCK_BITS/8];
 } HMAC;
 
 #if defined(__STDC__) && __STDC__ != 0

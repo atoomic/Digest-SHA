@@ -1,5 +1,10 @@
 Revision history for Perl extension Digest::SHA.
 
+5.03  Sat Jul 31 00:00:48 MST 2004
+	- corrected HMAC-SHA-384/512 bug (cpan #7181, Adam Woodbury)
+		-- code was using hardwired blocksize for SHA-1/256
+			-- ref. src/hmac.c, src/hmac.h
+
 5.02  Thu Jul 29 02:48:00 MST 2004
 	- updated documentation and "dump-load.t" test script
 		-- to be consistent with Digest::SHA::PurePerl
