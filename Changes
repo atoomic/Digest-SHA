@@ -1,5 +1,13 @@
 Revision history for Perl extension Digest::SHA.
 
+4.3.2 Wed Apr 28 03:56:00 MST 2004
+	- added Makefile.PL options
+		-- thread-safety: -t
+		-- exclude 384/512 support: -x
+		-- e.g. perl Makefile.PL -t
+	- temporarily suppress dump/load tests for SHA-384/512
+		-- pending clarification of problem on sun4u sparc
+
 4.3.1 Thu Mar  4 02:54:00 MST 2004
 	- removed unused functions from XS file
 		-- reduces size of compiled objects

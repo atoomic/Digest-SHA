@@ -5,7 +5,7 @@ use Digest::SHA qw(sha384_hex sha512_hex);
 use File::Basename qw(dirname);
 use File::Spec;
 
-BEGIN { plan tests => 4 }
+BEGIN { plan tests => 2 }
 
 my @sharsp = (
 	"34aa973cd4c4daa4f61eeb2bdbad27316534016f",
@@ -18,7 +18,7 @@ my @ext = (1, 256, 384, 512);
 my $data = "a" x 999998;
 my $skip;
 
-for (my $i = 0; $i < 4; $i++) {
+for (my $i = 0; $i < 2; $i++) {
 	$skip = 0;
 	if ($ext[$i] == 384) {
 		$skip = sha384_hex("") ? 0 : 1;

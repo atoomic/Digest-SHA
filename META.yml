@@ -1,0 +1,17 @@
+--- #YAML:1.0
+name: Digest-SHA
+version: 4.3.2
+author:
+  - Mark Shelor, mshelor@comcast.net
+abstract: Perl extension for SHA-1/224/256/384/512
+license: artistic
+requires: {}
+recommends: {}
+build_requires: {}
+conflicts: {}
+provides:
+  Digest::SHA:
+    file: SHA.pm
+    version: 4.3.2
+generated_by: Module::Build version 0.22
+

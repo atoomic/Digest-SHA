@@ -1,4 +1,4 @@
-Digest::SHA version 4.3.1
+Digest::SHA version 4.3.2
 =========================
 
 The Digest::SHA module provides an easy way to compute message
@@ -33,10 +33,15 @@ INSTALLATION
 
 To install this module type the following:
 
-	perl Makefile.PL
+	perl Makefile.PL [ options ]
 	make
 	make test
 	make install
+
+	The Makefile.PL options are:
+
+		-t : build a thread-safe version of module
+		-x : exclude support for SHA-384/512
 
 DEPENDENCIES
 
