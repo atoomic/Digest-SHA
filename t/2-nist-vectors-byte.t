@@ -2,11 +2,12 @@
 #
 #	ref: http://csrc.nist.gov/cryptval/shs.html
 #
-# Uses files "nist/byte-messages.sha1" and "nist/byte-hashes.sha1"
+# Uses files "nist/bytemsg.sha" and "nist/bytehash.sha"
 
 use strict;
 use integer;
 use File::Basename qw(dirname);
+use File::Spec;
 
 # extract byte messages
 
@@ -18,10 +19,12 @@ my $bitstr;
 my $bitval;
 my $line;
 
+my $file;
 my $datafile;
 
 BEGIN {
-	$datafile = dirname($0) . "/nist/bytemsg.sha";
+	$file = dirname($0) . "/nist/bytemsg.sha";
+	$datafile = File::Spec->canonpath($file);
 	open(F, $datafile);
 	while (<F>) {
 		last if (/Type 3/);
@@ -43,7 +46,8 @@ BEGIN {
 	}
 	close(F);
 
-	$datafile = dirname($0) . "/nist/bytehash.sha";
+	$file = dirname($0) . "/nist/bytehash.sha";
+	$datafile = File::Spec->canonpath($file);
 	open(F, $datafile);
 	while (<F>) {
 		$_ = substr($_, 0, length($_) - 2);

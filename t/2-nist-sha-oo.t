@@ -2,11 +2,13 @@ use Test::More tests => 2;
 use strict;
 use integer;
 use File::Basename qw(dirname);
+use File::Spec;
 use Digest::SHA;
 
 # test OO methods using first two SHA-256 vectors from NIST
 
-my $file = dirname($0) . "/oo.tmp";
+my $temp = dirname($0) . "/oo.tmp";
+my $file = File::Spec->canonpath($temp);
 open(FILE, ">$file");
 binmode(FILE);
 print FILE "bcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";

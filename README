@@ -1,4 +1,4 @@
-Digest::SHA version 4.0.8
+Digest::SHA version 4.0.9
 =========================
 
 The Digest::SHA module provides an easy way to compute message
@@ -18,10 +18,10 @@ However, if your compiler doesn't recognize the "long long" type,
 the routines associated with SHA-384 and SHA-512 will return null
 values.
 
-Version 4.0.8 now inherits from Digest::base if the latter is
-installed on your platform.  If the base class is not present,
-Digest::SHA still works; it simply uses its own local routines to
-supply the missing functionality.
+This module inherits from Digest::base if the latter is installed
+on your platform.  If the base class is not present, Digest::SHA
+still works; it simply uses its own local routines to supply the
+missing functionality.
 
 Please refer to the tests subdirectory (t/*.t) for an extensive
 set of SHA vectors compiled from various sources.  Of particular

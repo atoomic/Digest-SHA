@@ -6,6 +6,7 @@ use Test::More tests => 8;
 use strict;
 use integer;
 use File::Basename qw(dirname);
+use File::Spec;
 use Digest::SHA;
 
 #	SHA-1 Test Vectors
@@ -41,8 +42,11 @@ my @vecs011 = (	# 011 rep 1431655764
 	"01101", "3eee3e1e28dede2ca444d68da5675b2faaab3203"
 );
 
-my $STATE110 = dirname($0) . "/gillogly/state.110";
-my $STATE011 = dirname($0) . "/gillogly/state.011";
+my $fileSTATE110 = dirname($0) . "/gillogly/state.110";
+my $fileSTATE011 = dirname($0) . "/gillogly/state.011";
+
+my $STATE110 = File::Spec->canonpath($fileSTATE110);
+my $STATE011 = File::Spec->canonpath($fileSTATE011);
 
 my $reps = 1 << 14;
 my $loops = int(1431655764 / $reps);

@@ -1,5 +1,12 @@
 Revision history for Perl extension Digest::SHA.
 
+4.0.9 Wed Dec 24 02:58:22 MST 2003
+	- use canonical file specs in test scripts
+		-- enhances portability across different OSes
+	- modify type declarations of objects in XS file
+		-- re-declare as (SV *) and cast to (AV *) SvRV(self)
+			-- in response to AVPtr problem on MSWin32
+
 4.0.8 Thu Dec 18 23:32:00 MST 2003
 	- inherits from Digest::base if installed
 		-- also checks for MIME::Base64 

@@ -95,15 +95,15 @@ SHA *s;
 		ull2mem(s->digest + i * 8, *p++);
 }
 
-static void sha512(p, block)
-SHA *p;
+static void sha512(s, block)
+SHA *s;
 unsigned char *block;
 {
 	int t;
 	unsigned long long a, b, c, d, e, f, g, h, T1, T2;
 	static unsigned long long W[80];
 	unsigned long long *q = W;
-	unsigned long long *H = (unsigned long long *) p->H;
+	unsigned long long *H = (unsigned long long *) s->H;
 
 	if (sha_big_endian)
 		memcpy(W, block, 128);

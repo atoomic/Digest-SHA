@@ -187,7 +187,7 @@ PPCODE:
 
 void
 hashsize(self)
-	AV *	self
+	SV *	self
 ALIAS:
 	Digest::SHA::hashsize = 0
 	Digest::SHA::algorithm = 1
@@ -195,7 +195,7 @@ PREINIT:
 	SHA *state;
 	int result;
 PPCODE:
-	state = (SHA *) (SvIV(SvRV(*av_fetch(self, 0, 0))));
+	state = (SHA *) (SvIV(SvRV(*av_fetch((AV *) SvRV(self), 0, 0))));
 	result = shadsize(state) << 3;
 	if (ix == 1 && result == 160)
 		result = 1;
@@ -204,14 +204,14 @@ PPCODE:
 
 void
 add(self, ...)
-	AV *	self
+	SV *	self
 PREINIT:
 	unsigned int i;
 	unsigned char *data;
 	STRLEN len;
 	SHA *state;
 PPCODE:
-	state = (SHA *) (SvIV(SvRV(*av_fetch(self, 0, 0))));
+	state = (SHA *) (SvIV(SvRV(*av_fetch((AV *) SvRV(self), 0, 0))));
 	for (i = 1; i < items; i++) {
 		data = (unsigned char *)(SvPV(ST(i), len));
 		shawrite(data, len << 3, state);
@@ -220,7 +220,7 @@ PPCODE:
 
 void
 digest(self)
-	AV *	self
+	SV *	self
 ALIAS:
 	Digest::SHA::digest = 0
 	Digest::SHA::Hexdigest = 1
@@ -232,7 +232,7 @@ PREINIT:
 	SHA *state;
 	char *result;
 PPCODE:
-	state = (SHA *) (SvIV(SvRV(*av_fetch(self, 0, 0))));
+	state = (SHA *) (SvIV(SvRV(*av_fetch((AV *) SvRV(self), 0, 0))));
 	shafinish(state);
 	len = 0;
 	if (ix == 0) {

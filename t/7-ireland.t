@@ -1,6 +1,7 @@
 use Test::More tests => 1;
 use strict;
 use File::Basename qw(dirname);
+use File::Spec;
 use Digest::SHA;
 
 # David Ireland's test vector - SHA-256 digest of "a" x 536870912
@@ -8,7 +9,8 @@ use Digest::SHA;
 # Adapted from Julius Duque's original script (t/24-ireland.tmp)
 #	- modified to use state cache via dump()/load() methods
 
-my $file = dirname($0) . "/ireland.tmp";
+my $filename = dirname($0) . "/ireland.tmp";
+my $file = File::Spec->canonpath($filename);
 open(F, ">$file"); while (<DATA>) { print F $_ }  close(F);
 
 my $data = "a" x 1000000;

@@ -3,6 +3,7 @@ use strict;
 use integer;
 use Digest::SHA qw(sha384_hex sha512_hex);
 use File::Basename qw(dirname);
+use File::Spec;
 
 my @sharsp = (
 	"34aa973cd4c4daa4f61eeb2bdbad27316534016f",
@@ -33,8 +34,10 @@ for (my $i = 0; $i < 4; $i++) {
 	SKIP: {
 		my $state;
 		my $file;
+		my $filename;
 		skip("64-bit operations not supported", 1) if $skip;
-		$file = dirname($0) . "/state/state.$ext[$i]";
+		$filename = dirname($0) . "/state/state.$ext[$i]";
+		$file = File::Spec->canonpath($filename);
 		unless ($state = Digest::SHA->load($file)) {
 			$state = Digest::SHA->new($ext[$i]);
 			$state->add($data);
