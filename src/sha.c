@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 4.0.5
- * Sat Dec  6 00:02:24 MST 2003
+ * Version: 4.0.6
+ * Thu Dec 11 02:18:00 MST 2003
  *
  */
 
@@ -16,8 +16,6 @@
 #include <ctype.h>
 #include "sha.h"
 #include "sha64bit.h"
-#include "endian.h"
-#include "fmt.h"
 
 #define SHR(x, n)	( (x) >> (n) )
 #define ROTR(x, n)	( ( (x) >> (n) ) | ( (x) << (32 - (n)) ) )
@@ -95,10 +93,8 @@ unsigned char *block;
 
 	if (sha_big_endian)
 		memcpy(W, block, 64);
-	else for (t = 0; t < 16; t++, q++) {
-		*q = *block++; *q = (*q << 8) + *block++;
-		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
-	}
+	else for (t = 0; t < 16; t++, block += 4)
+		*q++ = block[0]<<24|block[1]<<16|block[2]<<8|block[3];
 
 /*
  * Use SHA-1 alternate method from FIPS PUB 180-2 (ref. 6.1.3)
@@ -209,10 +205,8 @@ unsigned char *block;
 
 	if (sha_big_endian)
 		memcpy(W, block, 64);
-	else for (t = 0; t < 16; t++, q++) {
-		*q = *block++; *q = (*q << 8) + *block++;
-		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
-	}
+	else for (t = 0; t < 16; t++, block += 4)
+		*q++ = block[0]<<24|block[1]<<16|block[2]<<8|block[3];
 
 /*
  * Use same technique as in sha1()
@@ -336,6 +330,40 @@ SHA *s;
 			ul2mem(s->digest + i * 4, s->H[i]);
 	else
 		digcpy64(s);
+}
+
+void sharewind(s)
+SHA *s;
+{
+	int alg = s->alg;
+
+	memset(s, 0, sizeof(SHA));
+	s->alg = alg;
+
+	if (alg == SHA1) {
+		s->sha = sha1;
+		memcpy(s->H, H01, sizeof(H01));
+		s->blocksize = SHA1_BLOCK_BITS;
+		s->digestlen = SHA1_DIGEST_BITS >> 3;
+	}
+	else if (alg == SHA256) {
+		s->sha = sha256;
+		memcpy(s->H, H0256, sizeof(H0256));
+		s->blocksize = SHA256_BLOCK_BITS;
+		s->digestlen = SHA256_DIGEST_BITS >> 3;
+	}
+	else if (alg == SHA384) {
+		s->sha = sha512;
+		memcpy(s->H, H0384, sizeof(H0384));
+		s->blocksize = SHA384_BLOCK_BITS;
+		s->digestlen = SHA384_DIGEST_BITS >> 3;
+	}
+	else if (alg == SHA512) {
+		s->sha = sha512;
+		memcpy(s->H, H0512, sizeof(H0512));
+		s->blocksize = SHA512_BLOCK_BITS;
+		s->digestlen = SHA512_DIGEST_BITS >> 3;
+	}
 }
 
 SHA *shaopen(alg)
@@ -548,6 +576,12 @@ SHA *s;
 	return(s->base64);
 }
 
+int shadsize(s)
+SHA *s;
+{
+	return(s->digestlen);
+}
+
 SHA *shadup(s)
 SHA *s;
 {
@@ -696,53 +730,3 @@ SHA *s;
 	}
 	return(0);
 }
-
-static unsigned char *shacomp(alg, fmt, bitstr, bitcnt)
-int alg;
-int fmt;
-unsigned char *bitstr;
-unsigned long bitcnt;
-{
-	SHA *s;
-	static unsigned char digest[SHA_MAX_HEX_LEN+1];
-	unsigned char *ret = digest;
-
-	if ((s = shaopen(alg)) == NULL)
-		return(NULL);
-	shawrite(bitstr, bitcnt, s);
-	shafinish(s);
-	if (fmt == SHA_FMT_RAW)
-		memcpy(digest, shadigest(s), s->digestlen);
-	else if (fmt == SHA_FMT_HEX)
-		strcpy((char *) digest, shahex(s));
-	else if (fmt == SHA_FMT_BASE64)
-		strcpy((char *) digest, shabase64(s));
-	else
-		ret = NULL;
-	shaclose(s);
-	return(ret);
-}
-
-#define SHA_DIRECT(type, name, alg, fmt) 			\
-type name(bitstr, bitcnt)					\
-unsigned char *bitstr;						\
-unsigned long bitcnt;						\
-{								\
-	return((type) shacomp(alg, fmt, bitstr, bitcnt));	\
-}
-
-SHA_DIRECT(unsigned char *, sha1digest, SHA1, SHA_FMT_RAW)
-SHA_DIRECT(char *, sha1hex, SHA1, SHA_FMT_HEX)
-SHA_DIRECT(char *, sha1base64, SHA1, SHA_FMT_BASE64)
-
-SHA_DIRECT(unsigned char *, sha256digest, SHA256, SHA_FMT_RAW)
-SHA_DIRECT(char *, sha256hex, SHA256, SHA_FMT_HEX)
-SHA_DIRECT(char *, sha256base64, SHA256, SHA_FMT_BASE64)
-
-SHA_DIRECT(unsigned char *, sha384digest, SHA384, SHA_FMT_RAW)
-SHA_DIRECT(char *, sha384hex, SHA384, SHA_FMT_HEX)
-SHA_DIRECT(char *, sha384base64, SHA384, SHA_FMT_BASE64)
-
-SHA_DIRECT(unsigned char *, sha512digest, SHA512, SHA_FMT_RAW)
-SHA_DIRECT(char *, sha512hex, SHA512, SHA_FMT_HEX)
-SHA_DIRECT(char *, sha512base64, SHA512, SHA_FMT_BASE64)

@@ -6,8 +6,6 @@ README
 SHA.pm
 SHA.xs
 typemap
-src/endian.h
-src/fmt.h
 src/hmac.c
 src/hmac.h
 src/sha.c
@@ -46,11 +44,3 @@ t/state/state.1
 t/state/state.256
 t/state/state.384
 t/state/state.512
-examples/finddups/finddups
-examples/finddups/README
-examples/finddups/sha
-examples/finddups/testfile1
-examples/finddups/testfile2
-examples/hashfile
-examples/README
-examples/strings

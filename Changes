@@ -1,5 +1,11 @@
 Revision history for Perl extension Digest::SHA.
 
+4.0.6 Thu Dec 11 02:18:00 MST 2003
+	- more optimization and streamlining
+		-- a bit faster on non-big-endians (e.g. Intel)
+	- rewrote time-critical functions and methods in XS
+	- removed unused C functions from source files
+
 4.0.5 Sat Dec  6 00:02:24 MST 2003
 	- performance optimizations
 		-- rewrote "add" method in XS

@@ -16,6 +16,8 @@
 #define sigmaQ0(x)	( ROTRQ(x,  1) ^ ROTRQ(x,  8) ^   SHR(x,  7) )
 #define sigmaQ1(x)	( ROTRQ(x, 19) ^ ROTRQ(x, 61) ^   SHR(x,  6) )
 
+#define SHA_64		unsigned long long
+
 static unsigned long long K512[80] =
 {
 	0x428a2f98d728ae22ULL, 0x7137449123ef65cdULL, 0xb5c0fbcfec4d3b2fULL,
@@ -105,12 +107,11 @@ unsigned char *block;
 
 	if (sha_big_endian)
 		memcpy(W, block, 128);
-	else for (t = 0; t < 16; t++, q++) {
-		*q = *block++; *q = (*q << 8) + *block++;
-		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
-		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
-		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
-	}
+	else for (t = 0; t < 16; t++, block += 8) *q++ =
+		(SHA_64) block[0] << 56 | (SHA_64) block[1] << 48 |
+		(SHA_64) block[2] << 40 | (SHA_64) block[3] << 32 |
+		(SHA_64) block[4] << 24 | (SHA_64) block[5] << 16 |
+		(SHA_64) block[6] <<  8 | (SHA_64) block[7];
 	for (t = 16; t < 80; t++)
 		W[t] = sigmaQ1(W[t-2]) + W[t-7] + sigmaQ0(W[t-15]) + W[t-16];
 	a = H[0]; b = H[1]; c = H[2]; d = H[3];

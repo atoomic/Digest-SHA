@@ -1,41 +1,34 @@
-Digest::SHA version 4.0.5
+Digest::SHA version 4.0.6
 =========================
 
-The Digest::SHA module provides a Perl interface to all varieties
-of the Secure Hash Algorithm, namely, SHA-1, SHA-256, SHA-384, and
-SHA-512.  Fuctions are also included to compute keyed-hashes using
-the HMAC algorithm.
+The Digest::SHA module provides an easy way to compute message
+digests using Perl.  It supports all algorithms of the NIST Secure
+Hash Standard (i.e. SHA-1, 256, 384, and 512).  The module also
+includes functions to compute keyed-hashes using the HMAC algorithm.
 
-Digest::SHA uses the naming conventions and styles of the Digest
-module.  Several features have been added, such as the ability to:
+Digest::SHA conforms to the naming conventions and styles of the
+CPAN Digest module.  Several features have been added, such as the
+ability to:
 
 	- calculate digests for bit-oriented messages
 	- store and retrieve intermediate SHA states
 
-The underlying C code is portable, and requires no special libraries
-beyond those found with typical compilers.  However, if your compiler
-doesn't recognize the "long long" type, the functions associated
-with SHA-384 and SHA-512 will return null values.
+The underlying C code is portable, and requires no special libraries.
+However, if your compiler doesn't recognize the "long long" type,
+the routines associated with SHA-384 and SHA-512 will return null
+values.
 
-Version 4.0.5 focuses on performance optimization.  The "add()"
-method has been rewritten in XS, and loops have been unrolled in
-the SHA-256 transform.  This has resulted in as much as a 50%
-performance increase on SHA benchmarks that compute digests in an
-iterative fashion.  The reader is urged to update to this version
-if speed is important to your application.
+Version 4.0.6 focuses on further performance enhancements.  All
+time-critical functions and methods have been rewritten in XS.
+Digest::SHA now compares favorably with other CPAN SHA modules in
+terms of performance.  Its speed on big-endian platforms is often
+significantly greater (e.g. when using the benchmark developed by
+Digest::  author Gisle Aas).
 
-The tests subdirectory (t/*.t) contains an extensive set of SHA
-vectors compiled from various sources.  Of particular interest are
-the NIST vectors, which examine a large variety of bit-strings and
-byte-strings (see the "t/nist/COPYRIGHT" file for details).  Also
-note the bit-vectors supplied by Jim Gillogly and Francois Grieu,
-which check the behavior of implementations for input strings that
-exceed 2^32 bits in length.
-
-The examples directory, kindly provided by Julius Duque, contains
-useful and instructive applications of the SHA digest routines.
-Refer to the "finddups" utility (featured in the December 2003
-issue of The Perl Journal) for a particularly interesting example.
+Please refer to the tests subdirectory (t/*.t) for an extensive
+set of SHA vectors compiled from various sources.  Of particular
+interest are the NIST vectors, which examine a large variety of
+bit-strings and byte-strings.
 
 INSTALLATION
 

@@ -1,5 +1,5 @@
 use Test::More tests => 1;
-use Digest::SHA qw(sha1_hex);
+use Digest::SHA qw(sha1);
 use strict;
 use integer;
 
@@ -8,7 +8,7 @@ my @vecs = (
 );
 
 my @rsp = (
-	"2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"
+	pack("H*", "2aae6c35c94fcfb415dbe95f408b9ce91ee846ed")
 );
 
 my @name = (
@@ -17,7 +17,7 @@ my @name = (
 
 for (my $i = 0; $i < @vecs; $i++) {
 	is(
-		sha1_hex($vecs[$i]),
+		sha1($vecs[$i]),
 		$rsp[$i],
 		$name[$i]
 	);

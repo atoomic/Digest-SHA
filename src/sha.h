@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 4.0.5
- * Sat Dec  6 00:02:24 MST 2003
+ * Version: 4.0.6
+ * Thu Dec 11 02:18:00 MST 2003
  *
  */
 
@@ -17,6 +17,12 @@
 
 #if defined(ULONG_LONG_MAX) && !defined(NO_SHA_384_512)
 	#define SHA_384_512
+#endif
+
+#ifdef SHA_BIG_ENDIAN
+	#define sha_big_endian 1
+#else
+	#define sha_big_endian 0
 #endif
 
 #define SHA1	1
@@ -53,6 +59,10 @@ typedef struct {
 	char base64[SHA_MAX_BASE64_LEN+1];
 } SHA;
 
+#define SHA_FMT_RAW 1
+#define SHA_FMT_HEX 2
+#define SHA_FMT_BASE64 3
+
 #if defined(__STDC__) && __STDC__ != 0
 	#define _SHA_P(protos)	protos
 #else
@@ -67,9 +77,11 @@ typedef struct {
 SHA		*shaopen	_SHA_P((_SHA_ALG));
 unsigned long	 shawrite	_SHA_P((_SHA_DATA, _SHA_STATE));
 void		 shafinish	_SHA_P((_SHA_STATE));
+void		 sharewind	_SHA_P((_SHA_STATE));
 unsigned char	*shadigest	_SHA_P((_SHA_STATE));
 char		*shahex		_SHA_P((_SHA_STATE));
 char		*shabase64	_SHA_P((_SHA_STATE));
+int		 shadsize	_SHA_P((_SHA_STATE));
 SHA		*shadup		_SHA_P((_SHA_STATE));
 int		 shadump	_SHA_P((_SHA_FILE, _SHA_STATE));
 SHA		*shaload	_SHA_P((_SHA_FILE));
