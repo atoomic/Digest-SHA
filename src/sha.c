@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 2.4
- * Sat Nov 22 17:10:22 MST 2003
+ * Version: 3.0
+ * Wed Nov 26 05:02:34 MST 2003
  *
  */
 
@@ -17,6 +17,7 @@
 #include "sha.h"
 #include "sha64bit.h"
 #include "endian.h"
+#include "fmt.h"
 
 #define SHR(x, n)	( (x) >> (n) )
 #define ROTR(x, n)	( ( (x) >> (n) ) | ( (x) << (32 - (n)) ) )

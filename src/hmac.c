@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 2.4
- * Sat Nov 22 17:10:22 MST 2003
+ * Version: 3.0
+ * Wed Nov 26 05:02:34 MST 2003
  *
  */
 
@@ -15,6 +15,7 @@
 #include <string.h>
 #include "hmac.h"
 #include "sha.h"
+#include "fmt.h"
 
 HMAC *hmacopen(alg, key, keylen)
 int alg;
@@ -24,7 +25,7 @@ unsigned int keylen;
 	int i;
 	HMAC *h;
 
-	if ((h = (HMAC *) malloc(sizeof(HMAC))) == NULL)
+	if ((h = (HMAC *) calloc(1, sizeof(HMAC))) == NULL)
 		return(NULL);
 	if ((h->isha = shaopen(alg)) == NULL) {
 		free(h);
@@ -35,7 +36,6 @@ unsigned int keylen;
 		free(h);
 		return(NULL);
 	}
-	memset(h->key, 0, sizeof(h->key));
 	if (keylen <= sizeof(h->key))
 		memcpy(h->key, key, keylen);
 	else {

@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 2.4
- * Sat Nov 22 17:10:22 MST 2003
+ * Version: 3.0
+ * Wed Nov 26 05:02:34 MST 2003
  *
  */
 
@@ -38,10 +38,6 @@
 #define SHA_MAX_DIGEST_BITS	SHA512_DIGEST_BITS
 #define SHA_MAX_HEX_LEN		(SHA_MAX_DIGEST_BITS / 4)
 #define SHA_MAX_BASE64_LEN	(1 + (SHA_MAX_DIGEST_BITS / 6))
-
-#define SHA_FMT_RAW 1
-#define SHA_FMT_HEX 2
-#define SHA_FMT_BASE64 3
 
 typedef struct {
 	int alg;

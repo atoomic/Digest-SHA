@@ -7,6 +7,7 @@ SHA.pm
 SHA.xs
 typemap
 src/endian.h
+src/fmt.h
 src/hmac.c
 src/hmac.h
 src/sha.c
@@ -20,6 +21,7 @@ t/2-nist-sha-256.t
 t/2-nist-sha-384.t
 t/2-nist-sha-512.t
 t/2-nist-sha-base64.t
+t/2-nist-sha-oo.t
 t/2-nist-vectors-bit.t
 t/2-nist-vectors-byte.t
 t/3-gillogly-easy.t
@@ -29,6 +31,7 @@ t/4-bitstr-large.t
 t/4-bitstr-random.t
 t/5-hmac-fips198.t
 t/5-hmac-rfc2202.t
+t/5-hmac-sha-256.t
 t/6-shadump-shaload.t
 t/gillogly/state.011
 t/gillogly/state.110

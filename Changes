@@ -63,3 +63,13 @@ Revision history for Perl extension Digest::SHA.
 	- modularized all 64-bit (long long) code
 	- improved readability of header files
 	- simplified logic of "fixdump" utility
+
+3.0   Wed Nov 26 05:02:34 MST 2003
+	- added functions that conform to Digest:: interface
+		-- both functional and OO styles
+			-- byte-oriented data only
+		-- continue to support original interface as well
+			-- necessary for bit-oriented data
+	- supplied formal test vectors for HMAC-SHA-256
+		-- from draft-ietf-ipsec-ciph-sha-256-01.txt
+	- included tests for all OO methods
