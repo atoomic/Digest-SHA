@@ -1,13 +1,11 @@
 package Digest::SHA;
 
-#use 5.008;
-use base 'Digest::base';
+use base ("Digest::base", "Exporter");
+
+use 5.008;
 use strict;
 use warnings;
-
-require Exporter;
-
-our @ISA = qw(Exporter);
+use integer;
 
 our %EXPORT_TAGS = (
 'all' => [ qw(
@@ -34,227 +32,22 @@ our %EXPORT_TAGS = (
 	sha384_hex
 	sha512
 	sha512_base64
-	sha512_hex) ],
-'legacy' => [ qw(
-	hmac1base64
-	hmac1hex
-	hmac256base64
-	hmac256hex
-	hmac384base64
-	hmac384hex
-	hmac512base64
-	hmac512hex
-	sha1base64
-	sha1hex
-	sha256base64
-	sha256hex
-	sha384base64
-	sha384hex
-	sha512base64
-	sha512hex
-	shabase64
-	shaclose
-	shadump
-	shadup
-	shafinish
-	shahex
-	shaload
-	shaopen
-	shawrite) ]
+	sha512_hex) ]
 );
 
-our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} }, @{ $EXPORT_TAGS{'legacy'} } );
+our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw();
 
-our $VERSION = '4.0.2';
+our $VERSION = '4.0.3';
 
 require XSLoader;
 XSLoader::load('Digest::SHA', $VERSION);
 
 # Preloaded methods go here.
 
-sub shawrite {
-	my($data, $len, $state) = @_;
-
-	if (!defined($state)) {
-		$state = $len;
-		$len = 8 * length($data);
-	}
-	return(c_shawrite($data, $len, $state));
-}
-
-sub sha1hex {
-	my($data, $len) = @_;
-
-	$len = 8 * length($data) unless defined($len);
-	return(c_sha1hex($data, $len));
-}
-
-sub sha256hex {
-	my($data, $len) = @_;
-
-	$len = 8 * length($data) unless defined($len);
-	return(c_sha256hex($data, $len));
-}
-
-sub sha384hex {
-	my($data, $len) = @_;
-
-	$len = 8 * length($data) unless defined($len);
-	return(c_sha384hex($data, $len));
-}
-
-sub sha512hex {
-	my($data, $len) = @_;
-
-	$len = 8 * length($data) unless defined($len);
-	return(c_sha512hex($data, $len));
-}
-
-sub sha1base64 {
-	my($data, $len) = @_;
-
-	$len = 8 * length($data) unless defined($len);
-	return(c_sha1base64($data, $len));
-}
-
-sub sha256base64 {
-	my($data, $len) = @_;
-
-	$len = 8 * length($data) unless defined($len);
-	return(c_sha256base64($data, $len));
-}
-
-sub sha384base64 {
-	my($data, $len) = @_;
-
-	$len = 8 * length($data) unless defined($len);
-	return(c_sha384base64($data, $len));
-}
-
-sub sha512base64 {
-	my($data, $len) = @_;
-
-	$len = 8 * length($data) unless defined($len);
-	return(c_sha512base64($data, $len));
-}
-
-sub hmac1hex {
-	my($data, $dlen, $key, $klen) = @_;
-
-	if (!defined($key)) {
-		$key = $dlen;
-		$dlen = 8 * length($data);
-		$klen = length($key);
-	}
-	elsif (!defined($klen)) {
-		$klen = length($key);
-	}
-	return(c_hmac1hex($data, $dlen, $key, $klen));
-}
-
-sub hmac256hex {
-	my($data, $dlen, $key, $klen) = @_;
-
-	if (!defined($key)) {
-		$key = $dlen;
-		$dlen = 8 * length($data);
-		$klen = length($key);
-	}
-	elsif (!defined($klen)) {
-		$klen = length($key);
-	}
-	return(c_hmac256hex($data, $dlen, $key, $klen));
-}
-
-sub hmac384hex {
-	my($data, $dlen, $key, $klen) = @_;
-
-	if (!defined($key)) {
-		$key = $dlen;
-		$dlen = 8 * length($data);
-		$klen = length($key);
-	}
-	elsif (!defined($klen)) {
-		$klen = length($key);
-	}
-	return(c_hmac384hex($data, $dlen, $key, $klen));
-}
-
-sub hmac512hex {
-	my($data, $dlen, $key, $klen) = @_;
-
-	if (!defined($key)) {
-		$key = $dlen;
-		$dlen = 8 * length($data);
-		$klen = length($key);
-	}
-	elsif (!defined($klen)) {
-		$klen = length($key);
-	}
-	return(c_hmac512hex($data, $dlen, $key, $klen));
-}
-
-sub hmac1base64 {
-	my($data, $dlen, $key, $klen) = @_;
-
-	if (!defined($key)) {
-		$key = $dlen;
-		$dlen = 8 * length($data);
-		$klen = length($key);
-	}
-	elsif (!defined($klen)) {
-		$klen = length($key);
-	}
-	return(c_hmac1base64($data, $dlen, $key, $klen));
-}
-
-sub hmac256base64 {
-	my($data, $dlen, $key, $klen) = @_;
-
-	if (!defined($key)) {
-		$key = $dlen;
-		$dlen = 8 * length($data);
-		$klen = length($key);
-	}
-	elsif (!defined($klen)) {
-		$klen = length($key);
-	}
-	return(c_hmac256base64($data, $dlen, $key, $klen));
-}
-
-sub hmac384base64 {
-	my($data, $dlen, $key, $klen) = @_;
-
-	if (!defined($key)) {
-		$key = $dlen;
-		$dlen = 8 * length($data);
-		$klen = length($key);
-	}
-	elsif (!defined($klen)) {
-		$klen = length($key);
-	}
-	return(c_hmac384base64($data, $dlen, $key, $klen));
-}
-
-sub hmac512base64 {
-	my($data, $dlen, $key, $klen) = @_;
-
-	if (!defined($key)) {
-		$key = $dlen;
-		$dlen = 8 * length($data);
-		$klen = length($key);
-	}
-	elsif (!defined($klen)) {
-		$klen = length($key);
-	}
-	return(c_hmac512base64($data, $dlen, $key, $klen));
-}
-
 sub shadump {
 	my($file, $state) = @_;
-
 	if (!defined($state)) {
 		$state = $file;
 		$file = "";
@@ -264,102 +57,163 @@ sub shadump {
 
 sub shaload {
 	my($file) = @_;
-
 	if (!defined($file)) {
 		$file = "";
 	}
 	return(c_shaload($file));
 }
 
-sub sha1 { return(pack("H*", sha1hex(join("", @_)))) }
-sub sha1_hex { return(sha1hex(join("", @_))) }
-sub sha1_base64 { return(sha1base64(join("", @_))) }
+sub sha1 { 
+	my $d = join("", @_); 
+	return(pack("H*", sha1hex($d, length($d) << 3))) 
+}
 
-sub sha256 { return(pack("H*", sha256hex(join("", @_)))) }
-sub sha256_hex { return(sha256hex(join("", @_))) }
-sub sha256_base64 { return(sha256base64(join("", @_))) }
+sub sha1_hex { 
+	my $d = join("", @_); 
+	return(sha1hex($d, length($d) << 3)) 
+}
 
-sub sha384 { return(pack("H*", sha384hex(join("", @_)))) }
-sub sha384_hex { return(sha384hex(join("", @_))) }
-sub sha384_base64 { return(sha384base64(join("", @_))) }
+sub sha1_base64 { 
+	my $d = join("", @_); 
+	return(sha1base64($d, length($d) << 3)) 
+}
 
-sub sha512 { return(pack("H*", sha512hex(join("", @_)))) }
-sub sha512_hex { return(sha512hex(join("", @_))) }
-sub sha512_base64 { return(sha512base64(join("", @_))) }
+sub sha256 { 
+	my $d = join("",@_);
+	return(pack("H*", sha256hex($d, length($d) << 3))) 
+}
+
+sub sha256_hex { 
+	my $d = join("", @_); 
+	return(sha256hex($d, length($d) << 3)) 
+}
+
+sub sha256_base64 { 
+	my $d = join("", @_); 
+	return(sha256base64($d, length($d) << 3)) 
+}
+
+sub sha384 { 
+	my $d = join("",@_);
+	return(pack("H*", sha384hex($d, length($d) << 3))) 
+}
+
+sub sha384_hex { 
+	my $d = join("", @_); 
+	return(sha384hex($d, length($d) << 3)) 
+}
+
+sub sha384_base64 { 
+	my $d = join("", @_); 
+	return(sha384base64($d, length($d) << 3)) 
+}
+
+sub sha512 { 
+	my $d = join("",@_);
+	return(pack("H*", sha512hex($d, length($d) << 3))) 
+}
+
+sub sha512_hex { 
+	my $d = join("", @_); 
+	return(sha512hex($d, length($d) << 3)) 
+}
+
+sub sha512_base64 { 
+	my $d = join("", @_); 
+	return(sha512base64($d, length($d) << 3)) 
+}
 
 sub hmac_sha1 {
-	my $key = pop;
-	return(pack("H*", hmac1hex(join("", @_), $key)))
+	my $k = pop;
+	my $d = join("", @_);
+	return(pack("H*", hmac1hex($d, length($d) << 3, $k, length($k))))
 }
 
 sub hmac_sha1_hex {
-	my $key = pop;
-	return(hmac1hex(join("", @_), $key));
+	my $k = pop;
+	my $d = join("", @_);
+	return(hmac1hex($d, length($d) << 3, $k, length($k)));
 }
 
 sub hmac_sha1_base64 {
-	my $key = pop;
-	return(hmac1base64(join("", @_), $key));
+	my $k = pop;
+	my $d = join("", @_);
+	return(hmac1base64($d, length($d) << 3, $k, length($k)));
 }
 
 sub hmac_sha256 {
-	my $key = pop;
-	return(pack("H*", hmac256hex(join("", @_), $key)))
+	my $k = pop;
+	my $d = join("", @_);
+	return(pack("H*", hmac256hex($d, length($d) << 3, $k, length($k))))
 }
 
 sub hmac_sha256_hex {
-	my $key = pop;
-	return(hmac256hex(join("", @_), $key));
+	my $k = pop;
+	my $d = join("", @_);
+	return(hmac256hex($d, length($d) << 3, $k, length($k)));
 }
 
 sub hmac_sha256_base64 {
-	my $key = pop;
-	return(hmac256base64(join("", @_), $key));
+	my $k = pop;
+	my $d = join("", @_);
+	return(hmac256base64($d, length($d) << 3, $k, length($k)));
 }
 
 sub hmac_sha384 {
-	my $key = pop;
-	return(pack("H*", hmac384hex(join("", @_), $key)))
+	my $k = pop;
+	my $d = join("", @_);
+	return(pack("H*", hmac384hex($d, length($d) << 3, $k, length($k))))
 }
 
 sub hmac_sha384_hex {
-	my $key = pop;
-	return(hmac384hex(join("", @_), $key));
+	my $k = pop;
+	my $d = join("", @_);
+	return(hmac384hex($d, length($d) << 3, $k, length($k)));
 }
 
 sub hmac_sha384_base64 {
-	my $key = pop;
-	return(hmac384base64(join("", @_), $key));
+	my $k = pop;
+	my $d = join("", @_);
+	return(hmac384base64($d, length($d) << 3, $k, length($k)));
 }
 
 sub hmac_sha512 {
-	my $key = pop;
-	return(pack("H*", hmac512hex(join("", @_), $key)))
+	my $k = pop;
+	my $d = join("", @_);
+	return(pack("H*", hmac512hex($d, length($d) << 3, $k, length($k))))
 }
 
 sub hmac_sha512_hex {
-	my $key = pop;
-	return(hmac512hex(join("", @_), $key));
+	my $k = pop;
+	my $d = join("", @_);
+	return(hmac512hex($d, length($d) << 3, $k, length($k)));
 }
 
 sub hmac_sha512_base64 {
-	my $key = pop;
-	return(hmac512base64(join("", @_), $key));
+	my $k = pop;
+	my $d = join("", @_);
+	return(hmac512base64($d, length($d) << 3, $k, length($k)));
+}
+
+sub hashsize {
+	my $self = shift;
+	return(length(shahex($self->{STATE})) << 2);
 }
 
 sub new {
-	my $class = shift;
+	my($class, $alg) = @_;
 	if (ref($class)) {	# instance method
+		$alg = $class->hashsize unless defined $alg;
+		$alg =~ s/\D+//g;
+		$alg = 1 if $alg == 160;
 		shaclose($class->{STATE}) if $class->{STATE};
-		$class->{ALG} = shift || $class->{ALG};
-		$class->{ALG} =~ s/\D+//g;
-		$class->{STATE} = shaopen($class->{ALG}) || return;
+		$class->{STATE} = shaopen($alg) || return;
 		return($class);
 	}
+	$alg = 1 unless defined $alg;
+	$alg =~ s/\D+//g;
 	my $self = {};
-	$self->{ALG} = shift || 1;
-	$self->{ALG} =~ s/\D+//g;
-	$self->{STATE} = shaopen($self->{ALG}) || return;
+	$self->{STATE} = shaopen($alg) || return;
 	bless($self, $class);
 	return($self);
 }
@@ -369,14 +223,9 @@ sub DESTROY {
 	shaclose($self->{STATE}) if $self->{STATE};
 }
 
-sub hashsize {
-	my $self = shift;
-	return(length(shahex($self->{STATE})) * 4);
-}
-
 sub clone {
 	my $self = shift;
-	my $copy = Digest::SHA->new($self->{ALG});
+	my $copy = Digest::SHA->new() || return;
 	shaclose($copy->{STATE}) if $copy->{STATE};
 	$copy->{STATE} = shadup($self->{STATE});
 	return($copy);
@@ -385,10 +234,11 @@ sub clone {
 *reset = \&new;
 
 sub add {
-	my $self = shift;
-	my $data = join("", @_);
-	shawrite($data, $self->{STATE});
-	return($self);
+        my $self = shift;
+        for (@_) {
+                shawrite($_, length($_) << 3, $self->{STATE});
+        }
+        return($self);
 }
 
 sub add_bits {
@@ -399,11 +249,6 @@ sub add_bits {
 	}
 	shawrite($data, $nbits, $self->{STATE});
 	return($self);
-}
-
-# tweaked by jcd
-sub addfile {
-	return Digest::base::addfile(@_);
 }
 
 sub dump {
@@ -419,16 +264,12 @@ sub load {
 	my $file = shift || "";
 	if (ref($class)) {	# instance method
 		shaclose($class->{STATE}) if $class->{STATE};
-		return unless $class->{STATE} = c_shaload($file);
-		$class->{ALG} = $class->hashsize();
-		$class->{ALG} = 1 if $class->{ALG} == 160;
+		$class->{STATE} = shaload($file) || return;
 		return($class);
 	}
 	my $self = {};
-	return unless $self->{STATE} = c_shaload($file);
+	$self->{STATE} = shaload($file) || return;
 	bless($self, $class);
-	$self->{ALG} = $self->hashsize();
-	$self->{ALG} = 1 if $self->{ALG} == 160;
 	return($self);
 }
 
@@ -436,22 +277,6 @@ sub digest {
 	my $self = shift;
 	shafinish($self->{STATE});
 	my $val = pack("H*", shahex($self->{STATE}));
-	$self->reset;
-	return($val);
-}
-
-sub hexdigest {
-	my $self = shift;
-	shafinish($self->{STATE});
-	my $val = shahex($self->{STATE});
-	$self->reset;
-	return($val);
-}
-
-sub b64digest {
-	my $self = shift;
-	shafinish($self->{STATE});
-	my $val = shabase64($self->{STATE});
 	$self->reset;
 	return($val);
 }
@@ -483,23 +308,28 @@ Digest::SHA - Perl extension for SHA-1/256/384/512
  $sha->add_bits($bits);
  $sha->addfile(*FILE);
 
+ $sha->dump($filename);
+ $sha->load($filename);
+
  $digest = $sha->digest;
  $digest = $sha->hexdigest;
  $digest = $sha->b64digest;
 
 =head1 ABSTRACT
 
-Digest::SHA implements all four algorithms of the NIST Secure Hash
-Standard: SHA-1, SHA-256, SHA-384, and SHA-512.  The module is
-capable of calculating digest values of bit-wise as well as byte-wise
-messages.
+Digest::SHA is a full implementation of the NIST Secure Hash
+Standard.  It calculates message digests using the SHA-1, SHA-256,
+SHA-384, and SHA-512 algorithms.  The module accepts all message
+types, including bit data that's not aligned on byte boundaries.
 
 =head1 DESCRIPTION
 
-Digest::SHA provides a complete and portable implementation of the
-NIST Secure Hash Standard.  It offers two different ways to calculate
-digests: all-at-once, or in stages.  The following program calculates
-the SHA-256 digest of "hello world" using each method:
+Digest::SHA is a Perl interface to portable C code that implements
+all four hashing algorithms defined in NIST FIPS PUB 180-2.  It
+offers two ways to calculate digests: all-at-once, or in stages.
+
+To illustrate, the following short program computes the SHA-256
+digest of "hello world" using each approach:
 
 	use Digest::SHA ':all';
 
@@ -517,11 +347,11 @@ the SHA-256 digest of "hello world" using each method:
 	print $digest1 eq $digest2 ?
 		"whew!\n" : "career in aluminum siding\n";
 
-To compute the digest of an n-bit message where I<n> is not a
+To calculate the digest of an n-bit message where I<n> is not a
 multiple of 8, use the I<add_bits()> method.  As an example, consider
-the 446-bit message consisting of the fragment "110" repeated 148
-times, followed by the fragment "11".  Here's how to calculate its
-SHA-1 digest:
+the 446-bit message consisting of the bit-string "110" repeated
+148 times, followed by "11".  Here's how to calculate its SHA-1
+digest:
 
 	$bits = "110" x 148 . "11";
 	$digest = Digest::SHA->new(1)->add_bits($bits)->hexdigest;
@@ -530,13 +360,19 @@ Note that for larger bit-strings, it's more efficient to use the
 two-argument version I<add_bits($data, $nbits)>, where I<$data> is
 in the customary packed binary format used for Perl strings.
 
-As a temporary convenience, the Digest::SHA module provides
-self-contained routines to calculate HMAC-SHA-1/256/384/512 digests.
-These services exist in functional form only, and closely mimic
-the style and behavior of the I<shaX>, I<shaX_hex>, and I<shaX_base64>
-functions.  It's expected that they will be moved to an appropriate
-Digest::HMAC module as soon as the corresponding OO implementation
-is developed and tested.
+The module also allows you to save intermediate SHA states to
+persistent storage.  The I<dump()> method generates a portable,
+human-readable file containing the contents of the current state.
+You can then retrieve the file using I<load()> to resume where the
+previous calculation left off.
+
+As a temporary convenience, the Digest::SHA module offers self-contained
+routines to calculate keyed hashes using the HMAC-SHA-1/256/384/512
+algorithms.  These services exist in functional form only, and
+closely mimic the style and behavior of the I<sha()>, I<sha_hex()>,
+and I<sha_base64()> functions.  It's expected that they'll move to
+an appropriate Digest::HMAC module once the related OO methods are
+developed and tested.
 
 =head1 EXPORT
 
@@ -565,8 +401,8 @@ I<Functional style>
 
 =item B<sha512($data, ...)>
 
-Joins the arguments into a single string, and returns its
-SHA-1/256/384/512 digest encoded as a binary string.
+Logically joins the arguments into a single string, and returns
+its SHA-1/256/384/512 digest encoded as a binary string.
 
 =item B<sha1_hex($data, ...)>
 
@@ -576,8 +412,8 @@ SHA-1/256/384/512 digest encoded as a binary string.
 
 =item B<sha512_hex($data, ...)>
 
-Joins the arguments into a single string, and returns its
-SHA-1/256/384/512 digest encoded as a hexadecimal string.
+Logically joins the arguments into a single string, and returns
+its SHA-1/256/384/512 digest encoded as a hexadecimal string.
 
 =item B<sha1_base64($data, ...)>
 
@@ -587,8 +423,8 @@ SHA-1/256/384/512 digest encoded as a hexadecimal string.
 
 =item B<sha512_base64($data, ...)>
 
-Joins the arguments into a single string, and returns its
-SHA-1/256/384/512 digest encoded as a Base64 string.
+Logically joins the arguments into a single string, and returns
+its SHA-1/256/384/512 digest encoded as a Base64 string.
 
 =back
 
@@ -598,16 +434,15 @@ I<OO style>
 
 =item B<$sha = Digest::SHA-E<gt>new($alg)>
 
-Returns a new Digest::SHA object.  Permissible values for I<$alg>
-are 1, 256, 384, and 512.  However, it's also possible to use common
-string representations of the algorithm (e.g. "sha256", "SHA-384").
-If the argument is missing, SHA-1 will be used by default.
+Returns a new Digest::SHA object.  Values for I<$alg> are 1, 256,
+384, or 512.  It's also possible to use common string representations
+of the algorithm (e.g. "sha256", "SHA-384").  If the argument is
+missing, SHA-1 will be used by default.
 
-Invoking "new" as an instance method will not cause a new object
-to be created, but will simply reset the object to the initial
-state associated with I<$alg>.  If the argument is missing, the
-object will continue using the same algorithm that was selected at
-creation.
+Invoking "new" as an instance method will not create a new object;
+instead, it will simply reset the object to the initial state
+associated with I<$alg>.  If the argument is missing, the object
+will continue using the same algorithm that was selected at creation.
 
 =item B<$sha-E<gt>reset($alg)>
 
@@ -626,9 +461,9 @@ Returns a duplicate copy of the I<$sha> object.
 
 =item B<$sha-E<gt>add($data, ...)>
 
-Joins the arguments into a single string, and uses it to update
-the current I<$sha> digest state.  In other words, the following
-statements have the same effect:
+Logically joins the arguments into a single string, and uses that
+to update the current I<$sha> digest state.  In other words, the
+following statements have the same effect:
 
 	$sha->add("a"); $sha->add("b"); $sha->add("c");
 	$sha->add("a")->add("b")->add("c");
@@ -643,8 +478,8 @@ Updates the current digest state by appending bits to it.  The
 return value is the updated object itself.
 
 The first form causes the most-significant I<$nbits> of I<$data>
-to be appended to the stream.  The $data argument is in the customary
-binary format used for Perl strings.
+to be appended to the stream.  The I<$data> argument is in the
+customary binary format used for Perl strings.
 
 The second form takes an ASCII string of "0" and "1" characters as
 its argument.  It's simply a convenient shorthand for
@@ -659,7 +494,9 @@ So, the following two statements do the same thing:
 =item B<$sha-E<gt>addfile(*FILE)>
 
 Reads from I<FILE> until EOF, and appends that data to the current
-$sha state.  The return value is the updated $sha object itself.
+state.  The return value is the updated I<$sha> object itself.
+
+This method is inherited from the L<Digest::base> class.
 
 =item B<$sha-E<gt>dump($filename)>
 
@@ -693,6 +530,8 @@ Like I<digest>, this method is a read-once operation.  Call
 I<$sha-E<gt>clone-E<gt>hexdigest> if it's necessary to preserve
 the original digest state.
 
+This method is inherited from the L<Digest::base> class.
+
 =item B<$sha-E<gt>b64digest>
 
 Returns the digest encoded as a Base64 string.
@@ -700,6 +539,8 @@ Returns the digest encoded as a Base64 string.
 Like I<digest>, this method is a read-once operation.  Call
 I<$sha-E<gt>clone-E<gt>b64digest> if it's necessary to preserve
 the original digest state.
+
+This method is inherited from the L<Digest::base> class.
 
 =back
 
@@ -716,8 +557,9 @@ I<HMAC-SHA-1/256/384/512>
 =item B<hmac_sha512($data, $key)>
 
 Returns the HMAC-SHA-1/256/384/512 digest of I<$data>/I<$key>, with
-the result encoded as a binary string.  Multiple $data arguments
-are allowed, provided that $key is the final argument in the list.
+the result encoded as a binary string.  Multiple I<$data> arguments
+are allowed, provided that I<$key> is the final argument in the
+list.
 
 =item B<hmac_sha1_hex($data, $key)>
 
@@ -728,8 +570,9 @@ are allowed, provided that $key is the final argument in the list.
 =item B<hmac_sha512_hex($data, $key)>
 
 Returns the HMAC-SHA-1/256/384/512 digest of I<$data>/I<$key>, with
-the result encoded as a hexadecimal string.  Multiple $data arguments
-are allowed, provided that $key is the final argument in the list.
+the result encoded as a hexadecimal string.  Multiple I<$data>
+arguments are allowed, provided that I<$key> is the final argument
+in the list.
 
 =item B<hmac_sha1_base64($data, $key)>
 
@@ -740,14 +583,15 @@ are allowed, provided that $key is the final argument in the list.
 =item B<hmac_sha512_base64($data, $key)>
 
 Returns the HMAC-SHA-1/256/384/512 digest of I<$data>/I<$key>, with
-the result encoded as a Base64 string.  Multiple $data arguments
-are allowed, provided that $key is the final argument in the list.
+the result encoded as a Base64 string.  Multiple I<$data> arguments
+are allowed, provided that I<$key> is the final argument in the
+list.
 
 =back
 
 =head1 SEE ALSO
 
-L<Digest::>, L<Digest::SHA1>
+L<Digest>, L<Digest::SHA1>, L<Digest::SHA2>
 
 The Secure Hash Standard (FIPS PUB 180-2) can be found at:
 

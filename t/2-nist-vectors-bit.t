@@ -2,13 +2,14 @@
 #
 #	ref: http://csrc.nist.gov/cryptval/shs.html
 #
-# Uses files "nist/byte-messages.sha1" and "nist/byte-hashes.sha1"
+# Uses files "nist/bit-messages.sha1" and "nist/bit-hashes.sha1"
 
 use strict;
 use integer;
+
 use File::Basename qw(dirname);
 
-# extract byte messages
+# extract bit messages
 
 my $i;
 my @msgs;
@@ -21,7 +22,7 @@ my $line;
 my $datafile;
 
 BEGIN {
-	$datafile = dirname($0) . "/nist/byte-messages.sha1";
+	$datafile = dirname($0) . "/nist/bitmsg.sha";
 	open(F, $datafile);
 	while (<F>) {
 		last if (/Type 3/);
@@ -43,7 +44,7 @@ BEGIN {
 	}
 	close(F);
 
-	$datafile = dirname($0) . "/nist/byte-hashes.sha1";
+	$datafile = dirname($0) . "/nist/bithash.sha";
 	open(F, $datafile);
 	while (<F>) {
 		$_ = substr($_, 0, length($_) - 2);
@@ -59,7 +60,7 @@ BEGIN {
 use Test::More tests => scalar(@msgs);
 use Digest::SHA;
 
-my $ctx = Digest::SHA->new("sha1");
+my $ctx = Digest::SHA->new(1);
 for (my $i = 0; $i < @msgs; $i++) {
 	is(
 		uc($ctx->add_bits($msgs[$i])->hexdigest),

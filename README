@@ -1,65 +1,59 @@
-Digest::SHA version 4.0.2
+Digest::SHA version 4.0.3
 =========================
 
-The  Digest::SHA module provides a Perl interface to all varieties  of
-the  Secure  Hash  Algorithm,  namely, SHA-1,  SHA-256,  SHA-384,  and
-SHA-512.  Fuctions are also included to compute keyed-hashes using the
-HMAC algorithm.
+The Digest::SHA module provides a Perl interface to all varieties
+of the Secure Hash Algorithm, namely, SHA-1, SHA-256, SHA-384, and
+SHA-512.  Fuctions are also included to compute keyed-hashes using
+the HMAC algorithm.
 
-The  inteface  conforms to all requirements, styles,  and  conventions
-specified  in  the  CPAN  Digest:: module,  including  the  option  to
-calculate digests for messages that aren't aligned on byte boundaries.
-Also   provided   are  methods  to  save  and  subsequently   retrieve
-intermediate SHA states to and from persistent storage.
+Digest::SHA is a subclass of the CPAN Digest::base class, and
+thereby inherits all of its useful features and stylistic conventions.
+A number of additional features are provided, such as the ability to:
 
-The  underlying  C  code is designed to be portable, and  requires  no
-special  libraries beyond those found with typical compilers. However,
-if your compiler doesn't recognize the "long long" type, the functions
-associated  with  the SHA-384 and SHA-512 transforms will return  null
-values.
+	- calculate digests for bit-oriented messages
+	- store and retrieve intermediate SHA states
 
-As  of Version 4.0.0, the Digest::SHA module is beginning the  process
-of  deprecating the old "shaopen()/shawrite()/shaclose()" interface in
-favor  of  the more streamlined OO style. The old functions are  still
-available, and can be conveniently accessed by inserting
+The underlying C code is portable, and requires no special libraries
+beyond those found with typical compilers.  However, if your compiler
+doesn't recognize the "long long" type, the functions associated
+with the SHA-384 and SHA-512 transforms will return null values.
 
-        use Digest::SHA ':legacy';
+As of Version 4.0.3, the Digest::SHA module is deprecating the
+redundant "shaopen()/shawrite()/shaclose()" interface in favor of
+the more streamlined OO style.  Please refer to earlier versions
+of this module for documentation on the older style.  Code that
+depends on the deprecated interface can be easily modified to use
+the new version.
 
-in   your  code.  However,  continued  use  of  these   functions   is
-discouraged.
+The tests subdirectory (t/*.t) contains an extensive set of SHA
+vectors compiled from various sources.  Of particular interest are
+the NIST vectors, which examine a large variety of bit-strings and
+byte-strings (see the "t/nist/COPYRIGHT" file for details).  Also
+note the bit-vectors supplied by Jim Gillogly and Francois Grieu,
+which check the behavior of implementations for input strings that
+exceed 2^32 bits in length.
 
-The  tests  subdirectory  (t/*.t)  contains an extensive  set  of  SHA
-vectors  compiled from various sources. Of particular interest are the
-NIST  vectors,  which  examine  a large  variety  of  bit-strings  and
-byte-strings  (see  the  "t/nist/COPYRIGHT" file  for  details).  Also
-useful    are   the   bit-vectors   supplied   by   Jim Gillogly   and
-Francois Grieu,  which check the behavior of implementations for input
-strings that exceed 2^32 bits in length.
-
-The  24th  test  vector,  courtesy of David Ireland,  tests  how  well
-SHA-256  is implemented for a message containing 2^29 byte repetitions
-of  the  ASCII character, 'a'. Please read  t/ireland/ireland.txt  for
-details.  Since  this test takes a very long time, it is disabled,  by
-default.  To  use  it,  just rename  the  file  "t/24-ireland.tmp"  to
-"t/24-ireland.t".
+The examples directory, kindly provided by Julius Duque, contains
+useful and instructive applications of the SHA digest routines.
+Refer to the "finddups" utility (recently featured in The Perl
+Journal) for a particularly interesting example.
 
 INSTALLATION
 
 To install this module type the following:
 
-    perl Makefile.PL
-    make
-    make test
-    make install
+   perl Makefile.PL
+   make
+   make test
+   make install
 
 DEPENDENCIES
 
-Digest::base
+   Digest::base
 
-COPYRIGHT AND LICENSE
+COPYRIGHT AND LICENCE
 
 Copyright (C) 2003 Mark Shelor
 
-This  library is free software; you can redistribute it and/or  modify
+This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
-

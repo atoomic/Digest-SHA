@@ -1,125 +1,98 @@
 Revision history for Perl extension Digest::SHA.
 
-4.0.2 Mon Dec  1 16:06:23 PHT 2003 (Julius C. Duque)
-    - corrected some of the sample scripts
-    - added another important test vector, this time from
-      David Ireland (see t/ireland for an explanation)
+4.0.3 Wed Dec  3 00:01:20 MST 2003
+	- Digest::SHA now a subclass of Digest::base
+		-- inherits hexdigest/b64digest/addfile methods
+	- added "hashsize" method
+	- removed old "shaopen()/shawrite()/..." legacy code
+		-- in favor of standard, streamlined OO interface
+	- renamed test vector files from NIST
+		-- prevents problems on 8+3 filesystems
+	- added test for Dave Ireland's SHA-256 vector
 
-    - addfile() now uses the addfile() method of Digest::base
+4.0.0 Sat Nov 29 21:14:09 MST 2003
+	- major streamlining of interface (hence, major version change)
+		-- coordinated with Gisle Aas and J. Duque
+			-- goal is to produce a single SHA module
+		-- adheres to OO and functional styles of Digest::
+		-- greatly reduces the number of interface functions
+		-- old functions still supported
+			-- use Digest::SHA ':legacy'
+			-- will be deprecated in near future
+	- rewrote all test scripts to match new interface
+		-- very easy to modify all 281 tests
+		-- old interface maps cleanly to new one
 
-4.0.1 Sun Nov 30 15:53:06 PHT 2003 (Julius C. Duque)
-    - added test vectors compiled by Aaron Gifford
-      ({me}{at}{aarongifford}{dot}{com}), two of which can
-      reveal bugs in the SHA 256/384/512 implementations;
-      see t/gifford/*.info for descriptions of these tests
+3.0   Wed Nov 26 05:02:34 MST 2003
+	- added functions that conform to Digest:: interface
+		-- both functional and OO styles
+			-- byte-oriented data only
+		-- continue to support original interface as well
+			-- necessary for bit-oriented data
+	- supplied formal test vectors for HMAC-SHA-256
+		-- from draft-ietf-ipsec-ciph-sha-256-01.txt
+	- included tests for all OO methods
 
-    - added "examples" directory, which contains working Perl scripts
-      that show how to use Digest::SHA
+2.4   Sat Nov 22 17:10:22 MST 2003
+	- code cleanup
+		-- "sha.c" now completely free of #ifdef's
+	- modularized all 64-bit (long long) code
+	- improved readability of header files
+	- simplified logic of "fixdump" utility
 
-    - module Digest::base (by Gisle Aas) is now required
+2.3   Wed Nov 19 03:54:31 MST 2003
+	- minor optimizations and code cleanup
+		-- improved maintainability by reducing #ifdef's
+		-- sha1 transform code now easier to follow
+	- streamlined shadump/shaload file format
+		-- eliminated special "HQ" entry
+		-- state now held in "H" for all transforms
+		-- supplied "fixdump" utility to convert old format
+	- SHA-384/512 functions now return NULL for no 64-bit operations
+		-- previously they were undefined
+		-- no longer necessary to use eval's to test for presence
 
-    - tweaked Makefile.PL
-        -- added COMPRESS and SUFFIX options in Makefile.PL
+2.2   Sun Nov 16 01:54:00 MST 2003
+	- optimized the performance of the SHA-1 transform
+		-- around 20-30% faster than previous version
+		-- achieved by loop unrolling and assignment consolidation
+	- enhanced shaload/shadump to allow interaction with stdin/stdout
+		-- "$filename" argument now optional
 
-    - removed "use 5.008"; Digest::SHA should still work on Perl 5.6.x
+2.1   Sun Nov  9 03:28:04 MST 2003
+	- simplified data input routines
+		-- length argument now optional for byte data
+			(special thanks to Jeffrey Friedl for this idea)
+		-- interface still compatible with earlier versions
+			-- changes will not affect existing client code
+	- streamlined underlying C code for easier maintenance
+	- provided additional tests for persistent data
 
-4.0.0 Sat Nov 29 21:14:09 MST 2003 (Mark Shelor)
-    - major streamlining of interface (hence, major version change)
-        -- coordinated with Gisle Aas and J. Duque
-        -- goal is to produce a single SHA module
-        -- adheres to OO and functional styles of Digest::
-        -- greatly reduces the number of interface functions
-        -- old functions still supported
-        -- use Digest::SHA ':legacy'
-        -- will be deprecated in near future
+2.0   Sat Nov  1 03:55:36 MST 2003
+	- added functions for HMAC-SHA-1/256/384/512 (FIPS PUB 198)
+	- shadump/shaload files now compatible between 32/64-bit machines
 
-    - rewrote all test scripts to match new interface
-        -- very easy to modify all 281 tests
-        -- old interface maps cleanly to new one
+1.01  Sat Oct 25 02:44:55 MST 2003
+	- package now downloads and installs much faster
+	- reduced distribution size by 80%
+		-- pruned extensive NIST vectors to a useful subset
+		-- still possible to test all vectors if desired
+			--- see "t/nist/COPYRIGHT" file for details
+	- added routines to provide persistent storage of SHA states
+		-- shadump() and shaload()
+	- reduced runtime of large bitstring tests (gillogly-hard)
+		-- illustrates usefulness of shadump()/shaload()
 
-3.0 Wed Nov 26 05:02:34 MST 2003 (Mark Shelor)
-    - added functions that conform to Digest:: interface
-        -- both functional and OO styles
-            -- byte-oriented data only
+1.0   Sat Oct 18 17:35:07 MST 2003
+	- documentation fixes
+	- code cleanup: no more compiler warnings from gcc -Wall
+	- added code to allow reading of intermediate digest state
+		-- shahex() prior to shafinish() returns current state
 
-        -- continue to support original interface as well
-            -- necessary for bit-oriented data
+0.9   Thu Oct  9 20:43:54 MST 2003
+	- version updated to reflect portability check and passing
+		of all tests (1401)
 
-    - supplied formal test vectors for HMAC-SHA-256
-        -- from draft-ietf-ipsec-ciph-sha-256-01.txt
-
-    - included tests for all OO methods
-
-2.4 Sat Nov 22 17:10:22 MST 2003 (Mark Shelor)
-    - code cleanup
-        -- "sha.c" now completely free of #ifdef's
-
-    - modularized all 64-bit (long long) code
-    - improved readability of header files
-    - simplified logic of "fixdump" utility
-
-2.3 Wed Nov 19 03:54:31 MST 2003 (Mark Shelor)
-    - minor optimizations and code cleanup
-        -- improved maintainability by reducing #ifdef's
-        -- sha1 transform code now easier to follow
-
-    - streamlined shadump/shaload file format
-        -- eliminated special "HQ" entry
-        -- state now held in "H" for all transforms
-        -- supplied "fixdump" utility to convert old format
-
-    - SHA-384/512 functions now return NULL for no 64-bit operations
-        -- previously they were undefined
-        -- no longer necessary to use eval's to test for presence
-
-2.2 Sun Nov 16 01:54:00 MST 2003 (Mark Shelor)
-    - optimized the performance of the SHA-1 transform
-        -- around 20-30% faster than previous version
-        -- achieved by loop unrolling and assignment consolidation
-
-    - enhanced shaload/shadump to allow interaction with stdin/stdout
-        -- "$filename" argument now optional
-
-2.1 Sun Nov 9 03:28:04 MST 2003 (Mark Shelor)
-    - simplified data input routines
-        -- length argument now optional for byte data (special thanks to
-           Jeffrey Friedl for this idea)
-
-        -- interface still compatible with earlier versions
-        -- changes will not affect existing client code
-
-    - streamlined underlying C code for easier maintenance
-    - provided additional tests for persistent data
-
-2.0 Sat Nov 1 03:55:36 MST 2003 (Mark Shelor)
-    - added functions for HMAC-SHA-1/256/384/512 (FIPS PUB 198)
-    - shadump/shaload files now compatible between 32/64-bit machines
-
-1.01 Sat Oct 25 02:44:55 MST 2003 (Mark Shelor)
-    - package now downloads and installs much faster
-    - reduced distribution size by 80%
-        -- pruned extensive NIST vectors to a useful subset
-        -- still possible to test all vectors if desired
-            --- see "t/nist/COPYRIGHT" file for details
-
-    - added routines to provide persistent storage of SHA states
-        -- shadump() and shaload()
-
-    - reduced runtime of large bitstring tests (gillogly-hard)
-        -- illustrates usefulness of shadump()/shaload()
-
-1.0 Sat Oct 18 17:35:07 MST 2003 (Mark Shelor)
-    - documentation fixes
-    - code cleanup: no more compiler warnings from gcc -Wall
-    - added code to allow reading of intermediate digest state
-        -- shahex() prior to shafinish() returns current state
-
-0.9 Thu Oct 9 20:43:54 MST 2003 (Mark Shelor)
-    - version updated to reflect portability check and passing
-      of all tests (1401)
-
-0.01 Wed Oct 8 22:28:05 2003 (Mark Shelor)
-    - original version; created by h2xs 1.22 with options
-
-        -x -A -n Digest::SHA sha.h
-
+0.01  Wed Oct  8 22:28:05 2003
+	- original version; created by h2xs 1.22 with options
+		-x -A -n Digest::SHA sha.h
