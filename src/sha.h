@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2004 Mark Shelor, All Rights Reserved
  *
- * Version: 5.21
- * Mon Aug 23 04:02:00 MST 2004
+ * Version: 5.22
+ * Tue Sep  7 19:12:40 MST 2004
  *
  */
 
@@ -48,23 +48,27 @@
 	#define SHA32_CONST(c)	c ## UL
 #endif
 
-#if defined(ULONG_LONG_MAX) && !defined(ULLONG_MAX)
-	#define ULLONG_MAX	ULONG_LONG_MAX
+#if defined(ULONG_LONG_MAX) || defined(ULLONG_MAX) || defined(HAS_LONG_LONG)
+	#define SHA_ULL_EXISTS
 #endif
 
 #if (((ULONG_MAX >> 16) >> 16) >> 16) >> 15 == 1UL
 	#define SHA64	unsigned long
 	#define SHA64_CONST(c)	c ## UL
-#elif defined(ULLONG_MAX) && defined(LONGLONGSIZE) && LONGLONGSIZE == 8
+#elif defined(SHA_ULL_EXISTS) && defined(LONGLONGSIZE) && LONGLONGSIZE == 8
 	#define SHA64	unsigned long long
 	#define SHA64_CONST(c)	c ## ULL
-#elif defined(ULLONG_MAX)
+#elif defined(SHA_ULL_EXISTS)
 	#undef  SHA64_ALIGNED
 	#undef  SHA64_SHR
 	#define SHA64_SHR(x, n)	(((x) & SHA64_MAX) >> (n))
 	#define SHA64	unsigned long long
 	#define SHA64_CONST(c)	c ## ULL
-#elif defined(_MSC_VER)
+
+	/* The following cases detect compilers that
+	 * support 64-bit types in a non-standard way */
+
+#elif defined(_MSC_VER)					/* Microsoft C */
 	#define SHA64	unsigned __int64
 	#define SHA64_CONST(c)	(SHA64) c
 #endif
@@ -73,7 +77,7 @@
 	#define SHA_384_512
 #endif
 
-#if defined(BYTEORDER) && (BYTEORDER == 0x4321 || BYTEORDER == 0x87654321)
+#if defined(BYTEORDER) && (BYTEORDER & 0xffff) == 0x4321
 	#if defined(SHA32_ALIGNED)
 		#define SHA32_SCHED(W, b)	memcpy(W, b, 64)
 	#endif
@@ -98,10 +102,13 @@
 			(SHA64) b[6] <<  8 | (SHA64) b[7]; }
 #endif
 
-/* SHA_STO_CLASS: static arrays improve transform speed on Intel/Linux */
-#if defined(BYTEORDER) && (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678)
-	#define SHA_STO_CLASS	static
-#else
+/*
+ * SHA_STO_CLASS: default to auto storage class for message schedule
+ * arrays inside transform routines.  Note that redefining this to
+ * static might improve performance on some platforms (e.g. Intel).
+ */
+
+#if !defined(SHA_STO_CLASS)
 	#define SHA_STO_CLASS	auto
 #endif
 

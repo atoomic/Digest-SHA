@@ -5,13 +5,14 @@
  *
  * Copyright (C) 2003-2004 Mark Shelor, All Rights Reserved
  *
- * Version: 5.21
- * Mon Aug 23 04:02:00 MST 2004
+ * Version: 5.22
+ * Tue Sep  7 19:12:40 MST 2004
  *
  */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <string.h>
 #include <ctype.h>
 #include "sha.h"
@@ -341,7 +342,7 @@ SHA *s;
 	unsigned long numbits;
 	unsigned char buf[1<<9];
 	unsigned int bufsize = sizeof(buf);
-	unsigned long bufbits = bufsize << 3;
+	unsigned long bufbits = (unsigned long) bufsize << 3;
 	unsigned int numbytes = BYTECNT(bitcnt);
 	unsigned long savecnt = bitcnt;
 
@@ -433,7 +434,7 @@ SHA *s;
 
 	digcpy(s);
 	s->hex[0] = '\0';
-	if (HEXLEN(s->digestlen) >= sizeof(s->hex))
+	if (HEXLEN((size_t) s->digestlen) >= sizeof(s->hex))
 		return(s->hex);
 	for (i = 0; i < s->digestlen; i++)
 		sprintf(s->hex+i*2, "%02x", s->digest[i]);

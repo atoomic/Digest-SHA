@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use integer;
 
-our $VERSION = '5.21';
+our $VERSION = '5.22';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -160,7 +160,7 @@ From the command line:
 		# Construct a simple signature
 
 	$message = "I approved this message";
-	$key = "my unique fingerprint";
+	$key = "secret password";
 	$signature = hmac_sha256_hex($message, $key);
 
 =head1 ABSTRACT
@@ -497,6 +497,7 @@ L<http://csrc.nist.gov/publications/fips/fips198/fips-198a.pdf>
 The author is particularly grateful to
 
 	Gisle Aas
+	Chris Carey
 	Julius Duque
 	Jeffrey Friedl
 	Robert Gilmour

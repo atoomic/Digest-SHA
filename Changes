@@ -1,5 +1,16 @@
 Revision history for Perl extension Digest::SHA.
 
+5.22  Tue Sep  7 19:12:40 MST 2004
+	- broadened SHA-384/512 support
+		-- to compilers with no ULLONG_MAX in limits.h
+			-- e.g IBM C (xlC 6.0.0) on AIX 4.3.3
+			-- thanks to Chris Carey for suggestions
+				and technical expertise
+	- improved use of static storage class in transforms
+		-- detection of Intel arch. now done in Makefile.PL
+		-- NB: static not used if compiling for thread safety
+	- minor changes to documentation
+
 5.21  Mon Aug 23 04:02:00 MST 2004
 	- removed 64-bit constant expressions from #if statements
 		-- ref. src/sha.h (lines 55, 58, and 61)
@@ -34,7 +45,7 @@ Revision history for Perl extension Digest::SHA.
 
 5.01  Fri May 21 13:08:12 MST 2004
 	- check for undefined SHA handle when calling "shaclose()"
-		-- prevents intermittent cleanup errors during 
+		-- prevents intermittent cleanup errors during
 			global object destruction
 
 5.00  Fri May 14 04:45:00 MST 2004
