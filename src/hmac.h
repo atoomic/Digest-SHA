@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 2.0
- * Sat Nov  1 02:03:19 MST 2003
+ * Version: 2.1
+ * Sun Nov  9 03:39:01 MST 2003
  *
  */
 
@@ -140,4 +140,4 @@ char *hmac512base64();
 
 #endif	/* use K&R style declarations */
 
-#endif /* _INCLUDE_HMAC_H_ */
+#endif	/* _INCLUDE_HMAC_H_ */

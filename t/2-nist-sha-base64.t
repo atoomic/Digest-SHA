@@ -14,24 +14,24 @@ my @vecs = (
 
 my $rsp;
 
-eval { sha512base64("", 0) };
+eval { sha512base64("") };
 pop(@vecs) if $@;
 
-eval { sha384base64("", 0) };
+eval { sha384base64("") };
 pop(@vecs) if $@;
 
 for (my $i = 0; $i < @vecs; $i++) {
 	if ($i == 0) {
-		$rsp = sha1base64("abc", 24);
+		$rsp = sha1base64("abc");
 	}
 	elsif ($i == 1) {
-		$rsp = sha256base64("abc", 24);
+		$rsp = sha256base64("abc");
 	}
 	elsif ($i == 2) {
-		$rsp = sha384base64("abc", 24);
+		$rsp = sha384base64("abc");
 	}
 	elsif ($i == 3) {
-		$rsp = sha512base64("abc", 24);
+		$rsp = sha512base64("abc");
 	}
 	else {
 		$rsp = "Too many vectors";

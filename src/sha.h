@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 2.0
- * Sat Nov  1 02:03:19 MST 2003
+ * Version: 2.1
+ * Sun Nov  9 03:39:01 MST 2003
  *
  */
 
@@ -41,10 +41,13 @@
 #define SHA_MAX_HEX_LEN		(SHA_MAX_DIGEST_BITS / 4)
 #define SHA_MAX_BASE64_LEN	(1 + (SHA_MAX_DIGEST_BITS / 6))
 
+#define SHA_FMT_RAW 1
+#define SHA_FMT_HEX 2
+#define SHA_FMT_BASE64 3
+
 typedef struct {
+	int alg;
 	void (*sha)();
-	void (*pad)();
-	void (*put)();
 	unsigned long H[SHA256_DIGEST_BITS/32];
 	unsigned char block[SHA_MAX_BLOCK_BITS/8];
 	unsigned int blockcnt;
@@ -157,4 +160,4 @@ char *sha512base64();
 
 #endif	/* use K&R style declarations */
 
-#endif /* _INCLUDE_SHA_H_ */
+#endif	/* _INCLUDE_SHA_H_ */

@@ -4,6 +4,28 @@
 
 #include "ppport.h"
 
+#define shawrite c_shawrite
+
+#define hmac1hex c_hmac1hex
+#define hmac256hex c_hmac256hex
+#define hmac384hex c_hmac384hex
+#define hmac512hex c_hmac512hex
+
+#define hmac1base64 c_hmac1base64
+#define hmac256base64 c_hmac256base64
+#define hmac384base64 c_hmac384base64
+#define hmac512base64 c_hmac512base64
+
+#define sha1hex c_sha1hex
+#define sha256hex c_sha256hex
+#define sha384hex c_sha384hex
+#define sha512hex c_sha512hex
+
+#define sha1base64 c_sha1base64
+#define sha256base64 c_sha256base64
+#define sha384base64 c_sha384base64
+#define sha512base64 c_sha512base64
+
 #include <src/sha.c>
 #include <src/hmac.c>
 
@@ -16,28 +38,28 @@ PROTOTYPES: ENABLE
 #include <src/hmac.h>
 
 char *
-hmac1hex(bitstr, bitcnt, key, keylen)
+c_hmac1hex(bitstr, bitcnt, key, keylen)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 	unsigned char *	key
 	unsigned int	keylen
 
 char *
-hmac1base64(bitstr, bitcnt, key, keylen)
+c_hmac1base64(bitstr, bitcnt, key, keylen)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 	unsigned char *	key
 	unsigned int	keylen
 
 char *
-hmac256hex(bitstr, bitcnt, key, keylen)
+c_hmac256hex(bitstr, bitcnt, key, keylen)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 	unsigned char *	key
 	unsigned int	keylen
 
 char *
-hmac256base64(bitstr, bitcnt, key, keylen)
+c_hmac256base64(bitstr, bitcnt, key, keylen)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 	unsigned char *	key
@@ -46,28 +68,28 @@ hmac256base64(bitstr, bitcnt, key, keylen)
 #ifdef SHA_384_512
 
 char *
-hmac384hex(bitstr, bitcnt, key, keylen)
+c_hmac384hex(bitstr, bitcnt, key, keylen)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 	unsigned char *	key
 	unsigned int	keylen
 
 char *
-hmac384base64(bitstr, bitcnt, key, keylen)
+c_hmac384base64(bitstr, bitcnt, key, keylen)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 	unsigned char *	key
 	unsigned int	keylen
 
 char *
-hmac512hex(bitstr, bitcnt, key, keylen)
+c_hmac512hex(bitstr, bitcnt, key, keylen)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 	unsigned char *	key
 	unsigned int	keylen
 
 char *
-hmac512base64(bitstr, bitcnt, key, keylen)
+c_hmac512base64(bitstr, bitcnt, key, keylen)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 	unsigned char *	key
@@ -76,44 +98,44 @@ hmac512base64(bitstr, bitcnt, key, keylen)
 #endif
 
 char *
-sha1base64(bitstr, bitcnt)
+c_sha1base64(bitstr, bitcnt)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 
 char *
-sha1hex(bitstr, bitcnt)
+c_sha1hex(bitstr, bitcnt)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 
 char *
-sha256base64(bitstr, bitcnt)
+c_sha256base64(bitstr, bitcnt)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 
 char *
-sha256hex(bitstr, bitcnt)
+c_sha256hex(bitstr, bitcnt)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 
 #ifdef SHA_384_512
 
 char *
-sha384base64(bitstr, bitcnt)
+c_sha384base64(bitstr, bitcnt)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 
 char *
-sha384hex(bitstr, bitcnt)
+c_sha384hex(bitstr, bitcnt)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 
 char *
-sha512base64(bitstr, bitcnt)
+c_sha512base64(bitstr, bitcnt)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 
 char *
-sha512hex(bitstr, bitcnt)
+c_sha512hex(bitstr, bitcnt)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 
@@ -153,7 +175,7 @@ shaopen(alg)
 	int	alg
 
 unsigned long
-shawrite(bitstr, bitcnt, s)
+c_shawrite(bitstr, bitcnt, s)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 	SHA *	s

@@ -5,12 +5,13 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 2.0
- * Sat Nov  1 02:03:19 MST 2003
+ * Version: 2.1
+ * Sun Nov  9 03:39:01 MST 2003
  *
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "hmac.h"
 #include "sha.h"
@@ -103,226 +104,66 @@ HMAC *h;
 	return(0);
 }
 
-static HMAC *hmaccomp(alg, bitstr, bitcnt, key, keylen)
+static unsigned char *hmaccomp(alg, fmt, bitstr, bitcnt, key, keylen)
 int alg;
+int fmt;
 unsigned char *bitstr;
 unsigned long bitcnt;
 unsigned char *key;
 unsigned int keylen;
 {
 	HMAC *h;
+	static unsigned char digest[SHA_MAX_HEX_LEN+1];
 
 	if ((h = hmacopen(alg, key, keylen)) == NULL)
 		return(NULL);
 	hmacwrite(bitstr, bitcnt, h);
 	hmacfinish(h);
-	return(h);
-}
-
-unsigned char *hmac1digest(bitstr, bitcnt, key, keylen)
-unsigned char *bitstr;
-unsigned long bitcnt;
-unsigned char *key;
-unsigned int keylen;
-{
-	HMAC *h;
-	static unsigned char digest[SHA1_DIGEST_BITS/8];
-
-	memset(digest, 0, sizeof(digest));
-	if ((h = hmaccomp(SHA1, bitstr, bitcnt, key, keylen)) != NULL) {
-		memcpy(digest, hmacdigest(h), sizeof(digest));
-		hmacclose(h);
+	switch (fmt) {
+		case SHA_FMT_RAW:
+			memcpy(digest, hmacdigest(h), h->osha->digestlen); 
+			break;
+		case SHA_FMT_HEX:
+			strcpy((char *) digest, hmachex(h)); 
+			break;
+		case SHA_FMT_BASE64:
+			strcpy((char *) digest, hmacbase64(h)); 
+			break;
+		default:
+			hmacclose(h);
+			return(NULL);
 	}
+	hmacclose(h);
 	return(digest);
 }
 
-char *hmac1hex(bitstr, bitcnt, key, keylen)
-unsigned char *bitstr;
-unsigned long bitcnt;
-unsigned char *key;
-unsigned int keylen;
-{
-	HMAC *h;
-	static char hex[SHA_MAX_HEX_LEN+1];
-
-	hex[0] = '\0';
-	if ((h = hmaccomp(SHA1, bitstr, bitcnt, key, keylen)) != NULL) {
-		strcpy(hex, hmachex(h));
-		hmacclose(h);
-	}
-	return(hex);
+#define HMAC_DIRECT(type, name, alg, fmt) 			\
+type name(bitstr, bitcnt, key, keylen)				\
+unsigned char *bitstr;						\
+unsigned long bitcnt;						\
+unsigned char *key;						\
+unsigned int keylen;						\
+{								\
+	return((type) hmaccomp(alg, fmt, bitstr, bitcnt,	\
+					key, keylen));		\
 }
 
-char *hmac1base64(bitstr, bitcnt, key, keylen)
-unsigned char *bitstr;
-unsigned long bitcnt;
-unsigned char *key;
-unsigned int keylen;
-{
-	HMAC *h;
-	static char base64[SHA_MAX_BASE64_LEN+1];
+HMAC_DIRECT(unsigned char *, hmac1digest, SHA1, SHA_FMT_RAW)
+HMAC_DIRECT(char *, hmac1hex, SHA1, SHA_FMT_HEX)
+HMAC_DIRECT(char *, hmac1base64, SHA1, SHA_FMT_BASE64)
 
-	base64[0] = '\0';
-	if ((h = hmaccomp(SHA1, bitstr, bitcnt, key, keylen)) != NULL) {
-		strcpy(base64, hmacbase64(h));
-		hmacclose(h);
-	}
-	return(base64);
-}
-
-unsigned char *hmac256digest(bitstr, bitcnt, key, keylen)
-unsigned char *bitstr;
-unsigned long bitcnt;
-unsigned char *key;
-unsigned int keylen;
-{
-	HMAC *h;
-	static unsigned char digest[SHA256_DIGEST_BITS/8];
-
-	memset(digest, 0, sizeof(digest));
-	if ((h = hmaccomp(SHA256, bitstr, bitcnt, key, keylen)) != NULL) {
-		memcpy(digest, hmacdigest(h), sizeof(digest));
-		hmacclose(h);
-	}
-	return(digest);
-}
-
-char *hmac256hex(bitstr, bitcnt, key, keylen)
-unsigned char *bitstr;
-unsigned long bitcnt;
-unsigned char *key;
-unsigned int keylen;
-{
-	HMAC *h;
-	static char hex[SHA_MAX_HEX_LEN+1];
-
-	hex[0] = '\0';
-	if ((h = hmaccomp(SHA256, bitstr, bitcnt, key, keylen)) != NULL) {
-		strcpy(hex, hmachex(h));
-		hmacclose(h);
-	}
-	return(hex);
-}
-
-char *hmac256base64(bitstr, bitcnt, key, keylen)
-unsigned char *bitstr;
-unsigned long bitcnt;
-unsigned char *key;
-unsigned int keylen;
-{
-	HMAC *h;
-	static char base64[SHA_MAX_BASE64_LEN+1];
-
-	base64[0] = '\0';
-	if ((h = hmaccomp(SHA256, bitstr, bitcnt, key, keylen)) != NULL) {
-		strcpy(base64, hmacbase64(h));
-		hmacclose(h);
-	}
-	return(base64);
-}
+HMAC_DIRECT(unsigned char *, hmac256digest, SHA256, SHA_FMT_RAW)
+HMAC_DIRECT(char *, hmac256hex, SHA256, SHA_FMT_HEX)
+HMAC_DIRECT(char *, hmac256base64, SHA256, SHA_FMT_BASE64)
 
 #ifdef SHA_384_512
 
-unsigned char *hmac384digest(bitstr, bitcnt, key, keylen)
-unsigned char *bitstr;
-unsigned long bitcnt;
-unsigned char *key;
-unsigned int keylen;
-{
-	HMAC *h;
-	static unsigned char digest[SHA384_DIGEST_BITS/8];
+HMAC_DIRECT(unsigned char *, hmac384digest, SHA384, SHA_FMT_RAW)
+HMAC_DIRECT(char *, hmac384hex, SHA384, SHA_FMT_HEX)
+HMAC_DIRECT(char *, hmac384base64, SHA384, SHA_FMT_BASE64)
 
-	memset(digest, 0, sizeof(digest));
-	if ((h = hmaccomp(SHA384, bitstr, bitcnt, key, keylen)) != NULL) {
-		memcpy(digest, hmacdigest(h), sizeof(digest));
-		hmacclose(h);
-	}
-	return(digest);
-}
-
-char *hmac384hex(bitstr, bitcnt, key, keylen)
-unsigned char *bitstr;
-unsigned long bitcnt;
-unsigned char *key;
-unsigned int keylen;
-{
-	HMAC *h;
-	static char hex[SHA_MAX_HEX_LEN+1];
-
-	hex[0] = '\0';
-	if ((h = hmaccomp(SHA384, bitstr, bitcnt, key, keylen)) != NULL) {
-		strcpy(hex, hmachex(h));
-		hmacclose(h);
-	}
-	return(hex);
-}
-
-char *hmac384base64(bitstr, bitcnt, key, keylen)
-unsigned char *bitstr;
-unsigned long bitcnt;
-unsigned char *key;
-unsigned int keylen;
-{
-	HMAC *h;
-	static char base64[SHA_MAX_BASE64_LEN+1];
-
-	base64[0] = '\0';
-	if ((h = hmaccomp(SHA384, bitstr, bitcnt, key, keylen)) != NULL) {
-		strcpy(base64, hmacbase64(h));
-		hmacclose(h);
-	}
-	return(base64);
-}
-
-unsigned char *hmac512digest(bitstr, bitcnt, key, keylen)
-unsigned char *bitstr;
-unsigned long bitcnt;
-unsigned char *key;
-unsigned int keylen;
-{
-	HMAC *h;
-	static unsigned char digest[SHA512_DIGEST_BITS/8];
-
-	memset(digest, 0, sizeof(digest));
-	if ((h = hmaccomp(SHA512, bitstr, bitcnt, key, keylen)) != NULL) {
-		memcpy(digest, hmacdigest(h), sizeof(digest));
-		hmacclose(h);
-	}
-	return(digest);
-}
-
-char *hmac512hex(bitstr, bitcnt, key, keylen)
-unsigned char *bitstr;
-unsigned long bitcnt;
-unsigned char *key;
-unsigned int keylen;
-{
-	HMAC *h;
-	static char hex[SHA_MAX_HEX_LEN+1];
-
-	hex[0] = '\0';
-	if ((h = hmaccomp(SHA512, bitstr, bitcnt, key, keylen)) != NULL) {
-		strcpy(hex, hmachex(h));
-		hmacclose(h);
-	}
-	return(hex);
-}
-
-char *hmac512base64(bitstr, bitcnt, key, keylen)
-unsigned char *bitstr;
-unsigned long bitcnt;
-unsigned char *key;
-unsigned int keylen;
-{
-	HMAC *h;
-	static char base64[SHA_MAX_BASE64_LEN+1];
-
-	base64[0] = '\0';
-	if ((h = hmaccomp(SHA512, bitstr, bitcnt, key, keylen)) != NULL) {
-		strcpy(base64, hmacbase64(h));
-		hmacclose(h);
-	}
-	return(base64);
-}
+HMAC_DIRECT(unsigned char *, hmac512digest, SHA512, SHA_FMT_RAW)
+HMAC_DIRECT(char *, hmac512hex, SHA512, SHA_FMT_HEX)
+HMAC_DIRECT(char *, hmac512base64, SHA512, SHA_FMT_BASE64)
 
 #endif	/* #ifdef SHA_384_512 */

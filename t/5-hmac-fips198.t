@@ -40,12 +40,7 @@ my @name = (
 
 for ($i = 0; $i < @vecs; $i++) {
 	is(
-		hmac1hex(
-			$vecs[$i], 
-			length($vecs[$i]) * 8,
-			$keys[$i], 
-			length($keys[$i])
-		),
+		hmac1hex($vecs[$i], $keys[$i]),
 		$hmac1rsp[$i],
 		$name[$i]
 	);

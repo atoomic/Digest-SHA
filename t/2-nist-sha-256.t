@@ -23,7 +23,7 @@ my @name = (
 
 for (my $i = 0; $i < @vecs; $i++) {
 	is(
-		sha256hex($vecs[$i], length($vecs[$i]) * 8),
+		sha256hex($vecs[$i]),
 		$sha256rsp[$i],
 		$name[$i]
 	);

@@ -46,16 +46,192 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
-our @EXPORT = qw(
-	
-);
+our @EXPORT = qw();
 
-our $VERSION = '2.0';
+our $VERSION = '2.1';
 
 require XSLoader;
 XSLoader::load('Digest::SHA', $VERSION);
 
 # Preloaded methods go here.
+
+sub shawrite {
+	my($data, $len, $state) = @_;
+
+	if (!defined($state)) {
+		$state = $len;
+		$len = 8 * length($data);
+	}
+	return(c_shawrite($data, $len, $state));
+}
+
+sub sha1hex {
+	my($data, $len) = @_;
+
+	$len = 8 * length($data) unless defined($len);
+	return(c_sha1hex($data, $len));
+}
+
+sub sha256hex {
+	my($data, $len) = @_;
+
+	$len = 8 * length($data) unless defined($len);
+	return(c_sha256hex($data, $len));
+}
+
+sub sha384hex {
+	my($data, $len) = @_;
+
+	$len = 8 * length($data) unless defined($len);
+	return(c_sha384hex($data, $len));
+}
+
+sub sha512hex {
+	my($data, $len) = @_;
+
+	$len = 8 * length($data) unless defined($len);
+	return(c_sha512hex($data, $len));
+}
+
+sub sha1base64 {
+	my($data, $len) = @_;
+
+	$len = 8 * length($data) unless defined($len);
+	return(c_sha1base64($data, $len));
+}
+
+sub sha256base64 {
+	my($data, $len) = @_;
+
+	$len = 8 * length($data) unless defined($len);
+	return(c_sha256base64($data, $len));
+}
+
+sub sha384base64 {
+	my($data, $len) = @_;
+
+	$len = 8 * length($data) unless defined($len);
+	return(c_sha384base64($data, $len));
+}
+
+sub sha512base64 {
+	my($data, $len) = @_;
+
+	$len = 8 * length($data) unless defined($len);
+	return(c_sha512base64($data, $len));
+}
+
+sub hmac1hex {
+	my($data, $dlen, $key, $klen) = @_;
+
+	if (!defined($key)) {
+		$key = $dlen;
+		$dlen = 8 * length($data);
+		$klen = length($key);
+	}
+	elsif (!defined($klen)) {
+		$klen = length($key);
+	}
+	return(c_hmac1hex($data, $dlen, $key, $klen));
+}
+
+sub hmac256hex {
+	my($data, $dlen, $key, $klen) = @_;
+
+	if (!defined($key)) {
+		$key = $dlen;
+		$dlen = 8 * length($data);
+		$klen = length($key);
+	}
+	elsif (!defined($klen)) {
+		$klen = length($key);
+	}
+	return(c_hmac256hex($data, $dlen, $key, $klen));
+}
+
+sub hmac384hex {
+	my($data, $dlen, $key, $klen) = @_;
+
+	if (!defined($key)) {
+		$key = $dlen;
+		$dlen = 8 * length($data);
+		$klen = length($key);
+	}
+	elsif (!defined($klen)) {
+		$klen = length($key);
+	}
+	return(c_hmac384hex($data, $dlen, $key, $klen));
+}
+
+sub hmac512hex {
+	my($data, $dlen, $key, $klen) = @_;
+
+	if (!defined($key)) {
+		$key = $dlen;
+		$dlen = 8 * length($data);
+		$klen = length($key);
+	}
+	elsif (!defined($klen)) {
+		$klen = length($key);
+	}
+	return(c_hmac512hex($data, $dlen, $key, $klen));
+}
+
+sub hmac1base64 {
+	my($data, $dlen, $key, $klen) = @_;
+
+	if (!defined($key)) {
+		$key = $dlen;
+		$dlen = 8 * length($data);
+		$klen = length($key);
+	}
+	elsif (!defined($klen)) {
+		$klen = length($key);
+	}
+	return(c_hmac1base64($data, $dlen, $key, $klen));
+}
+
+sub hmac256base64 {
+	my($data, $dlen, $key, $klen) = @_;
+
+	if (!defined($key)) {
+		$key = $dlen;
+		$dlen = 8 * length($data);
+		$klen = length($key);
+	}
+	elsif (!defined($klen)) {
+		$klen = length($key);
+	}
+	return(c_hmac256base64($data, $dlen, $key, $klen));
+}
+
+sub hmac384base64 {
+	my($data, $dlen, $key, $klen) = @_;
+
+	if (!defined($key)) {
+		$key = $dlen;
+		$dlen = 8 * length($data);
+		$klen = length($key);
+	}
+	elsif (!defined($klen)) {
+		$klen = length($key);
+	}
+	return(c_hmac384base64($data, $dlen, $key, $klen));
+}
+
+sub hmac512base64 {
+	my($data, $dlen, $key, $klen) = @_;
+
+	if (!defined($key)) {
+		$key = $dlen;
+		$dlen = 8 * length($data);
+		$klen = length($key);
+	}
+	elsif (!defined($klen)) {
+		$klen = length($key);
+	}
+	return(c_hmac512base64($data, $dlen, $key, $klen));
+}
 
 1;
 __END__
@@ -69,8 +245,11 @@ Digest::SHA - Perl extension for SHA-1/256/384/512 and HMAC-SHA
   # Direct computation
   use Digest::SHA qw(sha1hex sha1base64 sha256hex sha256base64 ... );
 
-  $digest = sha1hex($data, $data_length_in_bits);
-  $digest = sha1base64($data, $data_length_in_bits);
+  $digest = sha1hex($data);			# byte-oriented data
+  $digest = sha1hex($data, $data_len_in_bits);	# bit-oriented
+
+  $digest = sha1base64($data);
+  $digest = sha1base64($data, $data_len_in_bits);
   ...
 
   # Iterative computation
@@ -79,9 +258,8 @@ Digest::SHA - Perl extension for SHA-1/256/384/512 and HMAC-SHA
 
   $state = shaopen($alg);	# $alg = 1, 256, 384, or 512
 
-  shawrite($data, $data_length_in_bits, $state);
-  shawrite($moredata, $moredata_length_in_bits, $state);
-  shawrite($evenmoredata, $evenmoredata_length_in_bits, $state);
+  shawrite($data, [ $data_len_in_bits, ] $state);
+  shawrite($moredata, [ $moredata_len_in_bits, ] $state);
 
   shafinish($state);
 
@@ -93,8 +271,8 @@ Digest::SHA - Perl extension for SHA-1/256/384/512 and HMAC-SHA
   # HMAC-SHA keyed hash
   use Digest::SHA qw(hmac1hex hmac1base64 hmac256hex ... );
 
-  $digest = hmac1hex($data, $data_length_in_bits, $key, $key_length);
-  $digest = hmac1base64($data, $data_length_in_bits, $key, $key_length);
+  $digest = hmac1hex($data, [ $data_len_in_bits, ] $key);
+  $digest = hmac1base64($data, [ $data_len_in_bits, ] $key);
   ...
 
 =head1 ABSTRACT
@@ -121,11 +299,11 @@ SHA-256 digest of "hello world" using the two different methods:
 	my $data = "hello world";
 	my @frags = split(//, $data);
 
-	my $method1 = sha256hex($data, 8*length($data));
+	my $method1 = sha256hex($data);
 
 	my $state = shaopen(256);
 	for (@frags) {
-		shawrite($_, 8*length($_), $state);
+		shawrite($_, $state);
 	}
 	shafinish($state);
 	my $method2 = shahex($state);
@@ -133,30 +311,32 @@ SHA-256 digest of "hello world" using the two different methods:
 	print $method1 eq $method2 ?
 		"whew!\n" : "career in aluminum siding\n";
 
-B<PLEASE NOTE>: the second arguments of "sha256hex()" and "shawrite()"
-are B<bit counts>, not byte counts.  That's why it's necessary to
-multiply by 8.
+B<PLEASE NOTE>: the optional I<$data_len_in_bits> argument of
+I<sha256hex()> and I<shawrite()> is omitted in the above example
+since the input data is byte-oriented.
 
 Computing the digest value of a bit-string is also easy.  Let's
-say the input string is 446 bits, consisting of the fragment "110"
-repeated 148 times, followed by the fragment "11".  Here's how to
+say the input string is 446 bits, consisting of the fragment I<110>
+repeated 148 times, followed by the fragment I<11>.  Here's how to
 calculate its SHA-1 digest:
 
 	$digest = sha1hex(pack("B*", ("110"x148)."11"), 446);
 
-Finally, when calculating keyed-hashes using the HMAC-SHA functions,
-it's important to note that the data length is in B<bits>, whereas
-the key length is in B<bytes>.  This irregularity is due to the
-way SHA and HMAC define their parameters: SHA allows general
-bit-string data inputs, whereas HMAC recognizes only byte-oriented
-keys.
+When calculating keyed-hashes using the HMAC-SHA functions, it's
+important to note that the optional data length argument is in
+B<bits>.  If omitted, the corresponding data is assumed to be
+byte-oriented.
 
-So, to compute the HMAC-SHA-1 digest of "hello world" using the
-same data as the key, the code would go something like this:
+So, to compute the HMAC-SHA-1 digest of I<burpleson> using a suitable
+key, the code would go something like this:
 
-	$data = "hello world";
-	$len = length($data);
-        $digest = hmac1hex($data, 8*$len, $data, $len);
+	$data = "burpleson";
+	$key = "poe";
+	$digest = hmac1hex($data, $key);
+
+or, if you're paid by the character:
+
+	$digest = hmac1hex($data, 8 * length($data), $key);
 
 =head1 EXPORT
 
@@ -173,43 +353,43 @@ require 64-bit operations.
 
 =item I<Direct Functions>
 
-=item B<sha1hex($data, $data_length_in_bits)>
+=item B<sha1hex($data [ , $data_len_in_bits ] )>
 
 Returns the SHA-1 digest of $data, encoded as a 40-character
 hexadecimal string.
 
-=item B<sha1base64($data, $data_length_in_bits)>
+=item B<sha1base64($data [ , $data_len_in_bits ] )>
 
 Returns the SHA-1 digest of $data, encoded as a Base64 string.
 
-=item B<sha256hex($data, $data_length_in_bits)>
+=item B<sha256hex($data [ , $data_len_in_bits ] )>
 
 Returns the SHA-256 digest of $data, encoded as a 64-character
 hexadecimal string.
 
-=item B<sha256base64($data, $data_length_in_bits)>
+=item B<sha256base64($data [ , $data_len_in_bits ] )>
 
 Returns the SHA-256 digest of $data, encoded as a Base64 string.
 
-=item B<sha384hex($data, $data_length_in_bits)>
+=item B<sha384hex($data [ , $data_len_in_bits ] )>
 
 Returns the SHA-384 digest of $data, encoded as a 96-character
 hexadecimal string.  This function will be undefined if your C
 compiler lacks support for 64-bit integral types.
 
-=item B<sha384base64($data, $data_length_in_bits)>
+=item B<sha384base64($data [ , $data_len_in_bits ] )>
 
 Returns the SHA-384 digest of $data, encoded as a Base64 string.
 This function will be undefined if your C compiler lacks support
 for 64-bit integral types.
 
-=item B<sha512hex($data, $data_length_in_bits)>
+=item B<sha512hex($data [ , $data_len_in_bits ] )>
 
 Returns the SHA-512 digest of $data, encoded as a 128-character
 hexadecimal string.  This function will be undefined if your C
 compiler lacks support for 64-bit integral types.
 
-=item B<sha512base64($data, $data_length_in_bits)>
+=item B<sha512base64($data [ , $data_len_in_bits ] )>
 
 Returns the SHA-512 digest of $data, encoded as a Base64 string.
 This function will be undefined if your C compiler lacks support
@@ -226,11 +406,11 @@ $alg = 256 corresponds to SHA-256).  This function will return a
 NULL value for $alg = 384 or $alg = 512 if your C compiler lacks
 support for 64-bit integral types.
 
-=item B<shawrite($data, $data_length_in_bits, $state)>
+=item B<shawrite($data, [ $data_len_in_bits, ] $state)>
 
 Updates the SHA state by feeding in $data.  The caller invokes this
 function repeatedly until all data has been processed.  The value
-of $data_length_in_bits B<must not> exceed 2^32-1 for each individual
+of $data_len_in_bits B<must not> exceed 2^32-1 for each individual
 call of "shawrite()".  However, per the NIST standard, the total
 accumulated length of the data stream may be as large as 2^64-1
 for SHA-1 and SHA-256, or 2^128-1 for SHA-384 and SHA-512.
@@ -279,45 +459,45 @@ Frees all memory allocated during the previous "shaopen()",
 
 =item I<HMAC-SHA Functions>
 
-=item B<hmac1hex($data, $data_length_in_bits, $key, $key_length)>
+=item B<hmac1hex($data, [ $data_len_in_bits, ] $key)>
 
 Returns the HMAC-SHA-1 digest of $data/$key, encoded as a 40-character
 hexadecimal string.
 
-=item B<hmac1base64($data, $data_length_in_bits, $key, $key_length)>
+=item B<hmac1base64($data, [ $data_len_in_bits, ] $key)>
 
 Returns the HMAC-SHA-1 digest of $data/$key, encoded as a Base64
 string.
 
-=item B<hmac256hex($data, $data_length_in_bits, $key, $key_length)>
+=item B<hmac256hex($data, [ $data_len_in_bits, ] $key)>
 
 Returns the HMAC-SHA-256 digest of $data/$key, encoded as a
 64-character hexadecimal string.
 
-=item B<hmac256base64($data, $data_length_in_bits, $key, $key_length)>
+=item B<hmac256base64($data, [ $data_len_in_bits, ] $key)>
 
 Returns the HMAC-SHA-256 digest of $data/$key, encoded as a Base64
 string.
 
-=item B<hmac384hex($data, $data_length_in_bits, $key, $key_length)>
+=item B<hmac384hex($data, [ $data_len_in_bits, ] $key)>
 
 Returns the HMAC-SHA-384 digest of $data/$key, encoded as a
 96-character hexadecimal string.  This function will be undefined
 if your C compiler lacks support for 64-bit integral types.
 
-=item B<hmac384base64($data, $data_length_in_bits, $key, $key_length)>
+=item B<hmac384base64($data, [ $data_len_in_bits, ] $key)>
 
 Returns the HMAC-SHA-384 digest of $data/$key, encoded as a Base64
 string.  This function will be undefined if your C compiler lacks
 support for 64-bit integral types.
 
-=item B<hmac512hex($data, $data_length_in_bits, $key, $key_length)>
+=item B<hmac512hex($data, [ $data_len_in_bits, ] $key)>
 
 Returns the HMAC-SHA-512 digest of $data/$key, encoded as a
 128-character hexadecimal string.  This function will be undefined
 if your C compiler lacks support for 64-bit integral types.
 
-=item B<hmac512base64($data, $data_length_in_bits, $key, $key_length)>
+=item B<hmac512base64($data, [ $data_len_in_bits, ] $key)>
 
 Returns the HMAC-SHA-512 digest of $data/$key, encoded as a Base64
 string.  This function will be undefined if your C compiler lacks
@@ -340,6 +520,9 @@ http://csrc.nist.gov/publications/fips/fips198/fips-198a.pdf
 =head1 AUTHOR
 
 Mark Shelor, E<lt>mshelor@comcast.netE<gt>
+
+The author is very grateful to the Perl community, in particular
+to Jeffrey Friedl, for their valuable comments and suggestions.
 
 =head1 COPYRIGHT AND LICENSE
 

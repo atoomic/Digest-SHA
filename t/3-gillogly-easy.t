@@ -1,4 +1,4 @@
-# Test against Jim Gillogly's SHA-1 Bitwise Vectors (Short)
+# Test against short bitwise vectors from Jim Gillogly and Francois Grieu
 #
 # http://www.chiark.greenend.org.uk/pipermail/ukcrypto/1999-February/003538.html
 
@@ -7,7 +7,7 @@ use strict;
 use integer;
 use Digest::SHA qw(sha1hex);
 
-#	SHA-1 Test Vectors from Jim Gillogly (jim@acm.org)
+#	SHA-1 Test Vectors
 #
 #	In the following we use the notation bitstring#n to mean a bitstring
 #	repeated n (in decimal) times, and we use | for concatenation.

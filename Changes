@@ -28,3 +28,12 @@ Revision history for Perl extension Digest::SHA.
 2.0   Sat Nov  1 03:55:36 MST 2003
 	- added functions for HMAC-SHA-1/256/384/512 (FIPS PUB 198)
 	- shadump/shaload files now compatible between 32/64-bit machines
+
+2.1   Sun Nov  9 03:28:04 MST 2003
+	- simplified data input routines
+		-- length argument now optional for byte data
+			(special thanks to Jeffrey Friedl for this idea)
+		-- interface still compatible with earlier versions
+			-- changes will not affect existing client code
+	- streamlined underlying C code for easier maintenance
+	- provided additional tests for persistent data

@@ -1,4 +1,4 @@
-Digest/SHA version 2.0
+Digest/SHA version 2.1
 ======================
 
 The Digest::SHA module provides a Perl interface to all varieties
@@ -28,9 +28,9 @@ The tests subdirectory (t/*.t) contains an extensive set of SHA
 vectors compiled from various sources.  Of particular interest are
 the NIST vectors, which examine a large variety of bit-strings and
 byte-strings (see the "t/nist/COPYRIGHT" file for details).  Also
-useful are the bit-vectors compiled by Jim Gillogly, which check
-the behavior of implementations for input strings that exceed 2^32
-bits in length.
+useful are the bit-vectors supplied by Jim Gillogly and Francois
+Grieu, which check the behavior of implementations for input strings
+that exceed 2^32 bits in length.
 
 INSTALLATION
 

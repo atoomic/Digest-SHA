@@ -21,14 +21,14 @@ my @name = (
 	"SHA-384('a' x 1000000)",
 );
 
-eval { sha384hex("", 0) };
+eval { sha384hex("") };
 my $skip = $@;
 
 for (my $i = 0; $i < @vecs; $i++) {
 	SKIP: {
 		skip("64-bit operations not supported", 1) if $skip;
 		is(
-			sha384hex($vecs[$i], length($vecs[$i])*8),
+			sha384hex($vecs[$i]),
 			$sha384rsp[$i],
 			$name[$i]
 		);
