@@ -19,5 +19,6 @@ WriteMakefile(
 	'LIBS'		=> [''],
 	'DEFINE'	=> $define,
 	'INC'		=> '-I.',
-	'NO_META'	=> 1
+	'NO_META'	=> 1,
+	'EXE_FILES'	=> [ 'shasum' ]
 );
