@@ -1,5 +1,9 @@
 Revision history for Perl extension Digest::SHA.
 
+4.1.0 Thu Dec 25 00:58:00 MST 2003
+	- repaired "nist-vectors" test scripts for MSWin32 portability
+		-- use binmode for data files
+
 4.0.9 Wed Dec 24 02:58:22 MST 2003
 	- use canonical file specs in test scripts
 		-- enhances portability across different OSes

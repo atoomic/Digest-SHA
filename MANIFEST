@@ -36,10 +36,10 @@ t/gillogly/state.011
 t/gillogly/state.110
 t/nist/COPYRIGHT
 t/nist/Readme.txt
-t/nist/bithash.sha
-t/nist/bitmsg.sha
-t/nist/bytehash.sha
-t/nist/bytemsg.sha
+t/nist/bit-hashes.sha1
+t/nist/bit-messages.sha1
+t/nist/byte-hashes.sha1
+t/nist/byte-messages.sha1
 t/state/state.1
 t/state/state.256
 t/state/state.384

@@ -2,7 +2,7 @@
 #
 #	ref: http://csrc.nist.gov/cryptval/shs.html
 #
-# Uses files "nist/bytemsg.sha" and "nist/bytehash.sha"
+# Uses files "nist/byte-messages.sha1" and "nist/byte-hashes.sha1"
 
 use strict;
 use integer;
@@ -23,9 +23,10 @@ my $file;
 my $datafile;
 
 BEGIN {
-	$file = dirname($0) . "/nist/bytemsg.sha";
+	$file = dirname($0) . "/nist/byte-messages.sha1";
 	$datafile = File::Spec->canonpath($file);
 	open(F, $datafile);
+	binmode(F);
 	while (<F>) {
 		last if (/Type 3/);
 		$_ = substr($_, 0, length($_) - 2);
@@ -46,9 +47,10 @@ BEGIN {
 	}
 	close(F);
 
-	$file = dirname($0) . "/nist/bytehash.sha";
+	$file = dirname($0) . "/nist/byte-hashes.sha1";
 	$datafile = File::Spec->canonpath($file);
 	open(F, $datafile);
+	binmode(F);
 	while (<F>) {
 		$_ = substr($_, 0, length($_) - 2);
 		next unless (/^[0-9A-F]/);
