@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2004 Mark Shelor, All Rights Reserved
  *
- * Version: 4.3.2
- * Wed Apr 28 03:56:00 MST 2004
+ * Version: 4.3.3
+ * Wed May  5 00:30:40 MST 2004
  *
  */
 
@@ -587,8 +587,8 @@ char **pprest;
 #define TYPE_32 3		/* 32-bit value */
 #define TYPE_64 4		/* 64-bit value */
 
-/* loadval: checks next line in dump file against tag, and loads values */
-static int loadval(f, tag, type, pval, rep, base)
+/* loadvals: checks next line in dump file against tag, and loads values */
+static int loadvals(f, tag, type, pval, rep, base)
 SHA_IO *f;
 char *tag;
 int type;
@@ -601,6 +601,7 @@ int base;
 	unsigned char *pc = (unsigned char *) pval;
 	unsigned int *pi = (unsigned int *) pval;
 	W32 *p32 = (W32 *) pval;
+	W64 *p64 = (W64 *) pval;
 	char line[1<<9];
 
 	while ((p = fgetstr(line, sizeof(line), f)) != NULL) {
@@ -620,7 +621,7 @@ int base;
 		else if (type == TYPE_32)
 			*p32++ = (W32) strtoul(p, NULL, base);
 		else if (type == TYPE_64)
-			load64(pval, p);
+			*p64++ = (W64) strto64(p);
 		else
 			return(0);
 	}
@@ -651,23 +652,23 @@ char *file;
 		f = SHA_IO_stdin();
 	else if ((f = SHA_IO_open(file, "r")) == NULL)
 		return(NULL);
-	if (!loadval(f, "alg", TYPE_I, &alg, 1, 10))
+	if (!loadvals(f, "alg", TYPE_I, &alg, 1, 10))
 		return(closeall(f, NULL));
 	if ((s = shaopen(alg)) == NULL)
 		return(closeall(f, NULL));
-	if (!loadval(f, "H", alg<=SHA256 ? TYPE_32 : TYPE_64, s->H, 8, 16))
+	if (!loadvals(f, "H", alg<=SHA256 ? TYPE_32 : TYPE_64, s->H, 8, 16))
 		return(closeall(f, s));
-	if (!loadval(f, "block", TYPE_C, s->block, s->blocksize>>3, 16))
+	if (!loadvals(f, "block", TYPE_C, s->block, s->blocksize>>3, 16))
 		return(closeall(f, s));
-	if (!loadval(f, "blockcnt", TYPE_I, &s->blockcnt, 1, 10))
+	if (!loadvals(f, "blockcnt", TYPE_I, &s->blockcnt, 1, 10))
 		return(closeall(f, s));
-	if (!loadval(f, "lenhh", TYPE_32, &s->lenhh, 1, 10))
+	if (!loadvals(f, "lenhh", TYPE_32, &s->lenhh, 1, 10))
 		return(closeall(f, s));
-	if (!loadval(f, "lenhl", TYPE_32, &s->lenhl, 1, 10))
+	if (!loadvals(f, "lenhl", TYPE_32, &s->lenhl, 1, 10))
 		return(closeall(f, s));
-	if (!loadval(f, "lenlh", TYPE_32, &s->lenlh, 1, 10))
+	if (!loadvals(f, "lenlh", TYPE_32, &s->lenlh, 1, 10))
 		return(closeall(f, s));
-	if (!loadval(f, "lenll", TYPE_32, &s->lenll, 1, 10))
+	if (!loadvals(f, "lenll", TYPE_32, &s->lenll, 1, 10))
 		return(closeall(f, s));
 	if (f != SHA_IO_stdin())
 		SHA_IO_close(f);

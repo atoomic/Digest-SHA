@@ -1,5 +1,10 @@
 Revision history for Perl extension Digest::SHA.
 
+4.3.3 Wed May  5 00:30:40 MST 2004
+	- fixed bug in "strto64()" function
+		-- caused problems in state files with CR/LF pairs
+		-- thanks to Martin Thurn for testing support
+
 4.3.2 Wed Apr 28 03:56:00 MST 2004
 	- added Makefile.PL options
 		-- thread-safety: -t

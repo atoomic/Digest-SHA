@@ -8,7 +8,8 @@
  */
 
 #define sha_384_512		0
-#define load64(pval, p)		return(0)
+#define W64			unsigned long
+#define strto64(p)		0
 #define digcpy64(s)		return
 #define sha512			NULL
 #define H0384			H01

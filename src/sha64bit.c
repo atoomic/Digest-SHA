@@ -1,7 +1,8 @@
 #ifdef SHA_384_512
 
 #undef sha_384_512
-#undef load64
+#undef W64
+#undef strto64
 #undef digcpy64
 #undef sha512
 #undef H0384
@@ -13,12 +14,6 @@
 #define C64		SHA64_CONST
 #define SR64		SHA64_SHR
 #define SL64		SHA64_SHL
-
-#define load64(pval, p) 				\
-	do {						\
-		*((W64 *) pval) = strto64(p);		\
-		pval = (W64 *) pval + 1;		\
-	} while (0)
 
 #define ROTRQ(x, n)	(SR64(x, n) | SL64(x, 64-(n)))
 #define SIGMAQ0(x)	(ROTRQ(x, 28) ^ ROTRQ(x, 34) ^ ROTRQ(x, 39))
@@ -89,7 +84,7 @@ char *s;
 	char str[2] = {0, 0};
 	W64 u = C64(0);
 
-	while ((str[0] = *s++) != '\0')
+	while (isxdigit(str[0] = *s++))
 		u = (u << 4) + strtoul(str, NULL, 16);
 	return(u);
 }

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use integer;
 
-our $VERSION = '4.3.2';
+our $VERSION = '4.3.3';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -493,8 +493,9 @@ http://csrc.nist.gov/publications/fips/fips198/fips-198a.pdf
 Mark Shelor, E<lt>mshelor@comcast.netE<gt>
 
 The author is particularly grateful to Gisle Ass, Julius Duque,
-Jeffrey Friedl, Robert Gilmour, Brian Gladman, Alex Muntada, and
-Chris Skiscim for their valuable comments and suggestions.
+Jeffrey Friedl, Robert Gilmour, Brian Gladman, Alex Muntada, Chris
+Skiscim, and Martin Thurn for their valuable comments, suggestions,
+and technical support.
 
 =head1 COPYRIGHT AND LICENSE
 
