@@ -1,20 +1,6 @@
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl 1.t'
-
-#########################
-
-# change 'tests => 1' to 'tests => last_test_to_print';
-
 use Test::More qw(no_plan);
-
-#########################
-
-# Insert your test code below, the Test::More module is use()ed here so read
-# its man page ( perldoc Test::More ) for help writing this test script.
-
 use strict;
 use integer;
-
 use Digest::SHA qw(sha384hex);
 
 my @vecs = (
@@ -35,14 +21,14 @@ my @name = (
 	"SHA-384('a' x 1000000)",
 );
 
-my $hex;
+eval { sha384hex("", 0) };
+my $skip = $@;
 
 for (my $i = 0; $i < @vecs; $i++) {
 	SKIP: {
-		eval { $hex = sha384hex($vecs[$i], length($vecs[$i])*8) };
-		skip("64-bit operations not supported", 1) if $@;
+		skip("64-bit operations not supported", 1) if $skip;
 		is(
-			$hex,
+			sha384hex($vecs[$i], length($vecs[$i])*8),
 			$sha384rsp[$i],
 			$name[$i]
 		);

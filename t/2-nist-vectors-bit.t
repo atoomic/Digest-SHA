@@ -1,7 +1,8 @@
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl 1.t'
-
-######################### initialize test data ######################### 
+# Test against SHA-1 Sample Vectors from NIST
+#
+#	ref: http://csrc.nist.gov/cryptval/shs.html
+#
+# Uses files "nist/bit-messages.sha1" and "nist/bit-hashes.sha1"
 
 use strict;
 use integer;
@@ -56,16 +57,7 @@ BEGIN {
 	close(F);
 }
 
-# change 'tests => 1' to 'tests => last_test_to_print';
-
 use Test::More tests => scalar(@msgs);
-
-#########################
-
-# Insert your test code below, the Test::More module is use()ed here so read
-# its man page ( perldoc Test::More ) for help writing this test script.
-
-
 use Digest::SHA qw(sha1hex);
 
 for (my $i = 0; $i < @msgs; $i++) {

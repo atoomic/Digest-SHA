@@ -40,7 +40,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.9';
+our $VERSION = '1.0';
 
 require XSLoader;
 XSLoader::load('Digest::SHA', $VERSION);
@@ -52,17 +52,16 @@ __END__
 
 =head1 NAME
 
-Digest::SHA - Perl extension for Bitwise SHA-1/256/384/512
+Digest::SHA - Perl extension for SHA-1/256/384/512
 
 =head1 SYNOPSIS
 
   # Direct computation
-  use Digest::SHA qw(sha1hex sha1base64 sha256hex sha256base64
-		sha384hex sha384base64 sha512hex sha512base64);
+  use Digest::SHA qw(sha1hex sha1base64 sha256hex sha256base64 ... );
 
   $digest = sha1hex($data, $data_length_in_bits);
   $digest = sha1base64($data, $data_length_in_bits);
-
+  ...
 
   # Iterative computation
   use Digest::SHA qw(shaopen shawrite shafinish shaclose
@@ -94,7 +93,7 @@ as well as byte-strings.  The underlying code is written in C.
 Digest::SHA offers two ways to calculate digests: all-at-once, or
 in stages.  The first is simpler, and often requires only one line
 of Perl.  The second is more general, allowing input to be processed
-iteratively in chunks.
+in chunks.
 
 To illustrate the difference, the following program calculates the
 SHA-256 digest of "hello world" using the two different methods:
@@ -102,28 +101,28 @@ SHA-256 digest of "hello world" using the two different methods:
 	use Digest::SHA ':all';
 
 	my $data = "hello world";
-	my @frags = ("hello", " ", "world");
+	my @frags = split(//, $data);
 
-	my $all_at_once = sha256hex($data, 8*length($data));
+	my $method1 = sha256hex($data, 8*length($data));
 
 	my $state = shaopen(256);
 	for (@frags) {
 		shawrite($_, 8*length($_), $state);
 	}
 	shafinish($state);
-	my $in_stages = shahex($state);
+	my $method2 = shahex($state);
 
-	print $all_at_once eq $in_stages ?
+	print $method1 eq $method2 ?
 		"whew!\n" : "career in aluminum siding\n";
 
-Note that the second argument of "shahex()" and "sha256hex()" is
-multiplied by 8.  This is because the second argument reflects a
-I<bit count>, not a byte count.
+B<PLEASE NOTE>: the second arguments of "sha256hex()" and "shawrite()"
+are B<bit counts>, not byte counts.  That's why it's necessary to
+multiply by 8.
 
-Calculating the digest value of a bit-string is equally straightforward.
-Let's say the input string is 446 bits, consisting of the fragment
-"110" repeated 148 times, followed by the fragment "11".  Here's
-how to calculate its SHA-1 digest:
+Computing the digest value of a bit-string is also easy.  Let's
+say the input string is 446 bits, consisting of the fragment "110"
+repeated 148 times, followed by the fragment "11".  Here's how to
+calculate its SHA-1 digest:
 
 	$digest = sha1hex(pack("B*", ("110"x148)."11"), 446);
 
@@ -140,53 +139,53 @@ all of these functions will be available for use.  If it doesn't,
 you won't have access to the SHA-384 and SHA-512 routines, which
 require 64-bit operations.
 
-=item B<Direct Functions>
+=item I<Direct Functions>
 
-=item I<sha1hex($data, $data_length_in_bits)>
+=item B<sha1hex($data, $data_length_in_bits)>
 
 Returns the SHA-1 digest of $data, encoded as a 40-character
 hexadecimal string.
 
-=item I<sha1base64($data, $data_length_in_bits)>
+=item B<sha1base64($data, $data_length_in_bits)>
 
 Returns the SHA-1 digest of $data, encoded as a Base64 string.
 
-=item I<sha256hex($data, $data_length_in_bits)>
+=item B<sha256hex($data, $data_length_in_bits)>
 
 Returns the SHA-256 digest of $data, encoded as a 64-character
 hexadecimal string.
 
-=item I<sha256base64($data, $data_length_in_bits)>
+=item B<sha256base64($data, $data_length_in_bits)>
 
 Returns the SHA-256 digest of $data, encoded as a Base64 string.
 
-=item I<sha384hex($data, $data_length_in_bits)>
+=item B<sha384hex($data, $data_length_in_bits)>
 
 Returns the SHA-384 digest of $data, encoded as a 96-character
 hexadecimal string.  This function will be undefined if your C
 compiler lacks support for 64-bit integral types.
 
-=item I<sha384base64($data, $data_length_in_bits)>
+=item B<sha384base64($data, $data_length_in_bits)>
 
 Returns the SHA-384 digest of $data, encoded as a Base64 string.
 This function will be undefined if your C compiler lacks support
 for 64-bit integral types.
 
-=item I<sha512hex($data, $data_length_in_bits)>
+=item B<sha512hex($data, $data_length_in_bits)>
 
 Returns the SHA-512 digest of $data, encoded as a 128-character
 hexadecimal string.  This function will be undefined if your C
 compiler lacks support for 64-bit integral types.
 
-=item I<sha512base64($data, $data_length_in_bits)>
+=item B<sha512base64($data, $data_length_in_bits)>
 
 Returns the SHA-512 digest of $data, encoded as a Base64 string.
 This function will be undefined if your C compiler lacks support
 for 64-bit integral types.
 
-=item B<Iterative Functions>
+=item I<Iterative Functions>
 
-=item I<shaopen($alg)>
+=item B<shaopen($alg)>
 
 Begins the iterative calculation of a SHA digest, returning a state
 variable for use by subsequent iterative "sha...()" functions.
@@ -195,16 +194,16 @@ $alg = 256 corresponds to SHA-256).  This function will return a
 NULL value for $alg = 384 or $alg = 512 if your C compiler lacks
 support for 64-bit integral types.
 
-=item I<shawrite($data, $data_length_in_bits, $state)>
+=item B<shawrite($data, $data_length_in_bits, $state)>
 
-Updates the SHA state by feeding in $data.  This function is called
-repeatedly until all data has been processed.  The value of
-$data_length_in_bits B<must not> exceed 2^32-1 for each individual
+Updates the SHA state by feeding in $data.  The caller invokes this
+function repeatedly until all data has been processed.  The value
+of $data_length_in_bits B<must not> exceed 2^32-1 for each individual
 call of "shawrite()".  However, per the NIST standard, the total
 accumulated length of the data stream may be as large as 2^64-1
 for SHA-1 and SHA-256, or 2^128-1 for SHA-384 and SHA-512.
 
-=item I<shafinish($state)>
+=item B<shafinish($state)>
 
 Finalizes the SHA calculation by padding and transforming the final
 block(s), and updating the state.  It is necessary to call this
@@ -213,34 +212,36 @@ function before attempting to access the final digest value through
 be useful to folks who are interested in examining SHA's internal
 state at various stages of the digest computation.
 
-=item I<shahex($state)>
+=item B<shahex($state)>
 
 Returns the digest value, encoded as a hexadecimal string.
 
-=item I<shabase64($state)>
+=item B<shabase64($state)>
 
 Returns the digest value, encoded as a Base64 string.
 
-=item I<shadup($state)>
+=item B<shadup($state)>
 
-Makes a copy of the current state, and returns a handle to that
-copy.  This is useful in speeding up SHA calculations for data sets
-that share identical headers.  See the "gillogly.hard" script in
-the "t/" subdirectory for an example of how "shadup()" can improve
-performance for such data sets.
+Returns a duplicate copy of the current state.  This helps to speed
+up SHA calculations for data sets that share identical headers.
+See the "gillogly-hard" script in the "t/" subdirectory for an
+example of how "shadup()" can improve performance for such data
+sets.
 
-=item I<shaclose($state)>
+=item B<shaclose($state)>
 
-Frees all memory associated the SHA calculation initiated with the
-corresponding "shaopen()" call.
+Frees all memory associated with the SHA calculation initiated in
+the corresponding "shaopen()" call.
+
+=back
 
 =head1 SEE ALSO
 
-Digest, Digest::SHA1
+L<Digest>, L<Digest::SHA1>
 
 The Secure Hash Standard (FIPS PUB 180-2) can be found at:
 
-	http://csrc.nist.gov/publications/fips/fips180-2/fips180-2.pdf
+http://csrc.nist.gov/publications/fips/fips180-2/fips180-2.pdf
 
 =head1 AUTHOR
 

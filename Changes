@@ -7,3 +7,9 @@ Revision history for Perl extension Digest::SHA.
 0.9   Thu Oct  9 20:43:54 MST 2003
 	- version updated to reflect portability check and passing
 		of all tests (1401)
+
+1.0   Sat Oct 18 17:35:07 MST 2003
+	- documentation fixes
+	- code cleanup: no more compiler warnings from gcc -Wall
+	- added code to allow reading of intermediate digest state
+		-- shahex() prior to shafinish() returns current state

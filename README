@@ -1,7 +1,7 @@
-Digest/SHA version 0.9
+Digest/SHA version 1.0
 ======================
 
-The Digest::SHA module provides a Perl interface to all variants
+The Digest::SHA module provides a Perl interface to all varieties
 of the Secure Hash Algorithm specified in the current NIST Secure
 Hash Standard (FIPS PUB 180-2).  In other words, the module supports
 SHA-1, SHA-256, SHA-384, and SHA-512.  The routines underlying
@@ -9,7 +9,7 @@ Digest::SHA are written in C for speed.
 
 Whereas most message digest packages are restricted to byte-oriented
 data, the full SHA standard calls for bit-oriented inputs as well.
-The Digest::SHA module addresses both types of input, and allows
+The Digest::SHA module accepts both types of input, and allows
 digest calculations to be performed directly, or iteratively in
 stages.
 
@@ -26,7 +26,7 @@ optimizations.
 The tests subdirectory (t/*.t) contains an extensive set of SHA
 vectors compiled from various sources.  Of particular interest are
 the NIST vectors, which examine a large variety of bit-strings and
-byte-strings.  Also useful are the bit-vectors specified by Jim
+byte-strings.  Also useful are the bit-vectors provided by Jim
 Gillogly, which check the behavior of implementations for large
 inputs (i.e. when input strings exceed length 2^32).
 

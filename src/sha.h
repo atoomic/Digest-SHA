@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 0.9
- * Wed Oct  8 21:49:37 MST 2003
+ * Version: 1.0
+ * Sun Oct 19 23:24:31 MST 2003
  *
  */
 

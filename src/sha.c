@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 0.9
- * Wed Oct  8 21:49:37 MST 2003
+ * Version: 1.0
+ * Sun Oct 19 23:24:31 MST 2003
  *
  */
 
@@ -16,13 +16,13 @@
 #include "sha.h"
 
 #define SHR(x, n)	( (x) >> (n) )
-#define ROTR(x, n)	( ( (x) >> (n) ) | ( (x) << 32 - (n) ) )
-#define ROTL(x, n)	( ( (x) << (n) ) | ( (x) >> 32 - (n) ) )
+#define ROTR(x, n)	( ( (x) >> (n) ) | ( (x) << (32 - (n)) ) )
+#define ROTL(x, n)	( ( (x) << (n) ) | ( (x) >> (32 - (n)) ) )
 
 
 #ifdef SHA_384_512
 
-#define ROTRQ(x, n)	( ( (x) >> (n) ) | ( (x) << 64 - (n) ) )
+#define ROTRQ(x, n)	( ( (x) >> (n) ) | ( (x) << (64 - (n)) ) )
 
 #endif	/* #ifdef SHA_384_512 */
 
@@ -192,8 +192,10 @@ static unsigned long long HQ0512[8] =
 #endif	/* #ifdef SHA_384_512 */
 
 
-#define SETBIT(str, pos)	str[pos >> 3] |=  (0x01 << (7 - pos % 8))
-#define CLRBIT(str, pos)	str[pos >> 3] &= ~(0x01 << (7 - pos % 8))
+#define SETBIT(str, pos)	str[(pos) >> 3] |=  (0x01 << (7 - (pos) % 8))
+#define CLRBIT(str, pos)	str[(pos) >> 3] &= ~(0x01 << (7 - (pos) % 8))
+#define BYTECNT(bitcnt)		(1 + (((bitcnt) - 1) >> 3))
+
 
 static void ul2mem(mem, ul)		/* endian-neutral */
 unsigned char *mem;
@@ -522,7 +524,7 @@ SHA *s;
 		bitcnt -= s->blocksize;
 	}
 	if (bitcnt > 0) {
-		memcpy(s->block, bitstr, 1+(bitcnt-1>>3));
+		memcpy(s->block, bitstr, BYTECNT(bitcnt));
 		s->blockcnt = bitcnt;
 	}
 	return(savecnt);
@@ -547,7 +549,7 @@ SHA *s;
 		shadirect(bitstr, bitcnt, s);
 	}
 	else {
-		memcpy(s->block+offset, bitstr, 1+(bitcnt-1>>3));
+		memcpy(s->block+offset, bitstr, BYTECNT(bitcnt));
 		s->blockcnt += bitcnt;
 	}
 	return(savecnt);
@@ -564,12 +566,12 @@ SHA *s;
 	static unsigned char buf[4096];
 	unsigned int bufsize = sizeof(buf);
 	unsigned long bufbits = bufsize << 3;
-	unsigned int numbytes = 1 + (bitcnt - 1 >> 3);
+	unsigned int numbytes = BYTECNT(bitcnt);
 	unsigned long savecnt = bitcnt;
 
 	gap = 8 - s->blockcnt % 8;
 	s->block[s->blockcnt>>3] &= ~0 << gap;
-	s->block[s->blockcnt>>3] |= *bitstr >> 8 - gap;
+	s->block[s->blockcnt>>3] |= *bitstr >> (8 - gap);
 	s->blockcnt += bitcnt < gap ? bitcnt : gap;
 	if (bitcnt < gap)
 		return(savecnt);
@@ -579,13 +581,13 @@ SHA *s;
 		return(savecnt);
 	while (numbytes > bufsize) {
 		for (i = 0; i < bufsize; i++)
-			buf[i] = bitstr[i] << gap | bitstr[i+1] >> 8-gap;
+			buf[i] = bitstr[i] << gap | bitstr[i+1] >> (8-gap);
 		numbits = bitcnt < bufbits ? bitcnt : bufbits;
 		shabytes(buf, numbits, s);
 		bitcnt -= numbits, bitstr += bufsize, numbytes -= bufsize;
 	}
 	for (i = 0; i < numbytes - 1; i++)
-		buf[i] = bitstr[i] << gap | bitstr[i+1] >> 8-gap;
+		buf[i] = bitstr[i] << gap | bitstr[i+1] >> (8-gap);
 	buf[numbytes-1] = bitstr[numbytes-1] << gap;
 	shabytes(buf, bitcnt, s);
 	return(savecnt);
@@ -620,8 +622,6 @@ SHA *s;
 void shafinish(s)
 SHA *s;
 {
-	int i;
-
 	s->pad(s);
 	s->sha(s, s->block);
 	s->put(s);
@@ -671,7 +671,7 @@ int n;
 char *shabase64(s)
 SHA *s;
 {
-	int i, n;
+	int n;
 	unsigned char *q;
 
 	s->put(s);
