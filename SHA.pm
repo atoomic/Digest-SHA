@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use integer;
 
-our $VERSION = '5.27';
+our $VERSION = '5.28';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -160,7 +160,7 @@ In programs:
 	$sha->add_bits($bits);
 	$sha->add_bits($data, $nbits);
 
-	$sha_copy = $sha->clone;	# if needed, make copy of 
+	$sha_copy = $sha->clone;	# if needed, make copy of
 	$sha->dump($file);		#	current digest state,
 	$sha->load($file);		#	or save it on disk
 

@@ -3,7 +3,6 @@
 #undef sha_384_512
 #undef W64
 #undef strto64
-#undef digcpy64
 #undef sha512
 #undef H0384
 #undef H0512
@@ -66,17 +65,6 @@ C64(0xa54ff53a5f1d36f1), C64(0x510e527fade682d1), C64(0x9b05688c2b3e6c1f),
 C64(0x1f83d9abfb41bd6b), C64(0x5be0cd19137e2179)
 };
 
-/* w64mem: writes 64-bit word to memory in big-endian order */
-static void w64mem(mem, w64)
-unsigned char *mem;
-W64 w64;
-{
-	int i;
-
-	for (i = 0; i < 8; i++)
-		*mem++ = (unsigned char) (SR64(w64, 56 - i * 8) & 0xff);
-}
-
 /* strto64: converts hex string to a 64-bit word */
 static W64 strto64(s)
 char *s;
@@ -87,17 +75,6 @@ char *s;
 	while (isxdigit(str[0] = *s++))
 		u = (u << 4) + strtoul(str, NULL, 16);
 	return(u);
-}
-
-/* digcpy64: writes current state to digest buffer */
-static void digcpy64(s)
-SHA *s;
-{
-	unsigned int i;
-	W64 *p = (W64 *) s->H;
-
-	for (i = 0; i < 8; i++)
-		w64mem(s->digest + i * 8, *p++);
 }
 
 static void sha512(s, block)	/* SHA-384/512 transform */

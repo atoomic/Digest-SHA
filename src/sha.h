@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2004 Mark Shelor, All Rights Reserved
  *
- * Version: 5.27
- * Sun Oct 24 02:54:00 MST 2004
+ * Version: 5.28
+ * Wed Nov 10 15:33:20 MST 2004
  *
  */
 
@@ -123,26 +123,26 @@
 	#define SHA_new			New
 	#define SHA_newz		Newz
 	#define SHA_free		Safefree
-	#define SHA_IO			PerlIO
-	#define SHA_IO_stdin()		PerlIO_stdin()
-	#define SHA_IO_stdout()		PerlIO_stdout()
-	#define SHA_IO_open		PerlIO_open
-	#define SHA_IO_close		PerlIO_close
-	#define SHA_IO_printf		PerlIO_printf
-	#define SHA_IO_eof		PerlIO_eof
-	#define SHA_IO_getc		PerlIO_getc
+	#define SHA_FILE		PerlIO
+	#define SHA_stdin()		PerlIO_stdin()
+	#define SHA_stdout()		PerlIO_stdout()
+	#define SHA_open		PerlIO_open
+	#define SHA_close		PerlIO_close
+	#define SHA_fprintf		PerlIO_printf
+	#define SHA_feof		PerlIO_eof
+	#define SHA_getc		PerlIO_getc
 #else
 	#define SHA_new(id, p, n, t)	p = (t *) malloc(sizeof(t))
 	#define SHA_newz(id, p, n, t)	p = (t *) calloc(n, sizeof(t))
 	#define SHA_free		free
-	#define SHA_IO			FILE
-	#define SHA_IO_stdin()		stdin
-	#define SHA_IO_stdout()		stdout
-	#define SHA_IO_open		fopen
-	#define SHA_IO_close		fclose
-	#define SHA_IO_printf		fprintf
-	#define SHA_IO_eof		feof
-	#define SHA_IO_getc		fgetc
+	#define SHA_FILE		FILE
+	#define SHA_stdin()		stdin
+	#define SHA_stdout()		stdout
+	#define SHA_open		fopen
+	#define SHA_close		fclose
+	#define SHA_fprintf		fprintf
+	#define SHA_feof		feof
+	#define SHA_getc		fgetc
 #endif
 
 #define SHA1	1
@@ -201,7 +201,7 @@ typedef struct {
 #define _SHA_STATE	SHA *s
 #define _SHA_ALG	int alg
 #define _SHA_DATA	unsigned char *bitstr, unsigned long bitcnt
-#define _SHA_FILE	char *filename
+#define _SHA_FNAME	char *filename
 
 SHA		*shaopen	_SHA_P((_SHA_ALG));
 unsigned long	 shawrite	_SHA_P((_SHA_DATA, _SHA_STATE));
@@ -212,8 +212,8 @@ char		*shahex		_SHA_P((_SHA_STATE));
 char		*shabase64	_SHA_P((_SHA_STATE));
 int		 shadsize	_SHA_P((_SHA_STATE));
 SHA		*shadup		_SHA_P((_SHA_STATE));
-int		 shadump	_SHA_P((_SHA_FILE, _SHA_STATE));
-SHA		*shaload	_SHA_P((_SHA_FILE));
+int		 shadump	_SHA_P((_SHA_FNAME, _SHA_STATE));
+SHA		*shaload	_SHA_P((_SHA_FNAME));
 int		 shaclose	_SHA_P((_SHA_STATE));
 
 unsigned char	*sha1digest	_SHA_P((_SHA_DATA));
