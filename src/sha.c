@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 4.2.0
- * Sat Dec 27 16:08:00 MST 2003
+ * Version: 4.2.1
+ * Sat Jan 24 00:56:54 MST 2004
  *
  */
 
@@ -73,17 +73,16 @@ static unsigned long H0256[8] =		/* SHA-256 initial hash value */
 	0x510e527fUL, 0x9b05688cUL, 0x1f83d9abUL, 0x5be0cd19UL
 };
 
-static unsigned long W[16];	/* message schedule for SHA-1/224/256 */
-
 static void sha1(s, block)
 SHA *s;
 unsigned char *block;
 {
 	int t;
 	unsigned long a, b, c, d, e;
+	static unsigned long W[16];
 	unsigned long *q = W;
 
-	if (sha_big_endian)
+	if (sha_big_endian_32)
 		memcpy(W, block, 64);
 	else for (t = 0; t < 16; t++, block += 4)
 		*q++ = block[0]<<24|block[1]<<16|block[2]<<8|block[3];
@@ -195,9 +194,10 @@ unsigned char *block;
 {
 	int t;
 	unsigned long a, b, c, d, e, f, g, h, T1;
+	static unsigned long W[16];
 	unsigned long *q = W;
 
-	if (sha_big_endian)
+	if (sha_big_endian_32)
 		memcpy(W, block, 64);
 	else for (t = 0; t < 16; t++, block += 4)
 		*q++ = block[0]<<24|block[1]<<16|block[2]<<8|block[3];
@@ -299,7 +299,7 @@ unsigned long ul;
 	int i;
 
 	for (i = 0; i < 4; i++)
-		*mem++ = SHR(ul, 24 - i * 8) & 0xff;
+		*mem++ = (unsigned char) (SHR(ul, 24 - i * 8) & 0xff);
 }
 
 #define SETBIT(str, pos)  str[(pos) >> 3] |=  (0x01 << (7 - (pos) % 8))
@@ -388,7 +388,8 @@ int alg;
 {
 	SHA *s;
 
-	if ((s = (SHA *) calloc(1, sizeof(SHA))) == NULL)
+	SHA_newz(0, s, 1, SHA);
+	if (s == NULL)
 		return(NULL);
 	s->alg = alg;
 	if (alg == SHA1) {
@@ -410,7 +411,7 @@ int alg;
 		s->digestlen = SHA256_DIGEST_BITS >> 3;
 	}
 	else if (!sha_384_512) {
-		free(s);
+		SHA_free(s);
 		return(NULL);
 	}
 	else if (alg == SHA384) {
@@ -426,7 +427,7 @@ int alg;
 		s->digestlen = SHA512_DIGEST_BITS >> 3;
 	}
 	else {
-		free(s);
+		SHA_free(s);
 		return(NULL);
 	}
 	return(s);
@@ -619,7 +620,8 @@ SHA *s;
 {
 	SHA *p;
 
-	if ((p = (SHA *) malloc(sizeof(SHA))) == NULL)
+	SHA_new(0, p, 1, SHA);
+	if (p == NULL)
 		return(NULL);
 	memcpy(p, s, sizeof(SHA));
 	return(p);
@@ -630,43 +632,64 @@ char *file;
 SHA *s;
 {
 	int i;
-	FILE *f;
+	SHA_IO *f;
 	unsigned char *p;
 
 	if (file == NULL || strlen(file) == 0)
-		f = stdout;
-	else if ((f = fopen(file, "w")) == NULL)
+		f = SHA_IO_stdout();
+	else if ((f = SHA_IO_open(file, "w")) == NULL)
 		return(0);
-	fprintf(f, "alg:%d\n", s->alg);
-	fprintf(f, "H");
+	SHA_IO_printf(f, "alg:%d\n", s->alg);
+	SHA_IO_printf(f, "H");
 	p = shadigest(s);
 	if (s->alg <= SHA256) for (i = 0; i < 8; i++, p += 4)
-		fprintf(f, ":%02x%02x%02x%02x", p[0],p[1],p[2],p[3]);
+		SHA_IO_printf(f, ":%02x%02x%02x%02x", p[0],p[1],p[2],p[3]);
 	else for (i = 0; i < 8; i++, p += 8)
-		fprintf(f, ":%02x%02x%02x%02x%02x%02x%02x%02x",
+		SHA_IO_printf(f, ":%02x%02x%02x%02x%02x%02x%02x%02x",
 			p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7]);
-	fprintf(f, "\n");
-	fprintf(f, "block");
+	SHA_IO_printf(f, "\n");
+	SHA_IO_printf(f, "block");
 	for (i = 0; i < sizeof(s->block); i++)
-		fprintf(f, ":%02x", s->block[i]);
-	fprintf(f, "\n");
-	fprintf(f, "blockcnt:%u\n", s->blockcnt);
-	fprintf(f, "lenhh:%lu\n", s->lenhh);
-	fprintf(f, "lenhl:%lu\n", s->lenhl);
-	fprintf(f, "lenlh:%lu\n", s->lenlh);
-	fprintf(f, "lenll:%lu\n", s->lenll);
-	if (f != stdout)
-		fclose(f);
+		SHA_IO_printf(f, ":%02x", s->block[i]);
+	SHA_IO_printf(f, "\n");
+	SHA_IO_printf(f, "blockcnt:%u\n", s->blockcnt);
+	SHA_IO_printf(f, "lenhh:%lu\n", s->lenhh);
+	SHA_IO_printf(f, "lenhl:%lu\n", s->lenhl);
+	SHA_IO_printf(f, "lenlh:%lu\n", s->lenlh);
+	SHA_IO_printf(f, "lenll:%lu\n", s->lenll);
+	if (f != SHA_IO_stdout())
+		SHA_IO_close(f);
 	return(1);
 }
 
+static char *fgetstr(s, n, f)
+char *s;
+unsigned int n;
+SHA_IO *f;
+{
+	char *b = s;
+
+	if (SHA_IO_eof(f) || n == 0)
+		return(NULL);
+	for (;; n--) {
+		if (SHA_IO_eof(f) || n == 1) {
+			*s = '\0';
+			return(b);
+		}
+		if ((*s++ = SHA_IO_getc(f)) == '\n') {
+			*s = '\0';
+			return(b);
+		}
+	}
+}
+
 static int match(f, tag)
-FILE *f;
+SHA_IO *f;
 char *tag;
 {
 	static char line[1<<10];
 
-	while (fgets(line, sizeof(line), f) != NULL)
+	while (fgetstr(line, sizeof(line), f) != NULL)
 		if (line[0] == '#' || isspace(line[0]))
 			continue;
 		else
@@ -680,7 +703,7 @@ char *tag;
 #define TYPE_LL 4
 
 static int loadval(f, tag, type, pval, num, base)
-FILE *f;
+SHA_IO *f;
 char *tag;
 int type;
 void *pval;
@@ -688,6 +711,9 @@ int num;
 int base;
 {
 	char *p;
+	unsigned char *pc = (unsigned char *) pval;
+	unsigned int  *pi = (unsigned int  *) pval;
+	unsigned long *pl = (unsigned long *) pval;
 
 	if (!match(f, tag))
 		return(0);
@@ -695,25 +721,25 @@ int base;
 		if ((p = strtok(NULL, ":\n")) == NULL)
 			return(0);
 		if (type == TYPE_C)
-			*((unsigned char *) pval)++ = strtoul(p, NULL, base);
+			*pc++ = (unsigned char) strtoul(p, NULL, base);
 		else if (type == TYPE_I)
-			*((unsigned int *) pval)++ = strtoul(p, NULL, base);
+			*pi++ = (unsigned int) strtoul(p, NULL, base);
 		else if (type == TYPE_L)
-			*((unsigned long *) pval)++ = strtoul(p, NULL, base);
-		else if (type == TYPE_LL)
+			*pl++ = strtoul(p, NULL, base);
+		else if (type == TYPE_LL) {
 			loadull(pval, p);
-		else
+		} else
 			return(0);
 	}
 	return(1);
 }
 
 static SHA *closeall(f, s)
-FILE *f;
+SHA_IO *f;
 SHA *s;
 {
-	if (f != NULL && f != stdin)
-		fclose(f);
+	if (f != NULL && f != SHA_IO_stdin())
+		SHA_IO_close(f);
 	if (s != NULL)
 		shaclose(s);
 	return(NULL);
@@ -724,11 +750,11 @@ char *file;
 {
 	int alg;
 	SHA *s;
-	FILE *f;
+	SHA_IO *f;
 
 	if (file == NULL || strlen(file) == 0)
-		f = stdin;
-	else if ((f = fopen(file, "r")) == NULL)
+		f = SHA_IO_stdin();
+	else if ((f = SHA_IO_open(file, "r")) == NULL)
 		return(NULL);
 	if (!loadval(f, "alg", TYPE_I, &alg, 1, 10))
 		return(closeall(f, NULL));
@@ -748,8 +774,8 @@ char *file;
 		return(closeall(f, s));
 	if (!loadval(f, "lenll", TYPE_L, &s->lenll, 1, 10))
 		return(closeall(f, s));
-	if (f != stdin)
-		fclose(f);
+	if (f != SHA_IO_stdin())
+		SHA_IO_close(f);
 	return(s);
 }
 
@@ -758,7 +784,7 @@ SHA *s;
 {
 	if (s != NULL) {
 		memset(s, 0, sizeof(SHA));
-		free(s);
+		SHA_free(s);
 	}
 	return(0);
 }

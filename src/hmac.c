@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 4.2.0
- * Sat Dec 27 16:08:00 MST 2003
+ * Version: 4.2.1
+ * Sat Jan 24 00:56:54 MST 2004
  *
  */
 
@@ -24,15 +24,16 @@ unsigned int keylen;
 	int i;
 	HMAC *h;
 
-	if ((h = (HMAC *) calloc(1, sizeof(HMAC))) == NULL)
+	SHA_newz(0, h, 1, HMAC);
+	if (h == NULL)
 		return(NULL);
 	if ((h->isha = shaopen(alg)) == NULL) {
-		free(h);
+		SHA_free(h);
 		return(NULL);
 	}
 	if ((h->osha = shaopen(alg)) == NULL) {
 		shaclose(h->isha);
-		free(h);
+		SHA_free(h);
 		return(NULL);
 	}
 	if (keylen <= sizeof(h->key))
@@ -41,7 +42,7 @@ unsigned int keylen;
 		if ((h->ksha = shaopen(alg)) == NULL) {
 			shaclose(h->isha);
 			shaclose(h->osha);
-			free(h);
+			SHA_free(h);
 			return(NULL);
 		}
 		shawrite(key, keylen * 8, h->ksha);
@@ -100,7 +101,7 @@ HMAC *h;
 	shaclose(h->osha);
 	if (h != NULL) {
 		memset(h, 0, sizeof(HMAC));
-		free(h);
+		SHA_free(h);
 	}
 	return(0);
 }

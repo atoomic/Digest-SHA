@@ -8,7 +8,10 @@
 #undef H0512
 
 #define sha_384_512		1
-#define loadull(pval, p)	*((unsigned long long *) pval)++ = hex2ull(p)
+
+#define loadull(pval, p)				\
+	*((unsigned long long *) pval) = hex2ull(p);	\
+	pval = (unsigned long long *) pval + 1
 
 #define ROTRQ(x, n)	( ( (x) >> (n) ) | ( (x) << (64 - (n)) ) )
 #define SIGMAQ0(x)	( ROTRQ(x, 28) ^ ROTRQ(x, 34) ^ ROTRQ(x, 39) )
@@ -105,7 +108,7 @@ unsigned char *block;
 	unsigned long long *q = W;
 	unsigned long long *H = (unsigned long long *) s->H;
 
-	if (sha_big_endian)
+	if (sha_big_endian_32)
 		memcpy(W, block, 128);
 	else for (t = 0; t < 16; t++, block += 8) *q++ =
 		(SHA_64) block[0] << 56 | (SHA_64) block[1] << 48 |

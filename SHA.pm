@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use integer;
 
-our $VERSION = '4.2.0';
+our $VERSION = '4.2.1';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -63,6 +63,7 @@ sub new {
 sub DESTROY {
 	my $self = shift;
 	shaclose($self->[0]) if $self->[0];
+	$self->[0] = 0;
 }
 
 sub clone {
@@ -491,9 +492,13 @@ http://csrc.nist.gov/publications/fips/fips198/fips-198a.pdf
 
 Mark Shelor, E<lt>mshelor@comcast.netE<gt>
 
+The author extends special thanks to Jeffrey Friedl, Chris Skiscim,
+Gisle Ass, Julius Duque, Robert Gilmour, and Brian Gladman for
+their many valuable suggestions.
+
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2003 by Mark Shelor
+Copyright (C) 2003-2004 Mark Shelor
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

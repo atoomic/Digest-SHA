@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 4.2.0
- * Sat Dec 27 16:08:00 MST 2003
+ * Version: 4.2.1
+ * Sat Jan 24 00:56:54 MST 2004
  *
  */
 
@@ -19,10 +19,38 @@
 	#define SHA_384_512
 #endif
 
-#ifdef SHA_BIG_ENDIAN
-	#define sha_big_endian 1
+/* Configure memory management and I/O for Perl or standalone C */
+
+#ifdef SHA_PERL_MODULE
+	#define SHA_new			New
+	#define SHA_newz		Newz
+	#define SHA_free		Safefree
+	#define SHA_IO			PerlIO
+	#define SHA_IO_stdin()		PerlIO_stdin()
+	#define SHA_IO_stdout()		PerlIO_stdout()
+	#define SHA_IO_open		PerlIO_open
+	#define SHA_IO_close		PerlIO_close
+	#define SHA_IO_printf		PerlIO_printf
+	#define SHA_IO_eof		PerlIO_eof
+	#define SHA_IO_getc		PerlIO_getc
 #else
-	#define sha_big_endian 0
+	#define SHA_new(id, p, n, t)	p = (t *) malloc(sizeof(t))
+	#define SHA_newz(id, p, n, t)	p = (t *) calloc(n, sizeof(t))
+	#define SHA_free		free
+	#define SHA_IO			FILE
+	#define SHA_IO_stdin()		stdin
+	#define SHA_IO_stdout()		stdout
+	#define SHA_IO_open		fopen
+	#define SHA_IO_close		fclose
+	#define SHA_IO_printf		fprintf
+	#define SHA_IO_eof		feof
+	#define SHA_IO_getc		fgetc
+#endif
+
+#if defined(BYTEORDER) && (BYTEORDER == 0x4321)
+	#define sha_big_endian_32 1
+#else
+	#define sha_big_endian_32 0
 #endif
 
 #define SHA1	1

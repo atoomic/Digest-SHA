@@ -1,5 +1,14 @@
 Revision history for Perl extension Digest::SHA.
 
+4.2.1 Sat Jan 24 00:56:54 MST 2004
+	- modified I/O and memory management in underlying C code
+		-- uses Perl libraries when compiled as CPAN module
+			-- otherwise defaults to ANSI C libraries
+		-- bypasses problems in MSWin multi-threaded Perls
+			-- avoids "Free to wrong pool" error
+		-- special thanks to Robert Gilmour and Brian Gladman
+			for technical guidance and testing
+
 4.2.0 Sat Dec 27 16:08:00 MST 2003
 	- added support for recently-announced SHA-224 algorithm
 		-- ref. FIPS 180-2 Change Notice 1

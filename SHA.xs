@@ -7,7 +7,8 @@
 #include <src/sha.c>
 #include <src/hmac.c>
 
-static int sha_alg[] = {1,1,1,224,224,224,256,256,256,384,384,384,512,512,512};
+static int ix2alg[] =
+	{1,1,1,224,224,224,256,256,256,384,384,384,512,512,512};
 
 MODULE = Digest::SHA		PACKAGE = Digest::SHA		
 
@@ -118,13 +119,13 @@ ALIAS:
 	Digest::SHA::sha512_hex = 13
 	Digest::SHA::sha512_base64 = 14
 PREINIT:
-	unsigned int i;
+	int i;
 	unsigned char *data;
 	STRLEN len;
 	SHA *state;
 	char *result;
 PPCODE:
-	if ((state = shaopen(sha_alg[ix])) == NULL)
+	if ((state = shaopen(ix2alg[ix])) == NULL)
 		XSRETURN_UNDEF;
 	for (i = 0; i < items; i++) {
 		data = (unsigned char *)(SvPV(ST(i), len));
@@ -163,7 +164,7 @@ ALIAS:
 	Digest::SHA::hmac_sha512_hex = 13
 	Digest::SHA::hmac_sha512_base64 = 14
 PREINIT:
-	unsigned int i;
+	int i;
 	unsigned char *key;
 	unsigned char *data;
 	STRLEN len;
@@ -171,7 +172,7 @@ PREINIT:
 	char *result;
 PPCODE:
 	key = (unsigned char *)(SvPV(ST(items-1), len));
-	if ((state = hmacopen(sha_alg[ix], key, len)) == NULL)
+	if ((state = hmacopen(ix2alg[ix], key, len)) == NULL)
 		XSRETURN_UNDEF;
 	for (i = 0; i < items - 1; i++) {
 		data = (unsigned char *)(SvPV(ST(i), len));
@@ -212,7 +213,7 @@ void
 add(self, ...)
 	SV *	self
 PREINIT:
-	unsigned int i;
+	int i;
 	unsigned char *data;
 	STRLEN len;
 	SHA *state;
@@ -232,8 +233,6 @@ ALIAS:
 	Digest::SHA::Hexdigest = 1
 	Digest::SHA::B64digest = 2
 PREINIT:
-	unsigned int i;
-	unsigned char *data;
 	STRLEN len;
 	SHA *state;
 	char *result;
