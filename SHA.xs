@@ -174,4 +174,3 @@ c_shawrite(bitstr, bitcnt, s)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 	SHA *	s
-

@@ -1,6 +1,7 @@
 package Digest::SHA;
 
 #use 5.008;
+use base 'Digest::base';
 use strict;
 use warnings;
 
@@ -8,22 +9,33 @@ require Exporter;
 
 our @ISA = qw(Exporter);
 
-# Items to export into callers namespace by default. Note: do not export
-# names by default without a very good reason. Use EXPORT_OK instead.
-# Do not simply export all your public functions/methods/constants.
-
-# This allows declaration	use Digest::SHA ':all';
-# If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
-# will save memory.
-
-our %EXPORT_TAGS = ( 'all' => [ qw(
-	add
-	addfile
-	b64digest
-	clone
-	digest
-	hashsize
-	hexdigest
+our %EXPORT_TAGS = (
+'all' => [ qw(
+	hmac_sha1
+	hmac_sha1_base64
+	hmac_sha1_hex
+	hmac_sha256
+	hmac_sha256_base64
+	hmac_sha256_hex
+	hmac_sha384
+	hmac_sha384_base64
+	hmac_sha384_hex
+	hmac_sha512
+	hmac_sha512_base64
+	hmac_sha512_hex
+	sha1
+	sha1_base64
+	sha1_hex
+	sha256
+	sha256_base64
+	sha256_hex
+	sha384
+	sha384_base64
+	sha384_hex
+	sha512
+	sha512_base64
+	sha512_hex) ],
+'legacy' => [ qw(
 	hmac1base64
 	hmac1hex
 	hmac256base64
@@ -32,26 +44,12 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 	hmac384hex
 	hmac512base64
 	hmac512hex
-	new
-	reset
-	sha1
-	sha1_base64
-	sha1_hex
 	sha1base64
 	sha1hex
-	sha256
-	sha256_base64
-	sha256_hex
 	sha256base64
 	sha256hex
-	sha384
-	sha384_base64
-	sha384_hex
 	sha384base64
 	sha384hex
-	sha512
-	sha512_base64
-	sha512_hex
 	sha512base64
 	sha512hex
 	shabase64
@@ -62,26 +60,19 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 	shahex
 	shaload
 	shaopen
-	shawrite
-) ] );
+	shawrite) ]
+);
 
-our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} }, @{ $EXPORT_TAGS{'legacy'} } );
 
 our @EXPORT = qw();
 
-our $VERSION = '3.1-alpha1';
+our $VERSION = '4.0.2';
 
 require XSLoader;
 XSLoader::load('Digest::SHA', $VERSION);
 
 # Preloaded methods go here.
-
-# Added by jcd
-sub hashsize {
-    my $self = shift;
-    return (160/8) if ($self->{ALG} == 1);
-    return ($self->{ALG}/8);
-}
 
 sub shawrite {
 	my($data, $len, $state) = @_;
@@ -280,86 +271,118 @@ sub shaload {
 	return(c_shaload($file));
 }
 
-sub sha1 {
-	return(pack("H*", sha1hex(join("", @_))));
+sub sha1 { return(pack("H*", sha1hex(join("", @_)))) }
+sub sha1_hex { return(sha1hex(join("", @_))) }
+sub sha1_base64 { return(sha1base64(join("", @_))) }
+
+sub sha256 { return(pack("H*", sha256hex(join("", @_)))) }
+sub sha256_hex { return(sha256hex(join("", @_))) }
+sub sha256_base64 { return(sha256base64(join("", @_))) }
+
+sub sha384 { return(pack("H*", sha384hex(join("", @_)))) }
+sub sha384_hex { return(sha384hex(join("", @_))) }
+sub sha384_base64 { return(sha384base64(join("", @_))) }
+
+sub sha512 { return(pack("H*", sha512hex(join("", @_)))) }
+sub sha512_hex { return(sha512hex(join("", @_))) }
+sub sha512_base64 { return(sha512base64(join("", @_))) }
+
+sub hmac_sha1 {
+	my $key = pop;
+	return(pack("H*", hmac1hex(join("", @_), $key)))
 }
 
-sub sha1_hex {
-	return(sha1hex(join("", @_)));
+sub hmac_sha1_hex {
+	my $key = pop;
+	return(hmac1hex(join("", @_), $key));
 }
 
-sub sha1_base64 {
-	return(sha1base64(join("", @_)));
+sub hmac_sha1_base64 {
+	my $key = pop;
+	return(hmac1base64(join("", @_), $key));
 }
 
-sub sha256 {
-	return(pack("H*", sha256hex(join("", @_))));
+sub hmac_sha256 {
+	my $key = pop;
+	return(pack("H*", hmac256hex(join("", @_), $key)))
 }
 
-sub sha256_hex {
-	return(sha256hex(join("", @_)));
+sub hmac_sha256_hex {
+	my $key = pop;
+	return(hmac256hex(join("", @_), $key));
 }
 
-sub sha256_base64 {
-	return(sha256base64(join("", @_)));
+sub hmac_sha256_base64 {
+	my $key = pop;
+	return(hmac256base64(join("", @_), $key));
 }
 
-sub sha384 {
-	return(pack("H*", sha384hex(join("", @_))));
+sub hmac_sha384 {
+	my $key = pop;
+	return(pack("H*", hmac384hex(join("", @_), $key)))
 }
 
-sub sha384_hex {
-	return(sha384hex(join("", @_)));
+sub hmac_sha384_hex {
+	my $key = pop;
+	return(hmac384hex(join("", @_), $key));
 }
 
-sub sha384_base64 {
-	return(sha384base64(join("", @_)));
+sub hmac_sha384_base64 {
+	my $key = pop;
+	return(hmac384base64(join("", @_), $key));
 }
 
-sub sha512 {
-	return(pack("H*", sha512hex(join("", @_))));
+sub hmac_sha512 {
+	my $key = pop;
+	return(pack("H*", hmac512hex(join("", @_), $key)))
 }
 
-sub sha512_hex {
-	return(sha512hex(join("", @_)));
+sub hmac_sha512_hex {
+	my $key = pop;
+	return(hmac512hex(join("", @_), $key));
 }
 
-sub sha512_base64 {
-	return(sha512base64(join("", @_)));
+sub hmac_sha512_base64 {
+	my $key = pop;
+	return(hmac512base64(join("", @_), $key));
 }
 
 sub new {
 	my $class = shift;
 	if (ref($class)) {	# instance method
+		shaclose($class->{STATE}) if $class->{STATE};
 		$class->{ALG} = shift || $class->{ALG};
-		shaclose($class->{STATE});
-		$class->{STATE} = shaopen($class->{ALG});
+		$class->{ALG} =~ s/\D+//g;
+		$class->{STATE} = shaopen($class->{ALG}) || return;
 		return($class);
 	}
 	my $self = {};
-	bless($self, $class);
 	$self->{ALG} = shift || 1;
-	$self->{STATE} = shaopen($self->{ALG});
+	$self->{ALG} =~ s/\D+//g;
+	$self->{STATE} = shaopen($self->{ALG}) || return;
+	bless($self, $class);
 	return($self);
 }
 
 sub DESTROY {
 	my $self = shift;
-	shaclose($self->{STATE});
+	shaclose($self->{STATE}) if $self->{STATE};
+}
+
+sub hashsize {
+	my $self = shift;
+	return(length(shahex($self->{STATE})) * 4);
 }
 
 sub clone {
 	my $self = shift;
 	my $copy = Digest::SHA->new($self->{ALG});
-	shaclose($copy->{STATE});
+	shaclose($copy->{STATE}) if $copy->{STATE};
 	$copy->{STATE} = shadup($self->{STATE});
 	return($copy);
 }
 
-sub reset {
-	my $self = shift;
-	return($self->new(@_));
-}
+*reset = \&new;
 
 sub add {
 	my $self = shift;
@@ -368,13 +391,44 @@ sub add {
 	return($self);
 }
 
-sub addfile {
-	my $self = shift;
-	my $fh = shift;
-	my $buf;
-	while (read($fh, $buf, 1<<12)) {
-		shawrite($buf, $self->{STATE});
+sub add_bits {
+	my($self, $data, $nbits) = @_;
+	unless (defined $nbits) {
+		$nbits = length($data);
+		$data = pack("B*", $data);
 	}
+	shawrite($data, $nbits, $self->{STATE});
+	return($self);
+}
+
+# tweaked by jcd
+sub addfile {
+	return Digest::base::addfile(@_);
+}
+
+sub dump {
+	my $self = shift;
+	my $file = shift || "";
+
+	c_shadump($file, $self->{STATE}) || return;
+	return($self);
+}
+
+sub load {
+	my $class = shift;
+	my $file = shift || "";
+	if (ref($class)) {	# instance method
+		shaclose($class->{STATE}) if $class->{STATE};
+		return unless $class->{STATE} = c_shaload($file);
+		$class->{ALG} = $class->hashsize();
+		$class->{ALG} = 1 if $class->{ALG} == 160;
+		return($class);
+	}
+	my $self = {};
+	return unless $self->{STATE} = c_shaload($file);
+	bless($self, $class);
+	$self->{ALG} = $self->hashsize();
+	$self->{ALG} = 1 if $self->{ALG} == 160;
 	return($self);
 }
 
@@ -407,7 +461,7 @@ __END__
 
 =head1 NAME
 
-Digest::SHA - Perl extension for SHA-1/256/384/512 and HMAC-SHA
+Digest::SHA - Perl extension for SHA-1/256/384/512
 
 =head1 SYNOPSIS
 
@@ -420,143 +474,69 @@ Digest::SHA - Perl extension for SHA-1/256/384/512 and HMAC-SHA
 
 
  # OO style
- use Digest::SHA ':all';
+ use Digest::SHA;
 
- $sha = Digest::SHA->new($alg);	# alg = 1, 256, 384, 512
+ $sha = Digest::SHA->new($alg);		# alg = 1, 256, 384, 512
 
  $sha->add($data);
+ $sha->add_bits($data, $nbits);
+ $sha->add_bits($bits);
  $sha->addfile(*FILE);
-
- $sha_copy = $sha->clone;
 
  $digest = $sha->digest;
  $digest = $sha->hexdigest;
  $digest = $sha->b64digest;
 
-The simple interface above follows the guidelines and conventions
-described in the L<Digest::> module, and is sufficient to handle
-the majority of applications requiring SHA digest computations.
-Unfortunately, that interface alone cannot accommodate the full
-range of inputs outlined in the NIST SHA specification (FIPS PUB
-180-2).  Specifically, the routines are unable to handle general
-bit-string inputs (i.e. data streams that are not aligned on byte
-boundaries).
-
-For that reason, the Digest::SHA module includes additional functions
-to process such streams.  Also included are functions that perform
-useful services such as calculating keyed SHA hashes using the HMAC
-algorithm, and capturing and retrieving intermediate SHA states to
-and from persistent storage (see the L<EXPORTABLE FUNCTIONS> section
-for a complete description).  A brief synopsis of the interface
-follows:
-
-  # Direct computation
-  use Digest::SHA qw(sha1hex sha1base64 sha256hex sha256base64 ... );
-
-  $digest = sha1hex($data);			# byte-oriented data
-  $digest = sha1hex($data, $numbits);		# bit-oriented
-
-  $digest = sha384base64($data);
-  $digest = sha512base64($data, $numbits);
-  ...
-
-  # Iterative computation
-  use Digest::SHA qw(shaopen shawrite shafinish shaclose shahex ... );
-
-  $state = shaopen($alg);		# $alg = 1, 256, 384, or 512
-
-  shawrite($data, [ $numbits, ] $state);
-  shawrite($moredata, [ $numbits, ] $state);
-
-  shafinish($state);
-
-  $digest = shahex($state);
-  $digest = shabase64($state);
-
-  shaclose($state);
-
-  # HMAC-SHA keyed hash
-  use Digest::SHA qw(hmac1hex hmac1base64 hmac256hex ... );
-
-  $digest = hmac1hex($data, [ $numbits, ] $key);
-  $digest = hmac1base64($data, [ $numbits, ] $key);
-  ...
-
 =head1 ABSTRACT
 
-Digest::SHA provides a Perl interface to all algorithms defined in
-the NIST Secure Hash Standard (FIPS PUB 180-2).  The module also
-includes support for computing keyed SHA hashes using the HMAC
-algorithm described in FIPS PUB 198.  The routines are general-purpose,
-allowing digests to be calculated for bit-strings as well as
-byte-strings.  The underlying code is written in C.
+Digest::SHA implements all four algorithms of the NIST Secure Hash
+Standard: SHA-1, SHA-256, SHA-384, and SHA-512.  The module is
+capable of calculating digest values of bit-wise as well as byte-wise
+messages.
 
 =head1 DESCRIPTION
 
-Digest::SHA endeavors to provide a complete and portable implementation
-of the NIST Secure Hash Standard.  It differs from the majority of
-existing SHA packages which usually omit support for bit-string
-inputs, and often don't include the entire range of transforms
-specified by NIST.
-
-The module attempts to be as fast and efficient as possible, with
-the goal of combining Perl's ease-of-use with C's performance
-advantages.  For added convenience, the package includes the Perl
-script I<shasum> to perform myriad SHA operations through the
-command line.  Just go to the I<utils/> directory and type I<perl
-shasum --help> for details.
-
-Digest::SHA offers two ways to calculate digests: all-at-once, or
-in stages.  The first is simpler, and often requires only one line
-of Perl.  The second is more general, allowing input to be processed
-in chunks.
-
-To illustrate the difference, the following program calculates the
-SHA-256 digest of I<hello world> using the two different methods:
+Digest::SHA provides a complete and portable implementation of the
+NIST Secure Hash Standard.  It offers two different ways to calculate
+digests: all-at-once, or in stages.  The following program calculates
+the SHA-256 digest of "hello world" using each method:
 
 	use Digest::SHA ':all';
 
-	my $data = "hello world";
-	my @frags = split(//, $data);
+	$data = "hello world";
+	@frags = split(//, $data);
 
-	my $method1 = sha256hex($data);
+	# all-at-once (Functional style)
+	$digest1 = sha256_hex($data);
 
-	my $state = shaopen(256);
-	for (@frags) {
-		shawrite($_, $state);
-	}
-	shafinish($state);
-	my $method2 = shahex($state);
+	# in-stages (OO style)
+	$state = Digest::SHA->new(256);
+	for (@frags) { $state->add($_) }
+	$digest2 = $state->hexdigest;
 
-	print $method1 eq $method2 ?
+	print $digest1 eq $digest2 ?
 		"whew!\n" : "career in aluminum siding\n";
 
-B<PLEASE NOTE>: the optional I<$numbits> argument of I<sha256hex()>
-and I<shawrite()> is omitted in the above example since the input
-data is byte-oriented.
+To compute the digest of an n-bit message where I<n> is not a
+multiple of 8, use the I<add_bits()> method.  As an example, consider
+the 446-bit message consisting of the fragment "110" repeated 148
+times, followed by the fragment "11".  Here's how to calculate its
+SHA-1 digest:
 
-Computing the digest value of a bit-string is also easy.  Let's
-say the input string is 446 bits, consisting of the fragment I<110>
-repeated 148 times, followed by the fragment I<11>.  Here's how to
-calculate its SHA-1 digest:
+	$bits = "110" x 148 . "11";
+	$digest = Digest::SHA->new(1)->add_bits($bits)->hexdigest;
 
-	$digest = sha1hex(pack("B*", ("110"x148)."11"), 446);
+Note that for larger bit-strings, it's more efficient to use the
+two-argument version I<add_bits($data, $nbits)>, where I<$data> is
+in the customary packed binary format used for Perl strings.
 
-When calculating keyed-hashes using the HMAC-SHA functions, it's
-important to note that the optional data length argument is in
-B<bits>.  If omitted, the corresponding data is assumed to be
-byte-oriented.
-
-So, to compute the HMAC-SHA-1 digest of I<burpleson> using a suitable
-key, the code would go something like this:
-
-	$data = "burpleson";
-	$key = "poe";
-	$digest = hmac1hex($data, $key);
-
-or, if you're paid by the character:
-
-	$digest = hmac1hex($data, 8 * length($data), $key);
+As a temporary convenience, the Digest::SHA module provides
+self-contained routines to calculate HMAC-SHA-1/256/384/512 digests.
+These services exist in functional form only, and closely mimic
+the style and behavior of the I<shaX>, I<shaX_hex>, and I<shaX_base64>
+functions.  It's expected that they will be moved to an appropriate
+Digest::HMAC module as soon as the corresponding OO implementation
+is developed and tested.
 
 =head1 EXPORT
 
@@ -566,120 +546,142 @@ None by default.
 
 =over 4
 
-Provided your C compiler supports 64-bit types (i.e. long long),
-all of these functions will be available for use.  If it doesn't,
-you won't be able to perform SHA-384 and SHA-512 transforms, both
-of which require 64-bit operations.
+Provided your C compiler supports the "long long" type, all of
+these functions will be available for use.  If it doesn't, you
+won't be able to perform the SHA-384 and SHA-512 transforms, both
+of which require portable 64-bit operations.
 
-=item I<Functional style>
+=back
+
+I<Functional style>
+
+=over 4
 
 =item B<sha1($data, ...)>
 
-Concatenates the I<$data, ...> arguments into a single stream, and
-returns its SHA-1 digest encoded as a binary string.
-
-=item B<sha1_hex($data, ...)>
-
-Concatenates the I<$data, ...> arguments into a single stream, and
-returns its SHA-1 digest encoded as a hexadecimal string.
-
-=item B<sha1_base64($data, ...)>
-
-Concatenates the I<$data, ...> arguments into a single stream, and
-returns its SHA-1 digest encoded as a Base64 string.
-
 =item B<sha256($data, ...)>
-
-Concatenates the I<$data, ...> arguments into a single stream, and
-returns its SHA-256 digest encoded as a binary string.
-
-=item B<sha256_hex($data, ...)>
-
-Concatenates the I<$data, ...> arguments into a single stream, and
-returns its SHA-256 digest encoded as a hexadecimal string.
-
-=item B<sha256_base64($data, ...)>
-
-Concatenates the I<$data, ...> arguments into a single stream, and
-returns its SHA-256 digest encoded as a Base64 string.
 
 =item B<sha384($data, ...)>
 
-Concatenates the I<$data, ...> arguments into a single stream, and
-returns its SHA-384 digest encoded as a binary string.
+=item B<sha512($data, ...)>
+
+Joins the arguments into a single string, and returns its
+SHA-1/256/384/512 digest encoded as a binary string.
+
+=item B<sha1_hex($data, ...)>
+
+=item B<sha256_hex($data, ...)>
 
 =item B<sha384_hex($data, ...)>
 
-Concatenates the I<$data, ...> arguments into a single stream, and
-returns its SHA-384 digest encoded as a hexadecimal string.
+=item B<sha512_hex($data, ...)>
+
+Joins the arguments into a single string, and returns its
+SHA-1/256/384/512 digest encoded as a hexadecimal string.
+
+=item B<sha1_base64($data, ...)>
+
+=item B<sha256_base64($data, ...)>
 
 =item B<sha384_base64($data, ...)>
 
-Concatenates the I<$data, ...> arguments into a single stream, and
-returns its SHA-384 digest encoded as a Base64 string.
-
-=item B<sha512($data, ...)>
-
-Concatenates the I<$data, ...> arguments into a single stream, and
-returns its SHA-512 digest encoded as a binary string.
-
-=item B<sha512_hex($data, ...)>
-
-Concatenates the I<$data, ...> arguments into a single stream, and
-returns its SHA-512 digest encoded as a hexadecimal string.
-
 =item B<sha512_base64($data, ...)>
 
-Concatenates the I<$data, ...> arguments into a single stream, and
-returns its SHA-512 digest encoded as a Base64 string.
+Joins the arguments into a single string, and returns its
+SHA-1/256/384/512 digest encoded as a Base64 string.
 
-=item I<OO style>
+=back
+
+I<OO style>
+
+=over 4
 
 =item B<$sha = Digest::SHA-E<gt>new($alg)>
 
-Returns a new I<Digest::SHA> object.  Possible values for I<$alg>
-are 1, 256, 384, and 512, which correspond to the SHA-1, SHA-256,
-SHA-384, and SHA-512 transforms, respectively.  If I<$alg> is
-missing, the SHA-1 transform will be used by default.
+Returns a new Digest::SHA object.  Permissible values for I<$alg>
+are 1, 256, 384, and 512.  However, it's also possible to use common
+string representations of the algorithm (e.g. "sha256", "SHA-384").
+If the argument is missing, SHA-1 will be used by default.
 
-Invoking I<new($alg)> as an instance method will not cause a new
-object to be created, but rather will simply reset the digest state
-to the initial value associated with I<$alg>.  If I<$alg> is missing,
-the object will continue using the same transform that was selected
-at creation.
+Invoking "new" as an instance method will not cause a new object
+to be created, but will simply reset the object to the initial
+state associated with I<$alg>.  If the argument is missing, the
+object will continue using the same algorithm that was selected at
+creation.
 
 =item B<$sha-E<gt>reset($alg)>
 
 This method has exactly the same effect as I<$sha-E<gt>new($alg)>.
+In fact, "reset" is just an alias for "new".
+
+=item B<$sha-E<gt>hashsize>
+
+Returns the number of digest bits for this object.  The values are
+160, 256, 384, and 512 for SHA-1, SHA-256, SHA-384, and SHA-512,
+respectively.
 
 =item B<$sha-E<gt>clone>
 
-Returns a duplicate copy of the I<$sha> object.  
+Returns a duplicate copy of the I<$sha> object.
 
 =item B<$sha-E<gt>add($data, ...)>
 
-Concatenates the I<$data, ...> arguments into a single stream, and
-uses it to update the current I<$sha> digest state.  In other words,
-the following statements have the same effect:
+Joins the arguments into a single string, and uses it to update
+the current I<$sha> digest state.  In other words, the following
+statements have the same effect:
 
-    $sha->add("a"); $sha->add("b"); $sha->add("c");
-    $sha->add("a")->add("b")->add("c");
-    $sha->add("a", "b", "c");
-    $sha->add("abc");
+	$sha->add("a"); $sha->add("b"); $sha->add("c");
+	$sha->add("a")->add("b")->add("c");
+	$sha->add("a", "b", "c");
+	$sha->add("abc");
+
+=item B<$sha-E<gt>add_bits($data, $nbits)>
+
+=item B<$sha-E<gt>add_bits($bits)>
+
+Updates the current digest state by appending bits to it.  The
+return value is the updated object itself.
+
+The first form causes the most-significant I<$nbits> of I<$data>
+to be appended to the stream.  The $data argument is in the customary
+binary format used for Perl strings.
+
+The second form takes an ASCII string of "0" and "1" characters as
+its argument.  It's simply a convenient shorthand for
+
+	$sha->add_bits(pack("B*", $bits), length($bits));
+
+So, the following two statements do the same thing:
+
+	$ctx->add_bits("111100001010");
+	$ctx->add_bits("\xF0\xA0", 12);
 
 =item B<$sha-E<gt>addfile(*FILE)>
 
-Reads the file-handle until EOF, and uses that data to update the
-current I<$sha> state.  The return value is the I<$sha> object
-itself.
+Reads from I<FILE> until EOF, and appends that data to the current
+$sha state.  The return value is the updated $sha object itself.
+
+=item B<$sha-E<gt>dump($filename)>
+
+Provides persistent storage of intermediate SHA states by writing
+a portable, human-readable representation of the current state to
+I<$filename>.  If the argument is missing, or equal to the empty
+string, the state information will be written to stdout.
+
+=item B<$sha-E<gt>load($filename)>
+
+Returns a Digest::SHA object representing the intermediate SHA
+state that was previously stored to I<$filename>.  If called as a
+class method, a new object is created; if called as an instance
+method, the object is reset to the state contained in I<$filename>.
 
 =item B<$sha-E<gt>digest>
 
 Returns the digest encoded as a binary string.
 
 Note that the I<digest> method is a read-once operation. Once it
-has been performed, the I<Digest::SHA> object is automatically
-I<reset> in preparation for calculating another digest value.  Call
+has been performed, the Digest::SHA object is automatically reset
+in preparation for calculating another digest value.  Call
 I<$sha-E<gt>clone-E<gt>digest> if it's necessary to preserve the
 original digest state.
 
@@ -687,172 +689,59 @@ original digest state.
 
 Returns the digest encoded as a hexadecimal string.
 
-Like I<digest>, the I<hexdigest> method is a read-once operation.
-Call I<$sha-E<gt>clone-E<gt>hexdigest> if it's necessary to preserve
+Like I<digest>, this method is a read-once operation.  Call
+I<$sha-E<gt>clone-E<gt>hexdigest> if it's necessary to preserve
 the original digest state.
 
 =item B<$sha-E<gt>b64digest>
 
 Returns the digest encoded as a Base64 string.
 
-Like I<digest>, the I<b64digest> method is a read-once operation.
-Call I<$sha-E<gt>clone-E<gt>b64digest> if it's necessary to preserve
+Like I<digest>, this method is a read-once operation.  Call
+I<$sha-E<gt>clone-E<gt>b64digest> if it's necessary to preserve
 the original digest state.
 
-=item I<Direct Functions (Bit- and Byte-Oriented Data)>
+=back
 
-=item B<sha1hex($data [ , $numbits ] )>
+I<HMAC-SHA-1/256/384/512>
 
-Returns the SHA-1 digest of I<$data>, encoded as a 40-character
-hexadecimal string.
+=over 4
 
-=item B<sha1base64($data [ , $numbits ] )>
+=item B<hmac_sha1($data, $key)>
 
-Returns the SHA-1 digest of I<$data>, encoded as a Base64 string.
+=item B<hmac_sha256($data, $key)>
 
-=item B<sha256hex($data [ , $numbits ] )>
+=item B<hmac_sha384($data, $key)>
 
-Returns the SHA-256 digest of I<$data>, encoded as a 64-character
-hexadecimal string.
+=item B<hmac_sha512($data, $key)>
 
-=item B<sha256base64($data [ , $numbits ] )>
+Returns the HMAC-SHA-1/256/384/512 digest of I<$data>/I<$key>, with
+the result encoded as a binary string.  Multiple $data arguments
+are allowed, provided that $key is the final argument in the list.
 
-Returns the SHA-256 digest of I<$data>, encoded as a Base64 string.
+=item B<hmac_sha1_hex($data, $key)>
 
-=item B<sha384hex($data [ , $numbits ] )>
+=item B<hmac_sha256_hex($data, $key)>
 
-Returns the SHA-384 digest of I<$data>, encoded as a 96-character
-hexadecimal string.  This function will return a null value if your
-C compiler lacks support for 64-bit integral types.
+=item B<hmac_sha384_hex($data, $key)>
 
-=item B<sha384base64($data [ , $numbits ] )>
+=item B<hmac_sha512_hex($data, $key)>
 
-Returns the SHA-384 digest of I<$data>, encoded as a Base64 string.
-This function will return a null value if your C compiler lacks
-support for 64-bit integral types.
+Returns the HMAC-SHA-1/256/384/512 digest of I<$data>/I<$key>, with
+the result encoded as a hexadecimal string.  Multiple $data arguments
+are allowed, provided that $key is the final argument in the list.
 
-=item B<sha512hex($data [ , $numbits ] )>
+=item B<hmac_sha1_base64($data, $key)>
 
-Returns the SHA-512 digest of I<$data>, encoded as a 128-character
-hexadecimal string.  This function will return a null value if your
-C compiler lacks support for 64-bit integral types.
+=item B<hmac_sha256_base64($data, $key)>
 
-=item B<sha512base64($data [ , $numbits ] )>
+=item B<hmac_sha384_base64($data, $key)>
 
-Returns the SHA-512 digest of I<$data>, encoded as a Base64 string.
-This function will return a null value if your C compiler lacks
-support for 64-bit integral types.
+=item B<hmac_sha512_base64($data, $key)>
 
-=item I<Iterative Functions (Bit- and Byte-Oriented Data)>
-
-=item B<shaopen($alg)>
-
-Begins the iterative calculation of a SHA digest, returning a state
-variable for use by subsequent iterative I<sha...()> functions.
-The $alg argument determines which SHA transform will be used (e.g.
-$alg = 256 corresponds to SHA-256).  This function will return a
-null value for $alg = 384 or $alg = 512 if your C compiler lacks
-support for 64-bit integral types.
-
-=item B<shawrite($data, [ $numbits, ] $state)>
-
-Updates the SHA state by feeding in I<$data>.  The caller invokes
-this function repeatedly until all data has been processed.  The
-value of I<$numbits> B<must not> exceed 2^32-1 for each
-individual call of I<shawrite()>.  However, per the NIST standard,
-the total accumulated length of the data stream may be as large as
-2^64-1 for SHA-1 and SHA-256, or 2^128-1 for SHA-384 and SHA-512.
-
-=item B<shafinish($state)>
-
-Finalizes the SHA calculation by padding and transforming the final
-block(s), and updating the state.  It is necessary to call this
-function before attempting to access the final digest value through
-I<shahex()> or I<shabase64()>.  However, calling them beforehand
-may be useful to folks who are interested in examining SHA's internal
-state at various stages of the digest computation.
-
-=item B<shahex($state)>
-
-Returns the digest value, encoded as a hexadecimal string.
-
-=item B<shabase64($state)>
-
-Returns the digest value, encoded as a Base64 string.
-
-=item B<shadup($state)>
-
-Returns a duplicate copy of the current state.
-
-=item B<shadump( [ $filename, ] $state)>
-
-Provides persistent storage of intermediate SHA states by writing
-the contents of the I<$state> structure to disk.  If I<$filename>
-is missing, or equal to the empty string, the state information
-will be written to stdout.  In combination with I<shaload()> and
-I<shadup()>, this routine can help to speed up SHA calculations
-for data sets that share identical headers.  See the I<gillogly-hard>
-script in the I<t/> subdirectory for a simple illustration.
-
-=item B<shaload( [ $filename ] )>
-
-Retrieves the contents of an intermediate SHA state that was
-previously stored to disk by I<shadump()>.  If I<$filename> is
-missing, or equal to the empty string, the state information will
-be read from stdin.  The I<shaload()> routine returns a fresh copy
-of this state, so it's not necessary to create or initialize it
-beforehand by calling I<shaopen()>.
-
-=item B<shaclose($state)>
-
-Frees all memory allocated during the previous I<shaopen()>,
-I<shadup()>, or I<shaload()> call.
-
-=item I<HMAC-SHA Functions>
-
-=item B<hmac1hex($data, [ $numbits, ] $key)>
-
-Returns the HMAC-SHA-1 digest of I<$data/$key>, encoded as a
-40-character hexadecimal string.
-
-=item B<hmac1base64($data, [ $numbits, ] $key)>
-
-Returns the HMAC-SHA-1 digest of I<$data/$key>, encoded as a Base64
-string.
-
-=item B<hmac256hex($data, [ $numbits, ] $key)>
-
-Returns the HMAC-SHA-256 digest of I<$data/$key>, encoded as a
-64-character hexadecimal string.
-
-=item B<hmac256base64($data, [ $numbits, ] $key)>
-
-Returns the HMAC-SHA-256 digest of I<$data/$key>, encoded as a
-Base64 string.
-
-=item B<hmac384hex($data, [ $numbits, ] $key)>
-
-Returns the HMAC-SHA-384 digest of I<$data/$key>, encoded as a
-96-character hexadecimal string.  This function will return a null
-value if your C compiler lacks support for 64-bit integral types.
-
-=item B<hmac384base64($data, [ $numbits, ] $key)>
-
-Returns the HMAC-SHA-384 digest of I<$data/$key>, encoded as a
-Base64 string.  This function will return a null value if your C
-compiler lacks support for 64-bit integral types.
-
-=item B<hmac512hex($data, [ $numbits, ] $key)>
-
-Returns the HMAC-SHA-512 digest of I<$data/$key>, encoded as a
-128-character hexadecimal string.  This function will return a null
-value if your C compiler lacks support for 64-bit integral types.
-
-=item B<hmac512base64($data, [ $numbits, ] $key)>
-
-Returns the HMAC-SHA-512 digest of I<$data/$key>, encoded as a
-Base64 string.  This function will return a null value if your C
-compiler lacks support for 64-bit integral types.
+Returns the HMAC-SHA-1/256/384/512 digest of I<$data>/I<$key>, with
+the result encoded as a Base64 string.  Multiple $data arguments
+are allowed, provided that $key is the final argument in the list.
 
 =back
 
@@ -872,15 +761,14 @@ http://csrc.nist.gov/publications/fips/fips198/fips-198a.pdf
 
 Mark Shelor, E<lt>mshelor@comcast.netE<gt>
 
-The author extends special thanks to Jeffrey Friedl and Chris
+Many thanks to Gisle Aas, Julius Duque, Jeffrey Friedl, and Chris
 Skiscim for their valuable comments and suggestions.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2003 by Mark Shelor, Julius C. Duque
+Copyright (C) 2003 by Mark Shelor
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-

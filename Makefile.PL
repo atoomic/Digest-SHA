@@ -15,7 +15,7 @@ WriteMakefile(
     'PREREQ_PM'  => {'Digest::base' => '1.00'},
     ($] >= 5.005 ?
       (ABSTRACT_FROM => 'SHA.pm',
-       AUTHOR     => 'Mark Shelor and Julius C. Duque') : ()),
+       AUTHOR     => 'Mark Shelor') : ()),
     'LIBS'  => [''], # e.g., '-lm'
     'DEFINE'  => $define,
     'dist' => {'COMPRESS' => 'gzip -9f', 'SUFFIX' => 'gz'},

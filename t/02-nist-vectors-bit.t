@@ -6,7 +6,6 @@
 
 use strict;
 use integer;
-use Digest::base;
 
 use File::Basename qw(dirname);
 
@@ -59,11 +58,12 @@ BEGIN {
 }
 
 use Test::More tests => scalar(@msgs);
-use Digest::SHA qw(sha1hex);
+use Digest::SHA;
 
+my $ctx = Digest::SHA->new(1);
 for (my $i = 0; $i < @msgs; $i++) {
 	is(
-		uc(sha1hex(pack("B*", $msgs[$i]), length($msgs[$i]))),
+		uc($ctx->add_bits($msgs[$i])->hexdigest),
 		$hashes[$i],
 		$hashes[$i]
 	);

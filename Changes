@@ -1,21 +1,41 @@
 Revision history for Perl extension Digest::SHA.
 
-3.1 Sun Nov 30 15:53:06 PHT 2003 (Julius C. Duque)
+4.0.2 Mon Dec  1 16:06:23 PHT 2003 (Julius C. Duque)
+    - corrected some of the sample scripts
+    - added another important test vector, this time from
+      David Ireland (see t/ireland for an explanation)
+
+    - addfile() now uses the addfile() method of Digest::base
+
+4.0.1 Sun Nov 30 15:53:06 PHT 2003 (Julius C. Duque)
     - added test vectors compiled by Aaron Gifford
       ({me}{at}{aarongifford}{dot}{com}), two of which can
       reveal bugs in the SHA 256/384/512 implementations;
       see t/gifford/*.info for descriptions of these tests
 
-    - added hashsize() method (in SHA.pm) that returns the hash length
-      (in bytes) used; valid return values are 20, 32, 48, and 64
-      (for SHA-1, SHA-256, SHA-384, and SHA-512, respectively)
-
     - added "examples" directory, which contains working Perl scripts
       that show how to use Digest::SHA
 
+    - module Digest::base (by Gisle Aas) is now required
+
     - tweaked Makefile.PL
-        -- module Digest::base (by Gisle Aas) is now required
-        -- added COMPRESS and SUFFIX options
+        -- added COMPRESS and SUFFIX options in Makefile.PL
+
+    - removed "use 5.008"; Digest::SHA should still work on Perl 5.6.x
+
+4.0.0 Sat Nov 29 21:14:09 MST 2003 (Mark Shelor)
+    - major streamlining of interface (hence, major version change)
+        -- coordinated with Gisle Aas and J. Duque
+        -- goal is to produce a single SHA module
+        -- adheres to OO and functional styles of Digest::
+        -- greatly reduces the number of interface functions
+        -- old functions still supported
+        -- use Digest::SHA ':legacy'
+        -- will be deprecated in near future
+
+    - rewrote all test scripts to match new interface
+        -- very easy to modify all 281 tests
+        -- old interface maps cleanly to new one
 
 3.0 Wed Nov 26 05:02:34 MST 2003 (Mark Shelor)
     - added functions that conform to Digest:: interface

@@ -40,7 +40,7 @@ t/04-bitstr-random.t
 t/05-hmac-fips198.t
 t/05-hmac-rfc2202.t
 t/05-hmac-sha-256.t
-t/06-shadump-shaload.t
+t/06-dump-load.t
 t/07-gifford.t
 t/08-gifford.t
 t/09-gifford.t
@@ -58,6 +58,7 @@ t/20-gifford.t
 t/21-gifford.t
 t/22-gifford.t
 t/23-gifford.t
+t/24-ireland.tmp
 t/gifford/file01.dat
 t/gifford/file02.dat
 t/gifford/file03.dat
@@ -74,6 +75,7 @@ t/gifford/file12.dat
 t/gifford/file12.info
 t/gillogly/state.011
 t/gillogly/state.110
+t/ireland/ireland.txt
 t/nist/bit-hashes.sha1
 t/nist/bit-messages.sha1
 t/nist/byte-hashes.sha1
@@ -84,7 +86,6 @@ t/state/state.1
 t/state/state.256
 t/state/state.384
 t/state/state.512
+TODO
 typemap
-utils/fixdump
-utils/shasum
 META.yml                                 Module meta-data (added by MakeMaker)

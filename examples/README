@@ -1,12 +1,12 @@
 To use the Perl script, "hashfile", type:
 
-        ./hashfile <file>
+        ./hashfile file1 [file2 file3 ...]
 
-where <file> is the file you want to hash, e.g.,
+where file1, file2, file3, ... are the files you want to hash, e.g.,
 
-        ./hashfile README
+        ./hashfile README resume.doc refman.pdf
 
-Only one file can be hashed, though.
+hashfile takes at least one file as argument.
 
 The Perl script, "strings", hashes different strings using the different
 flavors of SHA. The use of the method hashsize() is also illustrated.

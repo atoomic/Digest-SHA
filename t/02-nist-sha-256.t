@@ -1,7 +1,7 @@
 use Test::More tests => 3;
 use strict;
 use integer;
-use Digest::SHA qw(sha256hex);
+use Digest::SHA qw(sha256_hex);
 
 my @vecs = (
 	"abc",
@@ -23,7 +23,7 @@ my @name = (
 
 for (my $i = 0; $i < @vecs; $i++) {
 	is(
-		sha256hex($vecs[$i]),
+		sha256_hex($vecs[$i]),
 		$sha256rsp[$i],
 		$name[$i]
 	);

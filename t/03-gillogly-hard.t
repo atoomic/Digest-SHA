@@ -3,12 +3,10 @@
 # http://www.chiark.greenend.org.uk/pipermail/ukcrypto/1999-February/003538.html
 
 use Test::More tests => 8;
-use Digest::base;
 use strict;
 use integer;
 use File::Basename qw(dirname);
-use Digest::SHA qw(shaopen shawrite shafinish shahex 
-			shaclose shadup shadump shaload);
+use Digest::SHA;
 
 #	SHA-1 Test Vectors
 #
@@ -54,18 +52,19 @@ sub state110 {
 	my $state;
 	my $bitstr;
 
+	$state = Digest::SHA->new(1);
 	if (-r $STATE110) {
-		if ($state = shaload($STATE110)) {
+		if ($state->load($STATE110)) {
 			return($state);
 		}
 	}
 	$bitstr = pack("B*", "110" x $reps);
-	$state = shaopen(1);
+	$state->reset;
 	for (my $i = 0; $i < $loops; $i++) {
-		shawrite($bitstr, 3 * $reps, $state);
+		$state->add_bits($bitstr, 3 * $reps);
 	}
-	shawrite($bitstr, $rest, $state);
-	shadump($STATE110, $state);
+	$state->add_bits($bitstr, $rest);
+	$state->dump($STATE110);
 	return($state);
 }
 
@@ -73,48 +72,42 @@ sub state011 {
 	my $state;
 	my $bitstr;
 
+	$state = Digest::SHA->new(1);
 	if (-r $STATE011) {
-		if ($state = shaload($STATE011)) {
+		if ($state->load($STATE011)) {
 			return($state);
 		}
 	}
 	$bitstr = pack("B*", "011" x $reps);
-	$state = shaopen(1);
+	$state->reset;
 	for (my $i = 0; $i < $loops; $i++) {
-		shawrite($bitstr, 3 * $reps, $state);
+		$state->add_bits($bitstr, 3 * $reps);
 	}
-	shawrite($bitstr, $rest, $state);
-	shadump($STATE011, $state);
+	$state->add_bits($bitstr, $rest);
+	$state->dump($STATE011);
 	return($state);
 }
 
 my $i;
-my $state;
 
 my $state110 = state110();
 for ($i = 0; $i < @vecs110/2; $i++) {
-	$state = shadup($state110);
-	shawrite(pack("B*", $vecs110[2*$i]), length($vecs110[2*$i]), $state);
-	shafinish($state);
+	my $state = $state110->clone;
+	$state->add_bits($vecs110[2*$i]);
 	is(
-		shahex($state),
+		$state->hexdigest,
 		$vecs110[2*$i+1],
 		'110 x 1431655764 . ' . $vecs110[2*$i]
 	);
-	shaclose($state);
 }
-shaclose($state110);
 
 my $state011 = state011();
 for ($i = 0; $i < @vecs011/2; $i++) {
-	$state = shadup($state011);
-	shawrite(pack("B*", $vecs011[2*$i]), length($vecs011[2*$i]), $state);
-	shafinish($state);
+	my $state = $state011->clone;
+	$state->add_bits($vecs011[2*$i]);
 	is(
-		shahex($state),
+		$state->hexdigest,
 		$vecs011[2*$i+1],
 		'011 x 1431655764 . ' . $vecs011[2*$i]
 	);
-	shaclose($state);
 }
-shaclose($state011);

@@ -1,7 +1,7 @@
 use Test::More qw(no_plan);
 use strict;
 use integer;
-use Digest::SHA qw(sha384hex);
+use Digest::SHA qw(sha384_hex);
 
 my @vecs = (
 	"abc",
@@ -21,13 +21,13 @@ my @name = (
 	"SHA-384('a' x 1000000)",
 );
 
-my $skip = sha384hex("") ? 0 : 1;
+my $skip = sha384_hex("") ? 0 : 1;
 
 for (my $i = 0; $i < @vecs; $i++) {
 	SKIP: {
 		skip("64-bit operations not supported", 1) if $skip;
 		is(
-			sha384hex($vecs[$i]),
+			sha384_hex($vecs[$i]),
 			$sha384rsp[$i],
 			$name[$i]
 		);

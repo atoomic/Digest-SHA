@@ -7,11 +7,17 @@ use strict;
 use warnings;
 use Digest::SHA;
 
-chomp $ARGV[0];
-open INFILE, $ARGV[0];
-my $context = new Digest::SHA 1;
-$context->addfile(*INFILE);
-my $digest = $context->hexdigest;
-print "$digest  $ARGV[0]\n";
-close INFILE;
+for (my $i = 0; $i < @ARGV; $i++) {
+    my $file = $ARGV[$i];
+    chomp $file;
+
+    if (-f $file) {  # hash only regular files
+        open INFILE, $file;
+        my $context = new Digest::SHA 256;
+        $context->addfile(*INFILE);
+        my $digest = $context->hexdigest;
+        print "$digest  $file\n";
+        close INFILE;
+    }
+}
 

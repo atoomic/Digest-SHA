@@ -3,7 +3,7 @@ by Julius C. Duque
 =======================
 
 Using "find"
-
+------------
 find  is  a  small  but  powerful utility that  is  available  on  all
 UNIX/Linux  systems. The following command, for example, tells find to
 descend  into /tmp (and recursively descend into all subdirectories it
@@ -33,7 +33,7 @@ output to the next program for processing, as in
 
 
 The "sha" Perl Script
-
+---------------------
 The  output of the Perl script, sha, consists of a 40-character  SHA-1
 digest,  followed  by  two single spaces, and lastly,  followed  by  a
 filename.
@@ -52,7 +52,7 @@ gives us something like:
 
 
 The "finddups" Perl Script
-
+--------------------------
 "finddups"  produces  an associative array, %dups, using  the  digests
 computed by sha (the first 40 characters) as keys.
 
@@ -64,20 +64,20 @@ well. For example,
 
 or
 
-        find ./testdir -name "*" | ./md5 | ./finddups -v
+        find ./testdir -name "*" | ./sha | ./finddups -v
 
 produces something like:
 
-        740a39e47f52e906b8ef4270ce42a6c34ce7b1c5  
-         ./finddups 
-         ./testfile1
-
         36751b1f7c8859084f023603a3614d8c9b7176f8  
-         ./sha 
-         ./testfile2
+         ./testdir/sha 
+         ./testdir/testfile2
 
-Here,  the files "finddups" and "testfile1" are identical.  Meanwhile,
-"sha" and "testfile2" are identical as well.
+        740a39e47f52e906b8ef4270ce42a6c34ce7b1c5  
+         ./testdir/finddups 
+         ./testdir/testfile1
+
+Here,  the files "sha" and "testfile2" are identical.  Meanwhile,
+"finddups" and "testfile1" are identical as well.
 
 An extended discussion of this technique is featured in the December
 2003 issue of The Perl Journal, written by Julius C. Duque.
