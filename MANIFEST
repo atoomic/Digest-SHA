@@ -32,7 +32,7 @@ t/4-bitstr-random.t
 t/5-hmac-fips198.t
 t/5-hmac-rfc2202.t
 t/5-hmac-sha-256.t
-t/6-shadump-shaload.t
+t/6-dump-load.t
 t/gillogly/state.011
 t/gillogly/state.110
 t/nist/COPYRIGHT
@@ -45,5 +45,3 @@ t/state/state.1
 t/state/state.256
 t/state/state.384
 t/state/state.512
-utils/shasum
-utils/fixdump

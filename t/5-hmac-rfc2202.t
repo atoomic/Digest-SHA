@@ -1,7 +1,7 @@
 use Test::More tests => 7;
 use strict;
 use integer;
-use Digest::SHA qw(hmac1hex);
+use Digest::SHA qw(hmac_sha1_hex);
 
 my @vecs = (
 	"Hi There",
@@ -38,7 +38,7 @@ my @hmac1rsp = (
 
 for ($i = 0; $i < @vecs; $i++) {
 	is(
-		hmac1hex($vecs[$i], $keys[$i]),
+		hmac_sha1_hex($vecs[$i], $keys[$i]),
 		$hmac1rsp[$i],
 		$hmac1rsp[$i]
 	);

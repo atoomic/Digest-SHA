@@ -1,7 +1,7 @@
 use Test::More qw(no_plan);
 use strict;
 use integer;
-use Digest::SHA ':all';
+use Digest::SHA qw(sha384_hex sha512_hex);
 use File::Basename qw(dirname);
 
 my @sharsp = (
@@ -20,35 +20,32 @@ my @name = (
 
 my @ext = (1, 256, 384, 512);
 my $data = "a" x 999998;
-my $state;
-my $file;
 my $skip;
 
 for (my $i = 0; $i < 4; $i++) {
 	$skip = 0;
 	if ($ext[$i] == 384) {
-		$skip = sha384hex("") ? 0 : 1;
+		$skip = sha384_hex("") ? 0 : 1;
 	}
 	if ($ext[$i] == 512) {
-		$skip = sha512hex("") ? 0 : 1;
+		$skip = sha512_hex("") ? 0 : 1;
 	}
 	SKIP: {
+		my $state;
+		my $file;
 		skip("64-bit operations not supported", 1) if $skip;
 		$file = dirname($0) . "/state/state.$ext[$i]";
-		unless ($state = shaload($file)) {
-			$state = shaopen($ext[$i]);
-			shawrite($data, $state);
-			shadump($file, $state);
-			shaclose($state);
-			$state = shaload($file);
+		unless ($state = Digest::SHA->load($file)) {
+			$state = Digest::SHA->new($ext[$i]);
+			$state->add($data);
+			$state->dump($file);
+			$state->load($file);
 		}
-		shawrite($data, 16, $state);
-		shafinish($state);
+		$state->add_bits($data, 16);
 		is(
-			shahex($state),
+			$state->hexdigest,
 			$sharsp[$i],
 			$name[$i]
 		);
-		shaclose($state);
 	}
 }

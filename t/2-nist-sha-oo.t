@@ -1,11 +1,13 @@
 use Test::More tests => 2;
 use strict;
 use integer;
-use Digest::SHA qw(new clone reset add addfile hexdigest b64digest);
+use File::Basename qw(dirname);
+use Digest::SHA;
 
-# Test all OO methods using first two SHA-256 vectors from FIPS PUB 180-2
+# test OO methods using first two SHA-256 vectors from NIST
 
-open(FILE, ">ootest$$.txt");
+my $file = dirname($0) . "/oo.tmp";
+open(FILE, ">$file");
 binmode(FILE);
 print FILE "bcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
 close(FILE);
@@ -16,15 +18,15 @@ my @vecs = (
 );
 
 my $ctx = Digest::SHA->new();
-$ctx->reset(256);
-$ctx->add("a");
+$ctx->reset("SHA-256");
+$ctx->add_bits("a", 5)->add_bits("001");
 
 my $rsp = shift(@vecs);
 is($ctx->clone->add("b", "c")->b64digest, $rsp, $rsp);
 
 $rsp = shift(@vecs);
-open(FILE, "ootest$$.txt");
+open(FILE, "<$file");
 binmode(FILE);
 is($ctx->addfile(*FILE)->hexdigest, $rsp, $rsp);
-
-unlink("ootest$$.txt");
+close(FILE);
+unlink($file);

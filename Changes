@@ -73,3 +73,16 @@ Revision history for Perl extension Digest::SHA.
 	- supplied formal test vectors for HMAC-SHA-256
 		-- from draft-ietf-ipsec-ciph-sha-256-01.txt
 	- included tests for all OO methods
+
+4.0.0 Sat Nov 29 21:14:09 MST 2003
+	- major streamlining of interface (hence, major version change)
+		-- coordinated with Gisle Aas and J. Duque
+			-- goal is to produce a single SHA module
+		-- adheres to OO and functional styles of Digest::
+		-- greatly reduces the number of interface functions
+		-- old functions still supported
+			-- use Digest::SHA ':legacy'
+			-- will be deprecated in near future
+	- rewrote all test scripts to match new interface
+		-- very easy to modify all 281 tests
+		-- old interface maps cleanly to new one

@@ -5,7 +5,7 @@
 use Test::More tests => 12;
 use strict;
 use integer;
-use Digest::SHA qw(sha1hex);
+use Digest::SHA;
 
 #	SHA-1 Test Vectors
 #
@@ -46,13 +46,14 @@ my @vecs = (
 
 my $bitstr;
 my $bitcnt;
+my $ctx = Digest::SHA->new(1);
 
 for (my $i = 0; $i < @vecs/4; $i++) {
 	$bitstr = ($vecs[4*$i] x $vecs[4*$i+1]) . $vecs[4*$i+2];
 	$bitcnt = length($bitstr);
 	$bitstr = pack("B*", $bitstr);
 	is(
-		sha1hex($bitstr, $bitcnt),
+		$ctx->add_bits($bitstr, $bitcnt)->hexdigest,
 		$vecs[4*$i+3],
 		"$vecs[4*$i] x " . "$vecs[4*$i+1] \. " . $vecs[4*$i+2]
 	);

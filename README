@@ -1,38 +1,31 @@
-Digest::SHA version 3.0
-=======================
+Digest::SHA version 4.0.0
+=========================
 
 The Digest::SHA module provides a Perl interface to all varieties
-of the Secure Hash Algorithm specified in the current NIST Secure
-Hash Standard (FIPS PUB 180-2).  In other words, the module supports
-SHA-1, SHA-256, SHA-384, and SHA-512.  Fuctions are also included
-to compute keyed SHA hashes using the HMAC algorithm.
+of the Secure Hash Algorithm, namely, SHA-1, SHA-256, SHA-384, and
+SHA-512.  Fuctions are also included to compute keyed-hashes using
+the HMAC algorithm.
 
-The inteface conforms to the conventions and guidelines specified
-in the CPAN Digest:: module, and provides many additional functions
-to handle bit-oriented data and the persistent storage of intermediate
-SHA states.  The core of Digest::SHA is written in C for speed.
-
-Whereas most message digest packages are restricted to byte-oriented
-data, the full SHA standard calls for bit-oriented inputs as well.
-The Digest::SHA module accepts both types of input, and allows
-digest calculations to be performed directly, or iteratively in
-stages.
+The inteface conforms to all requirements, styles, and conventions
+specified in the CPAN Digest:: module, including the option to
+calculate digests for messages that aren't aligned on byte boundaries.
+Also provided are methods to save and subsequently retrieve
+intermediate SHA states to and from persistent storage.
 
 The underlying C code is designed to be portable, and requires no
 special libraries beyond those found with typical compilers.
-However, if your compiler can't handle 64-bit integral types (i.e.
-long long), the functions associated with the SHA-384 and SHA-512
-transforms will return null values.
+However, if your compiler doesn't recognize the "long long" type,
+the functions associated with the SHA-384 and SHA-512 transforms
+will return null values.
 
-Prior to version 2.2, the SHA algorithm code mapped as closely as
-possible to the NIST specification in the interest of establishing
-correctness.  Subsequent versions of this module have begun to
-focus on performance optimization, particularly with regard to the
-heavily-used SHA-1 transform.  Informal benchmarks indicate that
-the version 2.2 code is roughly 20-30% faster than its predecessor
-for SHA-1 operations.  The goal is to achieve the fastest possible
-C implementation without any sacrifice in portability.  The author
-welcomes any comments or suggestions for further enhancements.
+As of Version 4.0.0, the Digest::SHA module is beginning the process
+of deprecating the old "shaopen()/shawrite()/shaclose()" interface
+in favor of the more streamlined OO style.  The old functions are
+still available, and can be conveniently accessed by inserting
+
+	use Digest::SHA ':legacy';
+
+in your code.  However, continued use of these functions is discouraged.
 
 The tests subdirectory (t/*.t) contains an extensive set of SHA
 vectors compiled from various sources.  Of particular interest are
