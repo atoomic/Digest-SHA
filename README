@@ -1,4 +1,4 @@
-Digest::SHA version 4.0.3
+Digest::SHA version 4.0.4
 =========================
 
 The Digest::SHA module provides a Perl interface to all varieties
@@ -6,9 +6,8 @@ of the Secure Hash Algorithm, namely, SHA-1, SHA-256, SHA-384, and
 SHA-512.  Fuctions are also included to compute keyed-hashes using
 the HMAC algorithm.
 
-Digest::SHA is a subclass of the CPAN Digest::base class, and
-thereby inherits all of its useful features and stylistic conventions.
-A number of additional features are provided, such as the ability to:
+Digest::SHA uses the naming conventions and styles of the Digest
+module.  Several features have been added, such as the ability to:
 
 	- calculate digests for bit-oriented messages
 	- store and retrieve intermediate SHA states
@@ -16,14 +15,11 @@ A number of additional features are provided, such as the ability to:
 The underlying C code is portable, and requires no special libraries
 beyond those found with typical compilers.  However, if your compiler
 doesn't recognize the "long long" type, the functions associated
-with the SHA-384 and SHA-512 transforms will return null values.
+with SHA-384 and SHA-512 will return null values.
 
-As of Version 4.0.3, the Digest::SHA module is deprecating the
+As of Version 4.0, the Digest::SHA module is deprecating the
 redundant "shaopen()/shawrite()/shaclose()" interface in favor of
-the more streamlined OO style.  Please refer to earlier versions
-of this module for documentation on the older style.  Code that
-depends on the deprecated interface can be easily modified to use
-the new version.
+the standard (and more streamlined) object-oriented style.
 
 The tests subdirectory (t/*.t) contains an extensive set of SHA
 vectors compiled from various sources.  Of particular interest are
@@ -49,7 +45,7 @@ To install this module type the following:
 
 DEPENDENCIES
 
-   Digest::base
+   None.
 
 COPYRIGHT AND LICENCE
 

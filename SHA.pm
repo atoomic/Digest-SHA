@@ -1,11 +1,13 @@
 package Digest::SHA;
 
-use base ("Digest::base", "Exporter");
-
 use 5.008;
 use strict;
 use warnings;
 use integer;
+
+require Exporter;
+
+our @ISA = qw(Exporter);
 
 our %EXPORT_TAGS = (
 'all' => [ qw(
@@ -39,7 +41,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw();
 
-our $VERSION = '4.0.3';
+our $VERSION = '4.0.4';
 
 require XSLoader;
 XSLoader::load('Digest::SHA', $VERSION);
@@ -251,6 +253,16 @@ sub add_bits {
 	return($self);
 }
 
+sub addfile {
+        my $self = shift; 
+        my $fh = shift;
+        my $buf;   
+        while (read($fh, $buf, 1<<12)) {
+                shawrite($buf, length($buf) << 3, $self->{STATE});
+        }
+        return($self);
+}       
+
 sub dump {
 	my $self = shift;
 	my $file = shift || "";
@@ -280,6 +292,22 @@ sub digest {
 	$self->reset;
 	return($val);
 }
+
+sub hexdigest {
+        my $self = shift; 
+        shafinish($self->{STATE});
+        my $val = shahex($self->{STATE});
+        $self->reset;
+        return($val);
+}       
+
+sub b64digest {
+        my $self = shift;
+        shafinish($self->{STATE});
+        my $val = shabase64($self->{STATE});
+        $self->reset;
+        return($val);
+}       
 
 1;
 __END__
@@ -496,8 +524,6 @@ So, the following two statements do the same thing:
 Reads from I<FILE> until EOF, and appends that data to the current
 state.  The return value is the updated I<$sha> object itself.
 
-This method is inherited from the L<Digest::base> class.
-
 =item B<$sha-E<gt>dump($filename)>
 
 Provides persistent storage of intermediate SHA states by writing
@@ -530,8 +556,6 @@ Like I<digest>, this method is a read-once operation.  Call
 I<$sha-E<gt>clone-E<gt>hexdigest> if it's necessary to preserve
 the original digest state.
 
-This method is inherited from the L<Digest::base> class.
-
 =item B<$sha-E<gt>b64digest>
 
 Returns the digest encoded as a Base64 string.
@@ -539,8 +563,6 @@ Returns the digest encoded as a Base64 string.
 Like I<digest>, this method is a read-once operation.  Call
 I<$sha-E<gt>clone-E<gt>b64digest> if it's necessary to preserve
 the original digest state.
-
-This method is inherited from the L<Digest::base> class.
 
 =back
 
