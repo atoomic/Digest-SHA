@@ -1,5 +1,11 @@
 Revision history for Perl extension Digest::SHA.
 
+5.00  Fri May 14 04:45:00 MST 2004
+	- minor documentation fixes
+	- restored classical style of version numbering (X.YZ)
+		-- previous X.Y.Z style caused installation difficulties
+			when using CPANPLUS
+
 4.3.3 Wed May  5 00:30:40 MST 2004
 	- fixed bug in "strto64()" function
 		-- caused problems in state files with CR/LF pairs

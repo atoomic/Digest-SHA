@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use integer;
 
-our $VERSION = '4.3.3';
+our $VERSION = '5.00';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -241,15 +241,11 @@ None by default.
 
 =head1 EXPORTABLE FUNCTIONS
 
-=over 4
-
 Provided your C compiler supports a native 64-bit type (e.g. the
 I<long long> of C99, or the I<__int64> type used by Microsoft
 C/C++), all of these functions will be available for use.  Otherwise,
 you won't be able to perform the SHA-384 and SHA-512 transforms,
 both of which require portable 64-bit operations.
-
-=back
 
 I<Functional style>
 
@@ -300,7 +296,7 @@ I<OO style>
 
 =over 4
 
-=item B<$sha = Digest::SHA-E<gt>new($alg)>
+=item B<new($alg)>
 
 Returns a new Digest::SHA object.  Values for I<$alg> are 1, 224,
 256, 384, or 512.  It's also possible to use common string
@@ -312,32 +308,32 @@ instead, it will simply reset the object to the initial state
 associated with I<$alg>.  If the argument is missing, the object
 will continue using the same algorithm that was selected at creation.
 
-=item B<$sha-E<gt>reset($alg)>
+=item B<reset($alg)>
 
-This method has exactly the same effect as I<$sha-E<gt>new($alg)>.
-In fact, I<reset> is just an alias for I<new>.
+This method has exactly the same effect as I<new($alg)>.  In fact,
+I<reset> is just an alias for I<new>.
 
-=item B<$sha-E<gt>hashsize>
+=item B<hashsize>
 
 Returns the number of digest bits for this object.  The values are
 160, 224, 256, 384, and 512 for SHA-1, SHA-224, SHA-256, SHA-384,
 and SHA-512, respectively.
 
-=item B<$sha-E<gt>algorithm>
+=item B<algorithm>
 
 Returns the digest algorithm for this object.  The values are 1,
 224, 256, 384, and 512 for SHA-1, SHA-224, SHA-256, SHA-384, and
 SHA-512, respectively.
 
-=item B<$sha-E<gt>clone>
+=item B<clone>
 
-Returns a duplicate copy of the I<$sha> object.
+Returns a duplicate copy of the object.
 
-=item B<$sha-E<gt>add($data, ...)>
+=item B<add($data, ...)>
 
 Logically joins the arguments into a single string, and uses that
-string to update the current I<$sha> digest state.  In other words,
-the following statements have the same effect:
+string to update the current digest state.  In other words, the
+following statements have the same effect:
 
 	$sha->add("a"); $sha->add("b"); $sha->add("c");
 	$sha->add("a")->add("b")->add("c");
@@ -346,9 +342,9 @@ the following statements have the same effect:
 
 The return value is the updated object itself.
 
-=item B<$sha-E<gt>add_bits($data, $nbits)>
+=item B<add_bits($data, $nbits)>
 
-=item B<$sha-E<gt>add_bits($bits)>
+=item B<add_bits($bits)>
 
 Updates the current digest state by appending bits to it.  The
 return value is the updated object itself.
@@ -364,25 +360,25 @@ its argument.  It's equivalent to
 
 So, the following two statements do the same thing:
 
-	$ctx->add_bits("111100001010");
-	$ctx->add_bits("\xF0\xA0", 12);
+	$sha->add_bits("111100001010");
+	$sha->add_bits("\xF0\xA0", 12);
 
-=item B<$sha-E<gt>addfile(*FILE)>
+=item B<addfile(*FILE)>
 
 Reads from I<FILE> until EOF, and appends that data to the current
-state.  The return value is the updated I<$sha> object itself.
+state.  The return value is the updated object itself.
 
 This method is inherited if L<Digest::base> is installed on your
 system.  Otherwise, a functionally equivalent substitute is used.
 
-=item B<$sha-E<gt>dump($filename)>
+=item B<dump($filename)>
 
 Provides persistent storage of intermediate SHA states by writing
 a portable, human-readable representation of the current state to
 I<$filename>.  If the argument is missing, or equal to the empty
 string, the state information will be written to STDOUT.
 
-=item B<$sha-E<gt>load($filename)>
+=item B<load($filename)>
 
 Returns a Digest::SHA object representing the intermediate SHA
 state that was previously stored to I<$filename>.  If called as a
@@ -391,7 +387,7 @@ method, the object is reset to the state contained in I<$filename>.
 If the argument is missing, or equal to the empty string, the state
 information will be read from STDIN.
 
-=item B<$sha-E<gt>digest>
+=item B<digest>
 
 Returns the digest encoded as a binary string.
 
@@ -401,7 +397,7 @@ in preparation for calculating another digest value.  Call
 I<$sha-E<gt>clone-E<gt>digest> if it's necessary to preserve the
 original digest state.
 
-=item B<$sha-E<gt>hexdigest>
+=item B<hexdigest>
 
 Returns the digest encoded as a hexadecimal string.
 
@@ -412,7 +408,7 @@ the original digest state.
 This method is inherited if L<Digest::base> is installed on your
 system.  Otherwise, a functionally equivalent substitute is used.
 
-=item B<$sha-E<gt>b64digest>
+=item B<b64digest>
 
 Returns the digest encoded as a Base64 string.
 
@@ -482,20 +478,20 @@ L<Digest>, L<Digest::SHA1>, L<Digest::SHA2>
 
 The Secure Hash Standard (FIPS PUB 180-2) can be found at:
 
-http://csrc.nist.gov/publications/fips/fips180-2/fips180-2.pdf
+L<http://csrc.nist.gov/publications/fips/fips180-2/fips180-2withchangenotice.pdf>
 
 The Keyed-Hash Message Authentication Code (HMAC):
 
-http://csrc.nist.gov/publications/fips/fips198/fips-198a.pdf
+L<http://csrc.nist.gov/publications/fips/fips198/fips-198a.pdf>
 
 =head1 AUTHOR
 
 Mark Shelor, E<lt>mshelor@comcast.netE<gt>
 
 The author is particularly grateful to Gisle Ass, Julius Duque,
-Jeffrey Friedl, Robert Gilmour, Brian Gladman, Alex Muntada, Chris
-Skiscim, and Martin Thurn for their valuable comments, suggestions,
-and technical support.
+Jeffrey Friedl, Robert Gilmour, Brian Gladman, Andy Lester, Alex
+Muntada, Chris Skiscim, and Martin Thurn for their valuable comments,
+suggestions, and technical support.
 
 =head1 COPYRIGHT AND LICENSE
 

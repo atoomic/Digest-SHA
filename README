@@ -1,5 +1,5 @@
-Digest::SHA version 4.3.3
-=========================
+Digest::SHA version 5.00
+========================
 
 The Digest::SHA module provides an easy way to compute message
 digests using Perl.  It supports all algorithms of the NIST Secure
@@ -15,9 +15,10 @@ ability to:
 	- store and retrieve intermediate SHA states
 
 The underlying C code is portable, and requires no special libraries.
-However, unless your compiler recognizes the "long long" type, or
-the "__int64" type used by Microsoft C/C++, the routines associated
-with SHA-384 and SHA-512 will return null values.
+However, unless your compiler supports a 64-bit integral type (e.g.
+the "long long" of C99, or the "__int64" of Microsoft C), the
+routines associated with SHA-384 and SHA-512 will return null
+values.
 
 This module inherits from Digest::base if the latter is installed
 on your platform.  If the base class is not present, Digest::SHA
@@ -38,16 +39,16 @@ To install this module type the following:
 	make test
 	make install
 
-	The Makefile.PL options are:
+The Makefile.PL options are:
 
-		-t : build a thread-safe version of module
-		-x : exclude support for SHA-384/512
+	-t : build a thread-safe version of module
+	-x : exclude support for SHA-384/512
 
 DEPENDENCIES
 
 	None
 
-COPYRIGHT AND LICENCE
+COPYRIGHT AND LICENSE
 
 Copyright (C) 2003-2004 Mark Shelor
 
