@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 # shasum: filter for computing SHA digests
 #
 # usage: see "sub usage()" directly below

@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 2.2
- * Sun Nov 16 01:54:00 MST 2003
+ * Version: 2.3
+ * Wed Nov 19 04:10:41 MST 2003
  *
  */
 
@@ -156,8 +156,6 @@ HMAC_DIRECT(unsigned char *, hmac256digest, SHA256, SHA_FMT_RAW)
 HMAC_DIRECT(char *, hmac256hex, SHA256, SHA_FMT_HEX)
 HMAC_DIRECT(char *, hmac256base64, SHA256, SHA_FMT_BASE64)
 
-#ifdef SHA_384_512
-
 HMAC_DIRECT(unsigned char *, hmac384digest, SHA384, SHA_FMT_RAW)
 HMAC_DIRECT(char *, hmac384hex, SHA384, SHA_FMT_HEX)
 HMAC_DIRECT(char *, hmac384base64, SHA384, SHA_FMT_BASE64)
@@ -165,5 +163,3 @@ HMAC_DIRECT(char *, hmac384base64, SHA384, SHA_FMT_BASE64)
 HMAC_DIRECT(unsigned char *, hmac512digest, SHA512, SHA_FMT_RAW)
 HMAC_DIRECT(char *, hmac512hex, SHA512, SHA_FMT_HEX)
 HMAC_DIRECT(char *, hmac512base64, SHA512, SHA_FMT_BASE64)
-
-#endif	/* #ifdef SHA_384_512 */

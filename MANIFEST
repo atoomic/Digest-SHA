@@ -5,7 +5,6 @@ ppport.h
 README
 SHA.pm
 SHA.xs
-shasum
 typemap
 src/hmac.c
 src/hmac.h
@@ -40,3 +39,5 @@ t/state/state.1
 t/state/state.256
 t/state/state.384
 t/state/state.512
+utils/shasum
+utils/fixdump

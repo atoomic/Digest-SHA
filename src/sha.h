@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 2.2
- * Sun Nov 16 01:54:00 MST 2003
+ * Version: 2.3
+ * Wed Nov 19 04:10:41 MST 2003
  *
  */
 
@@ -15,11 +15,9 @@
 
 #include <limits.h>
 
-
 #if defined(ULONG_LONG_MAX) && !defined(NO_SHA_384_512)
 	#define SHA_384_512
 #endif
-
 
 #define SHA1	1
 #define SHA256	256
@@ -48,7 +46,7 @@
 typedef struct {
 	int alg;
 	void (*sha)();
-	unsigned long H[SHA256_DIGEST_BITS/32];
+	unsigned long H[SHA_MAX_DIGEST_BITS/32];
 	unsigned char block[SHA_MAX_BLOCK_BITS/8];
 	unsigned int blockcnt;
 	unsigned int blocksize;
@@ -57,13 +55,7 @@ typedef struct {
 	int digestlen;
 	char hex[SHA_MAX_HEX_LEN+1];
 	char base64[SHA_MAX_BASE64_LEN+1];
-
-#ifdef SHA_384_512
-	unsigned long long HQ[SHA_MAX_DIGEST_BITS/64];
-#endif
-
 } SHA;
-
 
 #if defined(__STDC__) && __STDC__ != 0		/* use  prototypes */
 
@@ -90,7 +82,6 @@ char *sha1hex(
 char *sha1base64(
 	unsigned char *bitstr,
 	unsigned long bitcnt);
-
 unsigned char *sha256digest(
 	unsigned char *bitstr,
 	unsigned long bitcnt);
@@ -100,9 +91,6 @@ char *sha256hex(
 char *sha256base64(
 	unsigned char *bitstr,
 	unsigned long bitcnt);
-
-#ifdef SHA_384_512
-
 unsigned char *sha384digest(
 	unsigned char *bitstr,
 	unsigned long bitcnt);
@@ -112,7 +100,6 @@ char *sha384hex(
 char *sha384base64(
 	unsigned char *bitstr,
 	unsigned long bitcnt);
-
 unsigned char *sha512digest(
 	unsigned char *bitstr,
 	unsigned long bitcnt);
@@ -122,8 +109,6 @@ char *sha512hex(
 char *sha512base64(
 	unsigned char *bitstr,
 	unsigned long bitcnt);
-
-#endif	/* #ifdef SHA_384_512 */
 
 #else	/* use K&R style declarations */
 
@@ -141,22 +126,15 @@ int shaclose();
 unsigned char *sha1digest();
 char *sha1hex();
 char *sha1base64();
-
 unsigned char *sha256digest();
 char *sha256hex();
 char *sha256base64();
-
-#ifdef SHA_384_512
-
 unsigned char *sha384digest();
 char *sha384hex();
 char *sha384base64();
-
 unsigned char *sha512digest();
 char *sha512hex();
 char *sha512base64();
-
-#endif	/* #ifdef SHA_384_512 */
 
 #endif	/* use K&R style declarations */
 

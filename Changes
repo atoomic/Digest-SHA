@@ -44,3 +44,15 @@ Revision history for Perl extension Digest::SHA.
 		-- achieved by loop unrolling and assignment consolidation
 	- enhanced shaload/shadump to allow interaction with stdin/stdout
 		-- "$filename" argument now optional
+
+2.3   Wed Nov 19 03:54:31 MST 2003
+	- minor optimizations and code cleanup
+		-- improved maintainability by reducing #ifdef's
+		-- sha1 transform code now easier to follow
+	- streamlined shadump/shaload file format
+		-- eliminated special "HQ" entry
+		-- state now held in "H" for all transforms
+		-- supplied "fixdump" utility to convert old format
+	- SHA-384/512 functions now return NULL for no 64-bit operations
+		-- previously they were undefined
+		-- no longer necessary to use eval's to test for presence

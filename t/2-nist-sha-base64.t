@@ -16,11 +16,8 @@ my @vecs = (
 my $fcn;
 my $rsp;
 
-eval { sha512base64("") };
-pop(@vecs) && pop(@vecs) if $@;
-
-eval { sha384base64("") };
-pop(@vecs) && pop(@vecs) if $@;
+(pop(@vecs) && pop(@vecs)) unless sha512base64("");
+(pop(@vecs) && pop(@vecs)) unless sha384base64("");
 
 while (@vecs) {
 	$fcn = shift(@vecs);

@@ -48,7 +48,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw();
 
-our $VERSION = '2.2';
+our $VERSION = '2.3';
 
 require XSLoader;
 XSLoader::load('Digest::SHA', $VERSION);
@@ -240,7 +240,7 @@ sub shadump {
 		$state = $file;
 		$file = "";
 	}
-	c_shadump($file, $state);
+	return(c_shadump($file, $state));
 }
 
 sub shaload {
@@ -249,7 +249,7 @@ sub shaload {
 	if (!defined($file)) {
 		$file = "";
 	}
-	c_shaload($file);
+	return(c_shaload($file));
 }
 
 1;
@@ -313,9 +313,10 @@ specified by NIST.
 
 The module attempts to be as fast and efficient as possible, with
 the goal of combining Perl's ease-of-use with C's performance
-advantages.  For added convenience, the package also includes a
-Perl script to perform myriad SHA operations through the command
-line.  Just type I<shasum --help> for details.
+advantages.  For added convenience, the package includes the Perl
+script I<shasum> to perform myriad SHA operations through the
+command line.  Just go to the I<utils/> directory and type I<perl
+shasum --help> for details.
 
 Digest::SHA offers two ways to calculate digests: all-at-once, or
 in stages.  The first is simpler, and often requires only one line
@@ -379,8 +380,8 @@ None by default.
 
 Provided your C compiler supports 64-bit types (i.e. long long),
 all of these functions will be available for use.  If it doesn't,
-you won't have access to the SHA-384 and SHA-512 routines, which
-require 64-bit operations.
+you won't be able to perform SHA-384 and SHA-512 transforms, both
+of which require 64-bit operations.
 
 =item I<Direct Functions>
 
@@ -405,26 +406,26 @@ Returns the SHA-256 digest of I<$data>, encoded as a Base64 string.
 =item B<sha384hex($data [ , $data_len_in_bits ] )>
 
 Returns the SHA-384 digest of I<$data>, encoded as a 96-character
-hexadecimal string.  This function will be undefined if your C
-compiler lacks support for 64-bit integral types.
+hexadecimal string.  This function will return a null value if your
+C compiler lacks support for 64-bit integral types.
 
 =item B<sha384base64($data [ , $data_len_in_bits ] )>
 
 Returns the SHA-384 digest of I<$data>, encoded as a Base64 string.
-This function will be undefined if your C compiler lacks support
-for 64-bit integral types.
+This function will return a null value if your C compiler lacks
+support for 64-bit integral types.
 
 =item B<sha512hex($data [ , $data_len_in_bits ] )>
 
 Returns the SHA-512 digest of I<$data>, encoded as a 128-character
-hexadecimal string.  This function will be undefined if your C
-compiler lacks support for 64-bit integral types.
+hexadecimal string.  This function will return a null value if your
+C compiler lacks support for 64-bit integral types.
 
 =item B<sha512base64($data [ , $data_len_in_bits ] )>
 
 Returns the SHA-512 digest of I<$data>, encoded as a Base64 string.
-This function will be undefined if your C compiler lacks support
-for 64-bit integral types.
+This function will return a null value if your C compiler lacks
+support for 64-bit integral types.
 
 =item I<Iterative Functions>
 
@@ -434,7 +435,7 @@ Begins the iterative calculation of a SHA digest, returning a state
 variable for use by subsequent iterative I<sha...()> functions.
 The $alg argument determines which SHA transform will be used (e.g.
 $alg = 256 corresponds to SHA-256).  This function will return a
-NULL value for $alg = 384 or $alg = 512 if your C compiler lacks
+null value for $alg = 384 or $alg = 512 if your C compiler lacks
 support for 64-bit integral types.
 
 =item B<shawrite($data, [ $data_len_in_bits, ] $state)>
@@ -516,26 +517,26 @@ Base64 string.
 =item B<hmac384hex($data, [ $data_len_in_bits, ] $key)>
 
 Returns the HMAC-SHA-384 digest of I<$data/$key>, encoded as a
-96-character hexadecimal string.  This function will be undefined
-if your C compiler lacks support for 64-bit integral types.
+96-character hexadecimal string.  This function will return a null
+value if your C compiler lacks support for 64-bit integral types.
 
 =item B<hmac384base64($data, [ $data_len_in_bits, ] $key)>
 
 Returns the HMAC-SHA-384 digest of I<$data/$key>, encoded as a
-Base64 string.  This function will be undefined if your C compiler
-lacks support for 64-bit integral types.
+Base64 string.  This function will return a null value if your C
+compiler lacks support for 64-bit integral types.
 
 =item B<hmac512hex($data, [ $data_len_in_bits, ] $key)>
 
 Returns the HMAC-SHA-512 digest of I<$data/$key>, encoded as a
-128-character hexadecimal string.  This function will be undefined
-if your C compiler lacks support for 64-bit integral types.
+128-character hexadecimal string.  This function will return a null
+value if your C compiler lacks support for 64-bit integral types.
 
 =item B<hmac512base64($data, [ $data_len_in_bits, ] $key)>
 
 Returns the HMAC-SHA-512 digest of I<$data/$key>, encoded as a
-Base64 string.  This function will be undefined if your C compiler
-lacks support for 64-bit integral types.
+Base64 string.  This function will return a null value if your C
+compiler lacks support for 64-bit integral types.
 
 =back
 
@@ -555,8 +556,8 @@ http://csrc.nist.gov/publications/fips/fips198/fips-198a.pdf
 
 Mark Shelor, E<lt>mshelor@comcast.netE<gt>
 
-The author is very grateful to the Perl community, in particular
-to Jeffrey Friedl, for their valuable comments and suggestions.
+The author extends special thanks to Jeffrey Friedl and Chris
+Skiscim for their valuable comments and suggestions.
 
 =head1 COPYRIGHT AND LICENSE
 

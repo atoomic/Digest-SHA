@@ -21,8 +21,7 @@ my @name = (
 	"SHA-384('a' x 1000000)",
 );
 
-eval { sha384hex("") };
-my $skip = $@;
+my $skip = sha384hex("") ? 0 : 1;
 
 for (my $i = 0; $i < @vecs; $i++) {
 	SKIP: {

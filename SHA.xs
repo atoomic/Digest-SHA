@@ -68,8 +68,6 @@ c_hmac256base64(bitstr, bitcnt, key, keylen)
 	unsigned char *	key
 	unsigned int	keylen
 
-#ifdef SHA_384_512
-
 char *
 c_hmac384hex(bitstr, bitcnt, key, keylen)
 	unsigned char *	bitstr
@@ -98,8 +96,6 @@ c_hmac512base64(bitstr, bitcnt, key, keylen)
 	unsigned char *	key
 	unsigned int	keylen
 
-#endif
-
 char *
 c_sha1base64(bitstr, bitcnt)
 	unsigned char *	bitstr
@@ -120,8 +116,6 @@ c_sha256hex(bitstr, bitcnt)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 
-#ifdef SHA_384_512
-
 char *
 c_sha384base64(bitstr, bitcnt)
 	unsigned char *	bitstr
@@ -141,8 +135,6 @@ char *
 c_sha512hex(bitstr, bitcnt)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
-
-#endif
 
 char *
 shabase64(s)

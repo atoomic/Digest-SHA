@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 2.2
- * Sun Nov 16 01:54:00 MST 2003
+ * Version: 2.3
+ * Wed Nov 19 04:10:41 MST 2003
  *
  */
 
@@ -70,10 +70,6 @@ static unsigned long H0256[8] =
 	0x510e527fUL, 0x9b05688cUL, 0x1f83d9abUL, 0x5be0cd19UL
 };
 
-#ifdef SHA_BIG_ENDIAN
-	#define ul2mem(mem, ul) memcpy(mem, &(ul), 4)
-#else
-
 static void ul2mem(mem, ul)		/* endian-neutral */
 unsigned char *mem;
 unsigned long ul;
@@ -84,123 +80,121 @@ unsigned long ul;
 		*mem++ = SHR(ul, 24 - i * 8) & 0xff;
 }
 
-#endif
+static unsigned long W[64];
 
 static void sha1(p, block)
 SHA *p;
 unsigned char *block;
 {
 	unsigned long a, b, c, d, e;
-	static unsigned long W[16];
 
 #ifdef SHA_BIG_ENDIAN
 	memcpy(W, block, 64);
 #else
-
 	int t;
 	unsigned long *q;
 	for (t = 0, q = W; t < 16; t++, q++) {
 		*q = *block++; *q = (*q << 8) + *block++;
 		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
 	}
-
 #endif
 
 /*
- * Use SHA-1 "alternate" method from FIPS PUB 180-2 (ref. 6.1.3)
+ * Use SHA-1 alternate method from FIPS PUB 180-2 (ref. 6.1.3)
  *
- * To improve performance, unroll the loop and consolidate
- * assignments by changing the roles of the variables "a"
- * through "e" at each step.  Note that the variable "T" is
- * no longer needed.
+ * To improve performance, unroll the loop and consolidate assignments
+ * by changing the roles of variables "a" through "e" at each step.
+ * Note that the variable "T" is no longer needed.
  *
  */
 
-#define Pa Parity
-#define Ma Maj
+#define MIX(a,b,c,d,e,f,k,w)	e+=ROTL(a,5)+f(b,c,d)+k+w;b=ROTL(b,30)
 
-a = p->H[0]; b = p->H[1]; c = p->H[2]; d = p->H[3]; e = p->H[4];
-e+=ROTL(a,5)+Ch(b,c,d)+K11+W[0];b=ROTL(b,30);
-d+=ROTL(e,5)+Ch(a,b,c)+K11+W[1];a=ROTL(a,30);
-c+=ROTL(d,5)+Ch(e,a,b)+K11+W[2];e=ROTL(e,30);
-b+=ROTL(c,5)+Ch(d,e,a)+K11+W[3];d=ROTL(d,30);
-a+=ROTL(b,5)+Ch(c,d,e)+K11+W[4];c=ROTL(c,30);
-e+=ROTL(a,5)+Ch(b,c,d)+K11+W[5];b=ROTL(b,30);
-d+=ROTL(e,5)+Ch(a,b,c)+K11+W[6];a=ROTL(a,30);
-c+=ROTL(d,5)+Ch(e,a,b)+K11+W[7];e=ROTL(e,30);
-b+=ROTL(c,5)+Ch(d,e,a)+K11+W[8];d=ROTL(d,30);
-a+=ROTL(b,5)+Ch(c,d,e)+K11+W[9];c=ROTL(c,30);
-e+=ROTL(a,5)+Ch(b,c,d)+K11+W[10];b=ROTL(b,30);
-d+=ROTL(e,5)+Ch(a,b,c)+K11+W[11];a=ROTL(a,30);
-c+=ROTL(d,5)+Ch(e,a,b)+K11+W[12];e=ROTL(e,30);
-b+=ROTL(c,5)+Ch(d,e,a)+K11+W[13];d=ROTL(d,30);
-a+=ROTL(b,5)+Ch(c,d,e)+K11+W[14];c=ROTL(c,30);
-e+=ROTL(a,5)+Ch(b,c,d)+K11+W[15];b=ROTL(b,30);
-d+=ROTL(e,5)+Ch(a,b,c)+K11+(W[0]=ROTL(W[13]^W[8]^W[2]^W[0],1));a=ROTL(a,30);
-c+=ROTL(d,5)+Ch(e,a,b)+K11+(W[1]=ROTL(W[14]^W[9]^W[3]^W[1],1));e=ROTL(e,30);
-b+=ROTL(c,5)+Ch(d,e,a)+K11+(W[2]=ROTL(W[15]^W[10]^W[4]^W[2],1));d=ROTL(d,30);
-a+=ROTL(b,5)+Ch(c,d,e)+K11+(W[3]=ROTL(W[0]^W[11]^W[5]^W[3],1));c=ROTL(c,30);
-e+=ROTL(a,5)+Pa(b,c,d)+K12+(W[4]=ROTL(W[1]^W[12]^W[6]^W[4],1));b=ROTL(b,30);
-d+=ROTL(e,5)+Pa(a,b,c)+K12+(W[5]=ROTL(W[2]^W[13]^W[7]^W[5],1));a=ROTL(a,30);
-c+=ROTL(d,5)+Pa(e,a,b)+K12+(W[6]=ROTL(W[3]^W[14]^W[8]^W[6],1));e=ROTL(e,30);
-b+=ROTL(c,5)+Pa(d,e,a)+K12+(W[7]=ROTL(W[4]^W[15]^W[9]^W[7],1));d=ROTL(d,30);
-a+=ROTL(b,5)+Pa(c,d,e)+K12+(W[8]=ROTL(W[5]^W[0]^W[10]^W[8],1));c=ROTL(c,30);
-e+=ROTL(a,5)+Pa(b,c,d)+K12+(W[9]=ROTL(W[6]^W[1]^W[11]^W[9],1));b=ROTL(b,30);
-d+=ROTL(e,5)+Pa(a,b,c)+K12+(W[10]=ROTL(W[7]^W[2]^W[12]^W[10],1));a=ROTL(a,30);
-c+=ROTL(d,5)+Pa(e,a,b)+K12+(W[11]=ROTL(W[8]^W[3]^W[13]^W[11],1));e=ROTL(e,30);
-b+=ROTL(c,5)+Pa(d,e,a)+K12+(W[12]=ROTL(W[9]^W[4]^W[14]^W[12],1));d=ROTL(d,30);
-a+=ROTL(b,5)+Pa(c,d,e)+K12+(W[13]=ROTL(W[10]^W[5]^W[15]^W[13],1));c=ROTL(c,30);
-e+=ROTL(a,5)+Pa(b,c,d)+K12+(W[14]=ROTL(W[11]^W[6]^W[0]^W[14],1));b=ROTL(b,30);
-d+=ROTL(e,5)+Pa(a,b,c)+K12+(W[15]=ROTL(W[12]^W[7]^W[1]^W[15],1));a=ROTL(a,30);
-c+=ROTL(d,5)+Pa(e,a,b)+K12+(W[0]=ROTL(W[13]^W[8]^W[2]^W[0],1));e=ROTL(e,30);
-b+=ROTL(c,5)+Pa(d,e,a)+K12+(W[1]=ROTL(W[14]^W[9]^W[3]^W[1],1));d=ROTL(d,30);
-a+=ROTL(b,5)+Pa(c,d,e)+K12+(W[2]=ROTL(W[15]^W[10]^W[4]^W[2],1));c=ROTL(c,30);
-e+=ROTL(a,5)+Pa(b,c,d)+K12+(W[3]=ROTL(W[0]^W[11]^W[5]^W[3],1));b=ROTL(b,30);
-d+=ROTL(e,5)+Pa(a,b,c)+K12+(W[4]=ROTL(W[1]^W[12]^W[6]^W[4],1));a=ROTL(a,30);
-c+=ROTL(d,5)+Pa(e,a,b)+K12+(W[5]=ROTL(W[2]^W[13]^W[7]^W[5],1));e=ROTL(e,30);
-b+=ROTL(c,5)+Pa(d,e,a)+K12+(W[6]=ROTL(W[3]^W[14]^W[8]^W[6],1));d=ROTL(d,30);
-a+=ROTL(b,5)+Pa(c,d,e)+K12+(W[7]=ROTL(W[4]^W[15]^W[9]^W[7],1));c=ROTL(c,30);
-e+=ROTL(a,5)+Ma(b,c,d)+K13+(W[8]=ROTL(W[5]^W[0]^W[10]^W[8],1));b=ROTL(b,30);
-d+=ROTL(e,5)+Ma(a,b,c)+K13+(W[9]=ROTL(W[6]^W[1]^W[11]^W[9],1));a=ROTL(a,30);
-c+=ROTL(d,5)+Ma(e,a,b)+K13+(W[10]=ROTL(W[7]^W[2]^W[12]^W[10],1));e=ROTL(e,30);
-b+=ROTL(c,5)+Ma(d,e,a)+K13+(W[11]=ROTL(W[8]^W[3]^W[13]^W[11],1));d=ROTL(d,30);
-a+=ROTL(b,5)+Ma(c,d,e)+K13+(W[12]=ROTL(W[9]^W[4]^W[14]^W[12],1));c=ROTL(c,30);
-e+=ROTL(a,5)+Ma(b,c,d)+K13+(W[13]=ROTL(W[10]^W[5]^W[15]^W[13],1));b=ROTL(b,30);
-d+=ROTL(e,5)+Ma(a,b,c)+K13+(W[14]=ROTL(W[11]^W[6]^W[0]^W[14],1));a=ROTL(a,30);
-c+=ROTL(d,5)+Ma(e,a,b)+K13+(W[15]=ROTL(W[12]^W[7]^W[1]^W[15],1));e=ROTL(e,30);
-b+=ROTL(c,5)+Ma(d,e,a)+K13+(W[0]=ROTL(W[13]^W[8]^W[2]^W[0],1));d=ROTL(d,30);
-a+=ROTL(b,5)+Ma(c,d,e)+K13+(W[1]=ROTL(W[14]^W[9]^W[3]^W[1],1));c=ROTL(c,30);
-e+=ROTL(a,5)+Ma(b,c,d)+K13+(W[2]=ROTL(W[15]^W[10]^W[4]^W[2],1));b=ROTL(b,30);
-d+=ROTL(e,5)+Ma(a,b,c)+K13+(W[3]=ROTL(W[0]^W[11]^W[5]^W[3],1));a=ROTL(a,30);
-c+=ROTL(d,5)+Ma(e,a,b)+K13+(W[4]=ROTL(W[1]^W[12]^W[6]^W[4],1));e=ROTL(e,30);
-b+=ROTL(c,5)+Ma(d,e,a)+K13+(W[5]=ROTL(W[2]^W[13]^W[7]^W[5],1));d=ROTL(d,30);
-a+=ROTL(b,5)+Ma(c,d,e)+K13+(W[6]=ROTL(W[3]^W[14]^W[8]^W[6],1));c=ROTL(c,30);
-e+=ROTL(a,5)+Ma(b,c,d)+K13+(W[7]=ROTL(W[4]^W[15]^W[9]^W[7],1));b=ROTL(b,30);
-d+=ROTL(e,5)+Ma(a,b,c)+K13+(W[8]=ROTL(W[5]^W[0]^W[10]^W[8],1));a=ROTL(a,30);
-c+=ROTL(d,5)+Ma(e,a,b)+K13+(W[9]=ROTL(W[6]^W[1]^W[11]^W[9],1));e=ROTL(e,30);
-b+=ROTL(c,5)+Ma(d,e,a)+K13+(W[10]=ROTL(W[7]^W[2]^W[12]^W[10],1));d=ROTL(d,30);
-a+=ROTL(b,5)+Ma(c,d,e)+K13+(W[11]=ROTL(W[8]^W[3]^W[13]^W[11],1));c=ROTL(c,30);
-e+=ROTL(a,5)+Pa(b,c,d)+K14+(W[12]=ROTL(W[9]^W[4]^W[14]^W[12],1));b=ROTL(b,30);
-d+=ROTL(e,5)+Pa(a,b,c)+K14+(W[13]=ROTL(W[10]^W[5]^W[15]^W[13],1));a=ROTL(a,30);
-c+=ROTL(d,5)+Pa(e,a,b)+K14+(W[14]=ROTL(W[11]^W[6]^W[0]^W[14],1));e=ROTL(e,30);
-b+=ROTL(c,5)+Pa(d,e,a)+K14+(W[15]=ROTL(W[12]^W[7]^W[1]^W[15],1));d=ROTL(d,30);
-a+=ROTL(b,5)+Pa(c,d,e)+K14+(W[0]=ROTL(W[13]^W[8]^W[2]^W[0],1));c=ROTL(c,30);
-e+=ROTL(a,5)+Pa(b,c,d)+K14+(W[1]=ROTL(W[14]^W[9]^W[3]^W[1],1));b=ROTL(b,30);
-d+=ROTL(e,5)+Pa(a,b,c)+K14+(W[2]=ROTL(W[15]^W[10]^W[4]^W[2],1));a=ROTL(a,30);
-c+=ROTL(d,5)+Pa(e,a,b)+K14+(W[3]=ROTL(W[0]^W[11]^W[5]^W[3],1));e=ROTL(e,30);
-b+=ROTL(c,5)+Pa(d,e,a)+K14+(W[4]=ROTL(W[1]^W[12]^W[6]^W[4],1));d=ROTL(d,30);
-a+=ROTL(b,5)+Pa(c,d,e)+K14+(W[5]=ROTL(W[2]^W[13]^W[7]^W[5],1));c=ROTL(c,30);
-e+=ROTL(a,5)+Pa(b,c,d)+K14+(W[6]=ROTL(W[3]^W[14]^W[8]^W[6],1));b=ROTL(b,30);
-d+=ROTL(e,5)+Pa(a,b,c)+K14+(W[7]=ROTL(W[4]^W[15]^W[9]^W[7],1));a=ROTL(a,30);
-c+=ROTL(d,5)+Pa(e,a,b)+K14+(W[8]=ROTL(W[5]^W[0]^W[10]^W[8],1));e=ROTL(e,30);
-b+=ROTL(c,5)+Pa(d,e,a)+K14+(W[9]=ROTL(W[6]^W[1]^W[11]^W[9],1));d=ROTL(d,30);
-a+=ROTL(b,5)+Pa(c,d,e)+K14+(W[10]=ROTL(W[7]^W[2]^W[12]^W[10],1));c=ROTL(c,30);
-e+=ROTL(a,5)+Pa(b,c,d)+K14+(W[11]=ROTL(W[8]^W[3]^W[13]^W[11],1));b=ROTL(b,30);
-d+=ROTL(e,5)+Pa(a,b,c)+K14+(W[12]=ROTL(W[9]^W[4]^W[14]^W[12],1));a=ROTL(a,30);
-c+=ROTL(d,5)+Pa(e,a,b)+K14+(W[13]=ROTL(W[10]^W[5]^W[15]^W[13],1));e=ROTL(e,30);
-b+=ROTL(c,5)+Pa(d,e,a)+K14+(W[14]=ROTL(W[11]^W[6]^W[0]^W[14],1));d=ROTL(d,30);
-a+=ROTL(b,5)+Pa(c,d,e)+K14+(W[15]=ROTL(W[12]^W[7]^W[1]^W[15],1));c=ROTL(c,30);
-p->H[0] += a; p->H[1] += b; p->H[2] += c; p->H[3] += d; p->H[4] += e;
+#define ASG(s)	\
+	(W[s&15]=ROTL(W[(s+13)&15]^W[(s+8)&15]^W[(s+2)&15]^W[s&15],1))
+
+	a = p->H[0]; b = p->H[1]; c = p->H[2]; d = p->H[3]; e = p->H[4];
+	MIX(a, b, c, d, e, Ch, K11, W[0]);
+	MIX(e, a, b, c, d, Ch, K11, W[1]);
+	MIX(d, e, a, b, c, Ch, K11, W[2]);
+	MIX(c, d, e, a, b, Ch, K11, W[3]);
+	MIX(b, c, d, e, a, Ch, K11, W[4]);
+	MIX(a, b, c, d, e, Ch, K11, W[5]);
+	MIX(e, a, b, c, d, Ch, K11, W[6]);
+	MIX(d, e, a, b, c, Ch, K11, W[7]);
+	MIX(c, d, e, a, b, Ch, K11, W[8]);
+	MIX(b, c, d, e, a, Ch, K11, W[9]);
+	MIX(a, b, c, d, e, Ch, K11, W[10]);
+	MIX(e, a, b, c, d, Ch, K11, W[11]);
+	MIX(d, e, a, b, c, Ch, K11, W[12]);
+	MIX(c, d, e, a, b, Ch, K11, W[13]);
+	MIX(b, c, d, e, a, Ch, K11, W[14]);
+	MIX(a, b, c, d, e, Ch, K11, W[15]);
+	MIX(e, a, b, c, d, Ch, K11, ASG(0));
+	MIX(d, e, a, b, c, Ch, K11, ASG(1));
+	MIX(c, d, e, a, b, Ch, K11, ASG(2));
+	MIX(b, c, d, e, a, Ch, K11, ASG(3));
+	MIX(a, b, c, d, e, Parity, K12, ASG(4));
+	MIX(e, a, b, c, d, Parity, K12, ASG(5));
+	MIX(d, e, a, b, c, Parity, K12, ASG(6));
+	MIX(c, d, e, a, b, Parity, K12, ASG(7));
+	MIX(b, c, d, e, a, Parity, K12, ASG(8));
+	MIX(a, b, c, d, e, Parity, K12, ASG(9));
+	MIX(e, a, b, c, d, Parity, K12, ASG(10));
+	MIX(d, e, a, b, c, Parity, K12, ASG(11));
+	MIX(c, d, e, a, b, Parity, K12, ASG(12));
+	MIX(b, c, d, e, a, Parity, K12, ASG(13));
+	MIX(a, b, c, d, e, Parity, K12, ASG(14));
+	MIX(e, a, b, c, d, Parity, K12, ASG(15));
+	MIX(d, e, a, b, c, Parity, K12, ASG(0));
+	MIX(c, d, e, a, b, Parity, K12, ASG(1));
+	MIX(b, c, d, e, a, Parity, K12, ASG(2));
+	MIX(a, b, c, d, e, Parity, K12, ASG(3));
+	MIX(e, a, b, c, d, Parity, K12, ASG(4));
+	MIX(d, e, a, b, c, Parity, K12, ASG(5));
+	MIX(c, d, e, a, b, Parity, K12, ASG(6));
+	MIX(b, c, d, e, a, Parity, K12, ASG(7));
+	MIX(a, b, c, d, e, Maj, K13, ASG(8));
+	MIX(e, a, b, c, d, Maj, K13, ASG(9));
+	MIX(d, e, a, b, c, Maj, K13, ASG(10));
+	MIX(c, d, e, a, b, Maj, K13, ASG(11));
+	MIX(b, c, d, e, a, Maj, K13, ASG(12));
+	MIX(a, b, c, d, e, Maj, K13, ASG(13));
+	MIX(e, a, b, c, d, Maj, K13, ASG(14));
+	MIX(d, e, a, b, c, Maj, K13, ASG(15));
+	MIX(c, d, e, a, b, Maj, K13, ASG(0));
+	MIX(b, c, d, e, a, Maj, K13, ASG(1));
+	MIX(a, b, c, d, e, Maj, K13, ASG(2));
+	MIX(e, a, b, c, d, Maj, K13, ASG(3));
+	MIX(d, e, a, b, c, Maj, K13, ASG(4));
+	MIX(c, d, e, a, b, Maj, K13, ASG(5));
+	MIX(b, c, d, e, a, Maj, K13, ASG(6));
+	MIX(a, b, c, d, e, Maj, K13, ASG(7));
+	MIX(e, a, b, c, d, Maj, K13, ASG(8));
+	MIX(d, e, a, b, c, Maj, K13, ASG(9));
+	MIX(c, d, e, a, b, Maj, K13, ASG(10));
+	MIX(b, c, d, e, a, Maj, K13, ASG(11));
+	MIX(a, b, c, d, e, Parity, K14, ASG(12));
+	MIX(e, a, b, c, d, Parity, K14, ASG(13));
+	MIX(d, e, a, b, c, Parity, K14, ASG(14));
+	MIX(c, d, e, a, b, Parity, K14, ASG(15));
+	MIX(b, c, d, e, a, Parity, K14, ASG(0));
+	MIX(a, b, c, d, e, Parity, K14, ASG(1));
+	MIX(e, a, b, c, d, Parity, K14, ASG(2));
+	MIX(d, e, a, b, c, Parity, K14, ASG(3));
+	MIX(c, d, e, a, b, Parity, K14, ASG(4));
+	MIX(b, c, d, e, a, Parity, K14, ASG(5));
+	MIX(a, b, c, d, e, Parity, K14, ASG(6));
+	MIX(e, a, b, c, d, Parity, K14, ASG(7));
+	MIX(d, e, a, b, c, Parity, K14, ASG(8));
+	MIX(c, d, e, a, b, Parity, K14, ASG(9));
+	MIX(b, c, d, e, a, Parity, K14, ASG(10));
+	MIX(a, b, c, d, e, Parity, K14, ASG(11));
+	MIX(e, a, b, c, d, Parity, K14, ASG(12));
+	MIX(d, e, a, b, c, Parity, K14, ASG(13));
+	MIX(c, d, e, a, b, Parity, K14, ASG(14));
+	MIX(b, c, d, e, a, Parity, K14, ASG(15));
+	p->H[0] += a; p->H[1] += b; p->H[2] += c; p->H[3] += d; p->H[4] += e;
 }
 
 static void sha256(p, block)
@@ -209,18 +203,15 @@ unsigned char *block;
 {
 	int t;
 	unsigned long a, b, c, d, e, f, g, h, T1, T2;
-	static unsigned long W[64];
 
 #ifdef SHA_BIG_ENDIAN
 	memcpy(W, block, 64);
 #else
-
 	unsigned long *q;
 	for (t = 0, q = W; t < 16; t++, q++) {
 		*q = *block++; *q = (*q << 8) + *block++;
 		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
 	}
-
 #endif
 
 	for (t = 16; t < 64; t++)
@@ -290,9 +281,6 @@ static unsigned long long HQ0512[8] =
 	0x1f83d9abfb41bd6bULL, 0x5be0cd19137e2179ULL
 };
 
-#ifdef SHA_BIG_ENDIAN
-#define ull2mem(mem, ull) memcpy(mem, &(ull), 8)
-#else
 static void ull2mem(mem, ull)		/* endian-neutral */
 unsigned char *mem;
 unsigned long long ull;
@@ -302,7 +290,6 @@ unsigned long long ull;
 	for (i = 0; i < 8; i++)
 		*mem++ = SHR(ull, 56 - i * 8) & 0xff;
 }
-#endif
 
 /* strtoull() not always present, so cook up an alternative*/
 static unsigned long long hex2ull(s)
@@ -323,6 +310,7 @@ unsigned char *block;
 	int t;
 	unsigned long long a, b, c, d, e, f, g, h, T1, T2;
 	static unsigned long long W[80];
+	unsigned long long *HQ = (unsigned long long *) p->H;
 
 #ifdef SHA_BIG_ENDIAN
 	memcpy(W, block, 128);
@@ -335,18 +323,19 @@ unsigned char *block;
 		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
 	}
 #endif
+
 	for (t = 16; t < 80; t++)
 		W[t] = sigmaQ1(W[t-2]) + W[t-7] + sigmaQ0(W[t-15]) + W[t-16];
-	a = p->HQ[0]; b = p->HQ[1]; c = p->HQ[2]; d = p->HQ[3];
-	e = p->HQ[4]; f = p->HQ[5]; g = p->HQ[6]; h = p->HQ[7];
+	a = HQ[0]; b = HQ[1]; c = HQ[2]; d = HQ[3];
+	e = HQ[4]; f = HQ[5]; g = HQ[6]; h = HQ[7];
 	for (t = 0; t < 80; t++) {
 		T1 = h + SIGMAQ1(e) + Ch(e, f, g) + K512[t] + W[t];
 		T2 = SIGMAQ0(a) + Maj(a, b, c);
 		h = g; g = f; f = e; e = d + T1;
 		d = c; c = b; b = a; a = T1 + T2;
 	}
-	p->HQ[0] += a; p->HQ[1] += b; p->HQ[2] += c; p->HQ[3] += d;
-	p->HQ[4] += e; p->HQ[5] += f; p->HQ[6] += g; p->HQ[7] += h;
+	HQ[0] += a; HQ[1] += b; HQ[2] += c; HQ[3] += d;
+	HQ[4] += e; HQ[5] += f; HQ[6] += g; HQ[7] += h;
 }
 
 #endif	/* #ifdef SHA_384_512 */
@@ -382,12 +371,14 @@ SHA *s;
 	unsigned int i;
 
 	if (s->blocksize == SHA1_BLOCK_BITS)
-		for (i = 0; i < sizeof(s->H)/sizeof(s->H[0]); i++)
-			ul2mem(s->digest + i * sizeof(s->H[0]), s->H[i]);
+		for (i = 0; i < 16; i++)
+			ul2mem(s->digest + i * 4, s->H[i]);
 #ifdef SHA_384_512
-	else
-		for (i = 0; i < sizeof(s->HQ)/sizeof(s->HQ[0]); i++)
-			ull2mem(s->digest + i * sizeof(s->HQ[0]), s->HQ[i]);
+	else {
+		unsigned long long *p = (unsigned long long *) s->H;
+		for (i = 0; i < 8; i++)
+			ull2mem(s->digest + i * 8, *p++);
+	}
 #endif
 }
 
@@ -411,24 +402,20 @@ int alg;
 		s->blocksize = SHA256_BLOCK_BITS;
 		s->digestlen = SHA256_DIGEST_BITS >> 3;
 	}
-
 #ifdef SHA_384_512
-
 	else if (alg == SHA384) {
 		s->sha = sha512;
-		memcpy(s->HQ, HQ0384, sizeof(HQ0384));
+		memcpy(s->H, HQ0384, sizeof(HQ0384));
 		s->blocksize = SHA384_BLOCK_BITS;
 		s->digestlen = SHA384_DIGEST_BITS >> 3;
 	}
 	else if (alg == SHA512) {
 		s->sha = sha512;
-		memcpy(s->HQ, HQ0512, sizeof(HQ0512));
+		memcpy(s->H, HQ0512, sizeof(HQ0512));
 		s->blocksize = SHA512_BLOCK_BITS;
 		s->digestlen = SHA512_DIGEST_BITS >> 3;
 	}
-
 #endif	/* #ifdef SHA_384_512 */
-
 	else {
 		free(s);
 		return(NULL);
@@ -620,6 +607,7 @@ SHA *s;
 {
 	int i;
 	FILE *f;
+	unsigned char *p;
 
 	if (file == NULL || strlen(file) == 0)
 		f = stdout;
@@ -627,8 +615,13 @@ SHA *s;
 		return(0);
 	fprintf(f, "alg:%d\n", s->alg);
 	fprintf(f, "H");
-	for (i = 0; i < sizeof(s->H)/sizeof(s->H[0]); i++)
-		fprintf(f, ":%08lx", s->H[i]);
+	p = shadigest(s);
+	if (s->alg == SHA1 || s->alg == SHA256)
+		for (i = 0; i < 8; i++, p += 4)
+			fprintf(f, ":%02x%02x%02x%02x", p[0],p[1],p[2],p[3]);
+	else for (i = 0; i < 8; i++, p += 8)
+		fprintf(f, ":%02x%02x%02x%02x%02x%02x%02x%02x",
+			p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7]);
 	fprintf(f, "\n");
 	fprintf(f, "block");
 	for (i = 0; i < sizeof(s->block); i++)
@@ -639,21 +632,6 @@ SHA *s;
 	fprintf(f, "lenhl:%lu\n", s->lenhl);
 	fprintf(f, "lenlh:%lu\n", s->lenlh);
 	fprintf(f, "lenll:%lu\n", s->lenll);
-	if (s->alg == SHA1 || s->alg == SHA256) {
-		if (f != stdout)
-			fclose(f);
-		return(1);
-	}
-
-#ifdef SHA_384_512
-
-	fprintf(f, "HQ");
-	for (i = 0; i < sizeof(s->HQ)/sizeof(s->HQ[0]); i++)
-		fprintf(f, ":%016llx", s->HQ[i]);
-	fprintf(f, "\n");
-
-#endif
-
 	if (f != stdout)
 		fclose(f);
 	return(1);
@@ -735,8 +713,12 @@ char *file;
 		return(closeall(f, NULL));
 	if ((s = shaopen(alg)) == NULL)
 		return(closeall(f, NULL));
-	if (!loadval(f, "H", TYPE_L, s->H, sizeof(s->H)/sizeof(s->H[0]), 16))
-		return(closeall(f, s));
+	if (alg == SHA1	|| alg == SHA256) {
+		if (!loadval(f, "H", TYPE_L, s->H, 8, 16))
+			return(closeall(f, s));
+	}
+	else if (!loadval(f, "H", TYPE_LL, s->H, 8, 16))
+			return(closeall(f, s));
 	if (!loadval(f, "block", TYPE_C, s->block, s->blocksize>>3, 16))
 		return(closeall(f, s));
 	if (!loadval(f, "blockcnt", TYPE_I, &s->blockcnt, 1, 10))
@@ -749,17 +731,6 @@ char *file;
 		return(closeall(f, s));
 	if (!loadval(f, "lenll", TYPE_L, &s->lenll, 1, 10))
 		return(closeall(f, s));
-	if (alg == SHA1 || alg == SHA256) {
-		if (f != stdin)
-			fclose(f);
-		return(s);
-	}
-
-#ifdef SHA_384_512
-	if (!loadval(f,"HQ",TYPE_LL,s->HQ,sizeof(s->HQ)/sizeof(s->HQ[0]),16))
-		return(closeall(f, s));
-#endif
-
 	if (f != stdin)
 		fclose(f);
 	return(s);
@@ -815,8 +786,6 @@ SHA_DIRECT(unsigned char *, sha256digest, SHA256, SHA_FMT_RAW)
 SHA_DIRECT(char *, sha256hex, SHA256, SHA_FMT_HEX)
 SHA_DIRECT(char *, sha256base64, SHA256, SHA_FMT_BASE64)
 
-#ifdef SHA_384_512
-
 SHA_DIRECT(unsigned char *, sha384digest, SHA384, SHA_FMT_RAW)
 SHA_DIRECT(char *, sha384hex, SHA384, SHA_FMT_HEX)
 SHA_DIRECT(char *, sha384base64, SHA384, SHA_FMT_BASE64)
@@ -824,5 +793,3 @@ SHA_DIRECT(char *, sha384base64, SHA384, SHA_FMT_BASE64)
 SHA_DIRECT(unsigned char *, sha512digest, SHA512, SHA_FMT_RAW)
 SHA_DIRECT(char *, sha512hex, SHA512, SHA_FMT_HEX)
 SHA_DIRECT(char *, sha512base64, SHA512, SHA_FMT_BASE64)
-
-#endif	/* #ifdef SHA_384_512 */

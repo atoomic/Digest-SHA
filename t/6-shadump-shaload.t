@@ -27,12 +27,10 @@ my $skip;
 for (my $i = 0; $i < 4; $i++) {
 	$skip = 0;
 	if ($ext[$i] == 384) {
-		eval { sha384hex("") };
-		$skip = $@;
+		$skip = sha384hex("") ? 0 : 1;
 	}
 	if ($ext[$i] == 512) {
-		eval { sha512hex("") };
-		$skip = $@;
+		$skip = sha512hex("") ? 0 : 1;
 	}
 	SKIP: {
 		skip("64-bit operations not supported", 1) if $skip;

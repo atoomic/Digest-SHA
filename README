@@ -1,4 +1,4 @@
-Digest/SHA version 2.2
+Digest/SHA version 2.3
 ======================
 
 The Digest::SHA module provides a Perl interface to all varieties
@@ -17,7 +17,8 @@ stages.
 The underlying C code is designed to be portable, and requires no
 special libraries beyond those found with typical compilers.
 However, if your compiler can't handle 64-bit integral types (i.e.
-long long), the package will omit support for SHA-384 and SHA-512.
+long long), the functions associated with the SHA-384 and SHA-512
+transforms will return NULL values.
 
 Prior to version 2.2, the SHA algorithm code mapped as closely as
 possible to the NIST specification in the interest of establishing
