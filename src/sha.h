@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 2.3
- * Wed Nov 19 04:10:41 MST 2003
+ * Version: 2.4
+ * Sat Nov 22 17:10:22 MST 2003
  *
  */
 
@@ -57,85 +57,39 @@ typedef struct {
 	char base64[SHA_MAX_BASE64_LEN+1];
 } SHA;
 
-#if defined(__STDC__) && __STDC__ != 0		/* use  prototypes */
+#if defined(__STDC__) && __STDC__ != 0
+	#define _SHA_P(protos)	protos
+#else
+	#define _SHA_P(protos)	()
+#endif
 
-SHA *shaopen(int alg);
-unsigned long shawrite(
-	unsigned char *bitstr,
-	unsigned long bitcnt,
-	SHA *s);
-void shafinish(SHA *s);
-unsigned char *shadigest(SHA *s);
-char *shahex(SHA *s);
-char *shabase64(SHA *s);
-SHA *shadup(SHA *s);
-int shadump(char *file, SHA *s);
-SHA *shaload(char *file);
-int shaclose(SHA *s);
+#define _SHA_STATE	SHA *s
+#define _SHA_ALG	int alg
+#define _SHA_DATA	unsigned char *bitstr, unsigned long bitcnt
+#define _SHA_FILE	char *filename
 
-unsigned char *sha1digest(
-	unsigned char *bitstr,
-	unsigned long bitcnt);
-char *sha1hex(
-	unsigned char *bitstr,
-	unsigned long bitcnt);
-char *sha1base64(
-	unsigned char *bitstr,
-	unsigned long bitcnt);
-unsigned char *sha256digest(
-	unsigned char *bitstr,
-	unsigned long bitcnt);
-char *sha256hex(
-	unsigned char *bitstr,
-	unsigned long bitcnt);
-char *sha256base64(
-	unsigned char *bitstr,
-	unsigned long bitcnt);
-unsigned char *sha384digest(
-	unsigned char *bitstr,
-	unsigned long bitcnt);
-char *sha384hex(
-	unsigned char *bitstr,
-	unsigned long bitcnt);
-char *sha384base64(
-	unsigned char *bitstr,
-	unsigned long bitcnt);
-unsigned char *sha512digest(
-	unsigned char *bitstr,
-	unsigned long bitcnt);
-char *sha512hex(
-	unsigned char *bitstr,
-	unsigned long bitcnt);
-char *sha512base64(
-	unsigned char *bitstr,
-	unsigned long bitcnt);
+SHA		*shaopen	_SHA_P((_SHA_ALG));
+unsigned long	 shawrite	_SHA_P((_SHA_DATA, _SHA_STATE));
+void		 shafinish	_SHA_P((_SHA_STATE));
+unsigned char	*shadigest	_SHA_P((_SHA_STATE));
+char		*shahex		_SHA_P((_SHA_STATE));
+char		*shabase64	_SHA_P((_SHA_STATE));
+SHA		*shadup		_SHA_P((_SHA_STATE));
+int		 shadump	_SHA_P((_SHA_FILE, _SHA_STATE));
+SHA		*shaload	_SHA_P((_SHA_FILE));
+int		 shaclose	_SHA_P((_SHA_STATE));
 
-#else	/* use K&R style declarations */
-
-SHA *shaopen();
-unsigned long shawrite();
-void shafinish();
-unsigned char *shadigest();
-char *shahex();
-char *shabase64();
-SHA *shadup();
-int shadump();
-SHA *shaload();
-int shaclose();
-
-unsigned char *sha1digest();
-char *sha1hex();
-char *sha1base64();
-unsigned char *sha256digest();
-char *sha256hex();
-char *sha256base64();
-unsigned char *sha384digest();
-char *sha384hex();
-char *sha384base64();
-unsigned char *sha512digest();
-char *sha512hex();
-char *sha512base64();
-
-#endif	/* use K&R style declarations */
+unsigned char	*sha1digest	_SHA_P((_SHA_DATA));
+char		*sha1hex	_SHA_P((_SHA_DATA));
+char		*sha1base64	_SHA_P((_SHA_DATA));
+unsigned char	*sha256digest	_SHA_P((_SHA_DATA));
+char		*sha256hex	_SHA_P((_SHA_DATA));
+char		*sha256base64	_SHA_P((_SHA_DATA));
+unsigned char	*sha384digest	_SHA_P((_SHA_DATA));
+char		*sha384hex	_SHA_P((_SHA_DATA));
+char		*sha384base64	_SHA_P((_SHA_DATA));
+unsigned char	*sha512digest	_SHA_P((_SHA_DATA));
+char		*sha512hex	_SHA_P((_SHA_DATA));
+char		*sha512base64	_SHA_P((_SHA_DATA));
 
 #endif	/* _INCLUDE_SHA_H_ */

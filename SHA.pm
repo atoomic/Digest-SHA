@@ -48,7 +48,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw();
 
-our $VERSION = '2.3';
+our $VERSION = '2.4';
 
 require XSLoader;
 XSLoader::load('Digest::SHA', $VERSION);

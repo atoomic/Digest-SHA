@@ -4,25 +4,20 @@ use strict;
 
 die "Usage: fixdump file [ file ... ]\n" unless (@ARGV);
 
-my ($pre, $post, $alg, @f, $H, $fh, $fn);
+my ($fn, $fh, @lines, $fix, $lnum, $h, $hq);
 FILE: for (@ARGV) {
 	$fn = $_;
 	next unless open($fh, "<$fn");
-	$pre = ""; $post = ""; $alg = 0;
-	while (<$fh>) {
-		if (/^alg:/) {
-			$pre .= $_; $alg = 1; chomp; @f = split(":");
-			unless ($f[1] == 384 || $f[1] == 512) {
-				close($fh); next FILE;
-			}
-		}
-		elsif (/^H:/) { $H = $_ }
-		elsif (/^HQ:/) { s/Q//; $H = $_ }
-		elsif ($alg) { $post .= $_ }
-		else { $pre .= $_ }
+	@lines = <$fh>; close($fh);
+	($fix, $lnum, $h, $hq) = (0, 0, 0, 0);
+	for (@lines) {
+		if (/^H:/) { $h = $lnum }
+		elsif (/^HQ:/) { $hq = $lnum; $fix = 1 }
+		$lnum++;
 	}
-	close($fh);
-	next FILE unless open($fh, ">$fn");
-	print $fh $pre, $H, $post;
+	next FILE unless ($fix && open($fh, ">$fn"));
+	($lines[$h] = $lines[$hq]) =~ s/^HQ:/H:/;
+	$lines[$hq] = "";
+	print $fh @lines;
 	close($fh);
 }

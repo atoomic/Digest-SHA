@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 2.3
- * Wed Nov 19 04:10:41 MST 2003
+ * Version: 2.4
+ * Sat Nov 22 17:10:22 MST 2003
  *
  */
 
@@ -15,129 +15,45 @@
 
 #include "sha.h"
 
-#define HMAC_KEY_SIZE 64
+#define _HMAC_KEY_SIZE 64
 
 typedef struct {
 	SHA *ksha;
 	SHA *isha;
 	SHA *osha;
-	unsigned char key[HMAC_KEY_SIZE];
+	unsigned char key[_HMAC_KEY_SIZE];
 } HMAC;
 
-#if defined(__STDC__) && __STDC__ != 0		/* use  prototypes */
+#if defined(__STDC__) && __STDC__ != 0
+	#define _HMAC_P(protos)	protos
+#else
+	#define _HMAC_P(protos)	()
+#endif
 
-HMAC *hmacopen(
-	int alg,
-	unsigned char *key,
-	unsigned int keylen);
-unsigned long hmacwrite(
-	unsigned char *bitstr,
-	unsigned long bitcnt,
-	HMAC *h);
-void hmacfinish(HMAC *h);
-unsigned char *hmacdigest(HMAC *h);
-char *hmachex(HMAC *h);
-char *hmacbase64(HMAC *h);
-int hmacclose(HMAC *h);
+#define _HMAC_STATE	HMAC *h
+#define _HMAC_ALG	int alg
+#define _HMAC_DATA	unsigned char *bitstr, unsigned long bitcnt
+#define _HMAC_KEY	unsigned char *key, unsigned int keylen
 
-unsigned char *hmac1digest(
-	unsigned char *bitstr,
-	unsigned long bitcnt,
-	unsigned char *key,
-	unsigned int keylen);
-char *hmac1hex(
-	unsigned char *bitstr,
-	unsigned long bitcnt,
-	unsigned char *key,
-	unsigned int keylen);
-char *hmac1base64(
-	unsigned char *bitstr,
-	unsigned long bitcnt,
-	unsigned char *key,
-	unsigned int keylen);
+HMAC		*hmacopen 	_HMAC_P((_HMAC_ALG, _HMAC_KEY));
+unsigned long	 hmacwrite	_HMAC_P((_HMAC_DATA, _HMAC_STATE));
+void		 hmacfinish	_HMAC_P((_HMAC_STATE));
+unsigned char	*hmacdigest	_HMAC_P((_HMAC_STATE));
+char		*hmachex	_HMAC_P((_HMAC_STATE));
+char		*hmacbase64	_HMAC_P((_HMAC_STATE));
+int		 hmacclose	_HMAC_P((_HMAC_STATE));
 
-unsigned char *hmac256digest(
-	unsigned char *bitstr,
-	unsigned long bitcnt,
-	unsigned char *key,
-	unsigned int keylen);
-char *hmac256hex(
-	unsigned char *bitstr,
-	unsigned long bitcnt,
-	unsigned char *key,
-	unsigned int keylen);
-char *hmac256base64(
-	unsigned char *bitstr,
-	unsigned long bitcnt,
-	unsigned char *key,
-	unsigned int keylen);
-
-#ifdef SHA_384_512
-
-unsigned char *hmac384digest(
-	unsigned char *bitstr,
-	unsigned long bitcnt,
-	unsigned char *key,
-	unsigned int keylen);
-char *hmac384hex(
-	unsigned char *bitstr,
-	unsigned long bitcnt,
-	unsigned char *key,
-	unsigned int keylen);
-char *hmac384base64(
-	unsigned char *bitstr,
-	unsigned long bitcnt,
-	unsigned char *key,
-	unsigned int keylen);
-
-unsigned char *hmac512digest(
-	unsigned char *bitstr,
-	unsigned long bitcnt,
-	unsigned char *key,
-	unsigned int keylen);
-char *hmac512hex(
-	unsigned char *bitstr,
-	unsigned long bitcnt,
-	unsigned char *key,
-	unsigned int keylen);
-char *hmac512base64(
-	unsigned char *bitstr,
-	unsigned long bitcnt,
-	unsigned char *key,
-	unsigned int keylen);
-
-#endif	/* #ifdef SHA_384_512 */
-
-#else	/* use K&R style declarations */
-
-HMAC *hmacopen();
-unsigned long hmacwrite();
-void hmacfinish();
-unsigned char *hmacdigest();
-char *hmachex();
-char *hmacbase64();
-int hmacclose();
-
-unsigned char *hmac1digest();
-char *hmac1hex();
-char *hmac1base64();
-
-unsigned char *hmac256digest();
-char *hmac256hex();
-char *hmac256base64();
-
-#ifdef SHA_384_512
-
-unsigned char *hmac384digest();
-char *hmac384hex();
-char *hmac384base64();
-
-unsigned char *hmac512digest();
-char *hmac512hex();
-char *hmac512base64();
-
-#endif	/* #ifdef SHA_384_512 */
-
-#endif	/* use K&R style declarations */
+unsigned char	*hmac1digest	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
+char		*hmac1hex	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
+char		*hmac1base64	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
+unsigned char	*hmac256digest	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
+char		*hmac256hex	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
+char		*hmac256base64	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
+unsigned char	*hmac384digest	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
+char		*hmac384hex	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
+char		*hmac384base64	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
+unsigned char	*hmac512digest	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
+char		*hmac512hex	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
+char		*hmac512base64	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
 
 #endif	/* _INCLUDE_HMAC_H_ */

@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 2.3
- * Wed Nov 19 04:10:41 MST 2003
+ * Version: 2.4
+ * Sat Nov 22 17:10:22 MST 2003
  *
  */
 
@@ -114,27 +114,22 @@ unsigned int keylen;
 {
 	HMAC *h;
 	static unsigned char digest[SHA_MAX_HEX_LEN+1];
+	unsigned char *ret = digest;
 
 	if ((h = hmacopen(alg, key, keylen)) == NULL)
 		return(NULL);
 	hmacwrite(bitstr, bitcnt, h);
 	hmacfinish(h);
-	switch (fmt) {
-		case SHA_FMT_RAW:
-			memcpy(digest, hmacdigest(h), h->osha->digestlen); 
-			break;
-		case SHA_FMT_HEX:
-			strcpy((char *) digest, hmachex(h)); 
-			break;
-		case SHA_FMT_BASE64:
-			strcpy((char *) digest, hmacbase64(h)); 
-			break;
-		default:
-			hmacclose(h);
-			return(NULL);
-	}
+	if (fmt == SHA_FMT_RAW)
+		memcpy(digest, hmacdigest(h), h->osha->digestlen); 
+	else if (fmt == SHA_FMT_HEX)
+		strcpy((char *) digest, hmachex(h)); 
+	else if (fmt == SHA_FMT_BASE64)
+		strcpy((char *) digest, hmacbase64(h)); 
+	else
+		ret = NULL;
 	hmacclose(h);
-	return(digest);
+	return(ret);
 }
 
 #define HMAC_DIRECT(type, name, alg, fmt) 			\

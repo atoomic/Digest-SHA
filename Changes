@@ -56,3 +56,10 @@ Revision history for Perl extension Digest::SHA.
 	- SHA-384/512 functions now return NULL for no 64-bit operations
 		-- previously they were undefined
 		-- no longer necessary to use eval's to test for presence
+
+2.4   Sat Nov 22 17:10:22 MST 2003
+	- code cleanup
+		-- "sha.c" now completely free of #ifdef's
+	- modularized all 64-bit (long long) code
+	- improved readability of header files
+	- simplified logic of "fixdump" utility

@@ -6,10 +6,13 @@ README
 SHA.pm
 SHA.xs
 typemap
+src/endian.h
 src/hmac.c
 src/hmac.h
 src/sha.c
 src/sha.h
+src/sha64bit.c
+src/sha64bit.h
 t/1-exist.t
 t/1-hello-world.t
 t/2-nist-sha-1.t

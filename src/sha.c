@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 2.3
- * Wed Nov 19 04:10:41 MST 2003
+ * Version: 2.4
+ * Sat Nov 22 17:10:22 MST 2003
  *
  */
 
@@ -15,6 +15,8 @@
 #include <string.h>
 #include <ctype.h>
 #include "sha.h"
+#include "sha64bit.h"
+#include "endian.h"
 
 #define SHR(x, n)	( (x) >> (n) )
 #define ROTR(x, n)	( ( (x) >> (n) ) | ( (x) << (32 - (n)) ) )
@@ -86,18 +88,16 @@ static void sha1(p, block)
 SHA *p;
 unsigned char *block;
 {
-	unsigned long a, b, c, d, e;
-
-#ifdef SHA_BIG_ENDIAN
-	memcpy(W, block, 64);
-#else
 	int t;
-	unsigned long *q;
-	for (t = 0, q = W; t < 16; t++, q++) {
+	unsigned long a, b, c, d, e;
+	unsigned long *q = W;
+
+	if (sha_big_endian)
+		memcpy(W, block, 64);
+	else for (t = 0; t < 16; t++, q++) {
 		*q = *block++; *q = (*q << 8) + *block++;
 		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
 	}
-#endif
 
 /*
  * Use SHA-1 alternate method from FIPS PUB 180-2 (ref. 6.1.3)
@@ -203,17 +203,14 @@ unsigned char *block;
 {
 	int t;
 	unsigned long a, b, c, d, e, f, g, h, T1, T2;
+	unsigned long *q = W;
 
-#ifdef SHA_BIG_ENDIAN
-	memcpy(W, block, 64);
-#else
-	unsigned long *q;
-	for (t = 0, q = W; t < 16; t++, q++) {
+	if (sha_big_endian)
+		memcpy(W, block, 64);
+	else for (t = 0; t < 16; t++, q++) {
 		*q = *block++; *q = (*q << 8) + *block++;
 		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
 	}
-#endif
-
 	for (t = 16; t < 64; t++)
 		W[t] = sigma1(W[t-2]) + W[t-7] + sigma0(W[t-15]) + W[t-16];
 	a = p->H[0]; b = p->H[1]; c = p->H[2]; d = p->H[3];
@@ -228,117 +225,7 @@ unsigned char *block;
 	p->H[4] += e; p->H[5] += f; p->H[6] += g; p->H[7] += h;
 }
 
-#ifdef SHA_384_512
-
-#define ROTRQ(x, n)	( ( (x) >> (n) ) | ( (x) << (64 - (n)) ) )
-#define SIGMAQ0(x)	( ROTRQ(x, 28) ^ ROTRQ(x, 34) ^ ROTRQ(x, 39) )
-#define SIGMAQ1(x)	( ROTRQ(x, 14) ^ ROTRQ(x, 18) ^ ROTRQ(x, 41) )
-#define sigmaQ0(x)	( ROTRQ(x,  1) ^ ROTRQ(x,  8) ^   SHR(x,  7) )
-#define sigmaQ1(x)	( ROTRQ(x, 19) ^ ROTRQ(x, 61) ^   SHR(x,  6) )
-
-static unsigned long long K512[80] =
-{
-	0x428a2f98d728ae22ULL, 0x7137449123ef65cdULL, 0xb5c0fbcfec4d3b2fULL,
-	0xe9b5dba58189dbbcULL, 0x3956c25bf348b538ULL, 0x59f111f1b605d019ULL,
-	0x923f82a4af194f9bULL, 0xab1c5ed5da6d8118ULL, 0xd807aa98a3030242ULL,
-	0x12835b0145706fbeULL, 0x243185be4ee4b28cULL, 0x550c7dc3d5ffb4e2ULL,
-	0x72be5d74f27b896fULL, 0x80deb1fe3b1696b1ULL, 0x9bdc06a725c71235ULL,
-	0xc19bf174cf692694ULL, 0xe49b69c19ef14ad2ULL, 0xefbe4786384f25e3ULL,
-	0x0fc19dc68b8cd5b5ULL, 0x240ca1cc77ac9c65ULL, 0x2de92c6f592b0275ULL,
-	0x4a7484aa6ea6e483ULL, 0x5cb0a9dcbd41fbd4ULL, 0x76f988da831153b5ULL,
-	0x983e5152ee66dfabULL, 0xa831c66d2db43210ULL, 0xb00327c898fb213fULL,
-	0xbf597fc7beef0ee4ULL, 0xc6e00bf33da88fc2ULL, 0xd5a79147930aa725ULL,
-	0x06ca6351e003826fULL, 0x142929670a0e6e70ULL, 0x27b70a8546d22ffcULL,
-	0x2e1b21385c26c926ULL, 0x4d2c6dfc5ac42aedULL, 0x53380d139d95b3dfULL,
-	0x650a73548baf63deULL, 0x766a0abb3c77b2a8ULL, 0x81c2c92e47edaee6ULL,
-	0x92722c851482353bULL, 0xa2bfe8a14cf10364ULL, 0xa81a664bbc423001ULL,
-	0xc24b8b70d0f89791ULL, 0xc76c51a30654be30ULL, 0xd192e819d6ef5218ULL,
-	0xd69906245565a910ULL, 0xf40e35855771202aULL, 0x106aa07032bbd1b8ULL,
-	0x19a4c116b8d2d0c8ULL, 0x1e376c085141ab53ULL, 0x2748774cdf8eeb99ULL,
-	0x34b0bcb5e19b48a8ULL, 0x391c0cb3c5c95a63ULL, 0x4ed8aa4ae3418acbULL,
-	0x5b9cca4f7763e373ULL, 0x682e6ff3d6b2b8a3ULL, 0x748f82ee5defb2fcULL,
-	0x78a5636f43172f60ULL, 0x84c87814a1f0ab72ULL, 0x8cc702081a6439ecULL,
-	0x90befffa23631e28ULL, 0xa4506cebde82bde9ULL, 0xbef9a3f7b2c67915ULL,
-	0xc67178f2e372532bULL, 0xca273eceea26619cULL, 0xd186b8c721c0c207ULL,
-	0xeada7dd6cde0eb1eULL, 0xf57d4f7fee6ed178ULL, 0x06f067aa72176fbaULL,
-	0x0a637dc5a2c898a6ULL, 0x113f9804bef90daeULL, 0x1b710b35131c471bULL,
-	0x28db77f523047d84ULL, 0x32caab7b40c72493ULL, 0x3c9ebe0a15c9bebcULL,
-	0x431d67c49c100d4cULL, 0x4cc5d4becb3e42b6ULL, 0x597f299cfc657e2aULL,
-	0x5fcb6fab3ad6faecULL, 0x6c44198c4a475817ULL
-};
-
-static unsigned long long HQ0384[8] =
-{
-	0xcbbb9d5dc1059ed8ULL, 0x629a292a367cd507ULL, 0x9159015a3070dd17ULL,
-	0x152fecd8f70e5939ULL, 0x67332667ffc00b31ULL, 0x8eb44a8768581511ULL,
-	0xdb0c2e0d64f98fa7ULL, 0x47b5481dbefa4fa4ULL
-};
-
-static unsigned long long HQ0512[8] =
-{
-	0x6a09e667f3bcc908ULL, 0xbb67ae8584caa73bULL, 0x3c6ef372fe94f82bULL,
-	0xa54ff53a5f1d36f1ULL, 0x510e527fade682d1ULL, 0x9b05688c2b3e6c1fULL,
-	0x1f83d9abfb41bd6bULL, 0x5be0cd19137e2179ULL
-};
-
-static void ull2mem(mem, ull)		/* endian-neutral */
-unsigned char *mem;
-unsigned long long ull;
-{
-	int i;
-
-	for (i = 0; i < 8; i++)
-		*mem++ = SHR(ull, 56 - i * 8) & 0xff;
-}
-
-/* strtoull() not always present, so cook up an alternative*/
-static unsigned long long hex2ull(s)
-char *s;
-{
-	char str[2] = {0, 0};
-	unsigned long long u = 0ULL;
-
-	while ((str[0] = *s++) != '\0')
-		u = (u << 4) + strtoul(str, NULL, 16);
-	return(u);
-}
-
-static void sha512(p, block)
-SHA *p;
-unsigned char *block;
-{
-	int t;
-	unsigned long long a, b, c, d, e, f, g, h, T1, T2;
-	static unsigned long long W[80];
-	unsigned long long *HQ = (unsigned long long *) p->H;
-
-#ifdef SHA_BIG_ENDIAN
-	memcpy(W, block, 128);
-#else
-	unsigned long long *q;
-	for (t = 0, q = W; t < 16; t++, q++) {
-		*q = *block++; *q = (*q << 8) + *block++;
-		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
-		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
-		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
-	}
-#endif
-
-	for (t = 16; t < 80; t++)
-		W[t] = sigmaQ1(W[t-2]) + W[t-7] + sigmaQ0(W[t-15]) + W[t-16];
-	a = HQ[0]; b = HQ[1]; c = HQ[2]; d = HQ[3];
-	e = HQ[4]; f = HQ[5]; g = HQ[6]; h = HQ[7];
-	for (t = 0; t < 80; t++) {
-		T1 = h + SIGMAQ1(e) + Ch(e, f, g) + K512[t] + W[t];
-		T2 = SIGMAQ0(a) + Maj(a, b, c);
-		h = g; g = f; f = e; e = d + T1;
-		d = c; c = b; b = a; a = T1 + T2;
-	}
-	HQ[0] += a; HQ[1] += b; HQ[2] += c; HQ[3] += d;
-	HQ[4] += e; HQ[5] += f; HQ[6] += g; HQ[7] += h;
-}
-
-#endif	/* #ifdef SHA_384_512 */
+#include "sha64bit.c"
 
 static void pad(s)
 SHA *s;
@@ -373,13 +260,8 @@ SHA *s;
 	if (s->blocksize == SHA1_BLOCK_BITS)
 		for (i = 0; i < 16; i++)
 			ul2mem(s->digest + i * 4, s->H[i]);
-#ifdef SHA_384_512
-	else {
-		unsigned long long *p = (unsigned long long *) s->H;
-		for (i = 0; i < 8; i++)
-			ull2mem(s->digest + i * 8, *p++);
-	}
-#endif
+	else
+		digcpy64(s);
 }
 
 SHA *shaopen(alg)
@@ -402,20 +284,22 @@ int alg;
 		s->blocksize = SHA256_BLOCK_BITS;
 		s->digestlen = SHA256_DIGEST_BITS >> 3;
 	}
-#ifdef SHA_384_512
+	else if (!sha_384_512) {
+		free(s);
+		return(NULL);
+	}
 	else if (alg == SHA384) {
 		s->sha = sha512;
-		memcpy(s->H, HQ0384, sizeof(HQ0384));
+		memcpy(s->H, H0384, sizeof(H0384));
 		s->blocksize = SHA384_BLOCK_BITS;
 		s->digestlen = SHA384_DIGEST_BITS >> 3;
 	}
 	else if (alg == SHA512) {
 		s->sha = sha512;
-		memcpy(s->H, HQ0512, sizeof(HQ0512));
+		memcpy(s->H, H0512, sizeof(H0512));
 		s->blocksize = SHA512_BLOCK_BITS;
 		s->digestlen = SHA512_DIGEST_BITS >> 3;
 	}
-#endif	/* #ifdef SHA_384_512 */
 	else {
 		free(s);
 		return(NULL);
@@ -616,9 +500,8 @@ SHA *s;
 	fprintf(f, "alg:%d\n", s->alg);
 	fprintf(f, "H");
 	p = shadigest(s);
-	if (s->alg == SHA1 || s->alg == SHA256)
-		for (i = 0; i < 8; i++, p += 4)
-			fprintf(f, ":%02x%02x%02x%02x", p[0],p[1],p[2],p[3]);
+	if (s->alg <= SHA256) for (i = 0; i < 8; i++, p += 4)
+		fprintf(f, ":%02x%02x%02x%02x", p[0],p[1],p[2],p[3]);
 	else for (i = 0; i < 8; i++, p += 8)
 		fprintf(f, ":%02x%02x%02x%02x%02x%02x%02x%02x",
 			p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7]);
@@ -677,10 +560,8 @@ int base;
 			*((unsigned int *) pval)++ = strtoul(p, NULL, base);
 		else if (type == TYPE_L)
 			*((unsigned long *) pval)++ = strtoul(p, NULL, base);
-#ifdef SHA_384_512
 		else if (type == TYPE_LL)
-			*((unsigned long long *) pval)++ = hex2ull(p);
-#endif
+			loadull(pval, p);
 		else
 			return(0);
 	}
@@ -713,12 +594,8 @@ char *file;
 		return(closeall(f, NULL));
 	if ((s = shaopen(alg)) == NULL)
 		return(closeall(f, NULL));
-	if (alg == SHA1	|| alg == SHA256) {
-		if (!loadval(f, "H", TYPE_L, s->H, 8, 16))
-			return(closeall(f, s));
-	}
-	else if (!loadval(f, "H", TYPE_LL, s->H, 8, 16))
-			return(closeall(f, s));
+	if (!loadval(f, "H", alg<=SHA256 ? TYPE_L : TYPE_LL, s->H, 8, 16))
+		return(closeall(f, s));
 	if (!loadval(f, "block", TYPE_C, s->block, s->blocksize>>3, 16))
 		return(closeall(f, s));
 	if (!loadval(f, "blockcnt", TYPE_I, &s->blockcnt, 1, 10))
