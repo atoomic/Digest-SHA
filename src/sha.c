@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 4.0.0
- * Sat Nov 29 23:18:45 MST 2003
+ * Version: 4.0.5
+ * Sat Dec  6 00:02:24 MST 2003
  *
  */
 
@@ -83,7 +83,7 @@ unsigned long ul;
 		*mem++ = SHR(ul, 24 - i * 8) & 0xff;
 }
 
-static unsigned long W[64];
+static unsigned long W[16];
 
 static void sha1(p, block)
 SHA *p;
@@ -109,92 +109,93 @@ unsigned char *block;
  *
  */
 
-#define MIX(a,b,c,d,e,f,k,w)	e+=ROTL(a,5)+f(b,c,d)+k+w;b=ROTL(b,30)
+#define MIX1(a,b,c,d,e,f,k,w)	\
+	e+=ROTL(a,5)+f(b,c,d)+k+w;b=ROTL(b,30)
 
-#define ASG(s)	\
+#define ASG1(s)			\
 	(W[s&15]=ROTL(W[(s+13)&15]^W[(s+8)&15]^W[(s+2)&15]^W[s&15],1))
 
 	a = p->H[0]; b = p->H[1]; c = p->H[2]; d = p->H[3]; e = p->H[4];
-	MIX(a, b, c, d, e, Ch, K11, W[0]);
-	MIX(e, a, b, c, d, Ch, K11, W[1]);
-	MIX(d, e, a, b, c, Ch, K11, W[2]);
-	MIX(c, d, e, a, b, Ch, K11, W[3]);
-	MIX(b, c, d, e, a, Ch, K11, W[4]);
-	MIX(a, b, c, d, e, Ch, K11, W[5]);
-	MIX(e, a, b, c, d, Ch, K11, W[6]);
-	MIX(d, e, a, b, c, Ch, K11, W[7]);
-	MIX(c, d, e, a, b, Ch, K11, W[8]);
-	MIX(b, c, d, e, a, Ch, K11, W[9]);
-	MIX(a, b, c, d, e, Ch, K11, W[10]);
-	MIX(e, a, b, c, d, Ch, K11, W[11]);
-	MIX(d, e, a, b, c, Ch, K11, W[12]);
-	MIX(c, d, e, a, b, Ch, K11, W[13]);
-	MIX(b, c, d, e, a, Ch, K11, W[14]);
-	MIX(a, b, c, d, e, Ch, K11, W[15]);
-	MIX(e, a, b, c, d, Ch, K11, ASG(0));
-	MIX(d, e, a, b, c, Ch, K11, ASG(1));
-	MIX(c, d, e, a, b, Ch, K11, ASG(2));
-	MIX(b, c, d, e, a, Ch, K11, ASG(3));
-	MIX(a, b, c, d, e, Parity, K12, ASG(4));
-	MIX(e, a, b, c, d, Parity, K12, ASG(5));
-	MIX(d, e, a, b, c, Parity, K12, ASG(6));
-	MIX(c, d, e, a, b, Parity, K12, ASG(7));
-	MIX(b, c, d, e, a, Parity, K12, ASG(8));
-	MIX(a, b, c, d, e, Parity, K12, ASG(9));
-	MIX(e, a, b, c, d, Parity, K12, ASG(10));
-	MIX(d, e, a, b, c, Parity, K12, ASG(11));
-	MIX(c, d, e, a, b, Parity, K12, ASG(12));
-	MIX(b, c, d, e, a, Parity, K12, ASG(13));
-	MIX(a, b, c, d, e, Parity, K12, ASG(14));
-	MIX(e, a, b, c, d, Parity, K12, ASG(15));
-	MIX(d, e, a, b, c, Parity, K12, ASG(0));
-	MIX(c, d, e, a, b, Parity, K12, ASG(1));
-	MIX(b, c, d, e, a, Parity, K12, ASG(2));
-	MIX(a, b, c, d, e, Parity, K12, ASG(3));
-	MIX(e, a, b, c, d, Parity, K12, ASG(4));
-	MIX(d, e, a, b, c, Parity, K12, ASG(5));
-	MIX(c, d, e, a, b, Parity, K12, ASG(6));
-	MIX(b, c, d, e, a, Parity, K12, ASG(7));
-	MIX(a, b, c, d, e, Maj, K13, ASG(8));
-	MIX(e, a, b, c, d, Maj, K13, ASG(9));
-	MIX(d, e, a, b, c, Maj, K13, ASG(10));
-	MIX(c, d, e, a, b, Maj, K13, ASG(11));
-	MIX(b, c, d, e, a, Maj, K13, ASG(12));
-	MIX(a, b, c, d, e, Maj, K13, ASG(13));
-	MIX(e, a, b, c, d, Maj, K13, ASG(14));
-	MIX(d, e, a, b, c, Maj, K13, ASG(15));
-	MIX(c, d, e, a, b, Maj, K13, ASG(0));
-	MIX(b, c, d, e, a, Maj, K13, ASG(1));
-	MIX(a, b, c, d, e, Maj, K13, ASG(2));
-	MIX(e, a, b, c, d, Maj, K13, ASG(3));
-	MIX(d, e, a, b, c, Maj, K13, ASG(4));
-	MIX(c, d, e, a, b, Maj, K13, ASG(5));
-	MIX(b, c, d, e, a, Maj, K13, ASG(6));
-	MIX(a, b, c, d, e, Maj, K13, ASG(7));
-	MIX(e, a, b, c, d, Maj, K13, ASG(8));
-	MIX(d, e, a, b, c, Maj, K13, ASG(9));
-	MIX(c, d, e, a, b, Maj, K13, ASG(10));
-	MIX(b, c, d, e, a, Maj, K13, ASG(11));
-	MIX(a, b, c, d, e, Parity, K14, ASG(12));
-	MIX(e, a, b, c, d, Parity, K14, ASG(13));
-	MIX(d, e, a, b, c, Parity, K14, ASG(14));
-	MIX(c, d, e, a, b, Parity, K14, ASG(15));
-	MIX(b, c, d, e, a, Parity, K14, ASG(0));
-	MIX(a, b, c, d, e, Parity, K14, ASG(1));
-	MIX(e, a, b, c, d, Parity, K14, ASG(2));
-	MIX(d, e, a, b, c, Parity, K14, ASG(3));
-	MIX(c, d, e, a, b, Parity, K14, ASG(4));
-	MIX(b, c, d, e, a, Parity, K14, ASG(5));
-	MIX(a, b, c, d, e, Parity, K14, ASG(6));
-	MIX(e, a, b, c, d, Parity, K14, ASG(7));
-	MIX(d, e, a, b, c, Parity, K14, ASG(8));
-	MIX(c, d, e, a, b, Parity, K14, ASG(9));
-	MIX(b, c, d, e, a, Parity, K14, ASG(10));
-	MIX(a, b, c, d, e, Parity, K14, ASG(11));
-	MIX(e, a, b, c, d, Parity, K14, ASG(12));
-	MIX(d, e, a, b, c, Parity, K14, ASG(13));
-	MIX(c, d, e, a, b, Parity, K14, ASG(14));
-	MIX(b, c, d, e, a, Parity, K14, ASG(15));
+	MIX1(a, b, c, d, e, Ch, K11, W[0]);
+	MIX1(e, a, b, c, d, Ch, K11, W[1]);
+	MIX1(d, e, a, b, c, Ch, K11, W[2]);
+	MIX1(c, d, e, a, b, Ch, K11, W[3]);
+	MIX1(b, c, d, e, a, Ch, K11, W[4]);
+	MIX1(a, b, c, d, e, Ch, K11, W[5]);
+	MIX1(e, a, b, c, d, Ch, K11, W[6]);
+	MIX1(d, e, a, b, c, Ch, K11, W[7]);
+	MIX1(c, d, e, a, b, Ch, K11, W[8]);
+	MIX1(b, c, d, e, a, Ch, K11, W[9]);
+	MIX1(a, b, c, d, e, Ch, K11, W[10]);
+	MIX1(e, a, b, c, d, Ch, K11, W[11]);
+	MIX1(d, e, a, b, c, Ch, K11, W[12]);
+	MIX1(c, d, e, a, b, Ch, K11, W[13]);
+	MIX1(b, c, d, e, a, Ch, K11, W[14]);
+	MIX1(a, b, c, d, e, Ch, K11, W[15]);
+	MIX1(e, a, b, c, d, Ch, K11, ASG1(0));
+	MIX1(d, e, a, b, c, Ch, K11, ASG1(1));
+	MIX1(c, d, e, a, b, Ch, K11, ASG1(2));
+	MIX1(b, c, d, e, a, Ch, K11, ASG1(3));
+	MIX1(a, b, c, d, e, Parity, K12, ASG1(4));
+	MIX1(e, a, b, c, d, Parity, K12, ASG1(5));
+	MIX1(d, e, a, b, c, Parity, K12, ASG1(6));
+	MIX1(c, d, e, a, b, Parity, K12, ASG1(7));
+	MIX1(b, c, d, e, a, Parity, K12, ASG1(8));
+	MIX1(a, b, c, d, e, Parity, K12, ASG1(9));
+	MIX1(e, a, b, c, d, Parity, K12, ASG1(10));
+	MIX1(d, e, a, b, c, Parity, K12, ASG1(11));
+	MIX1(c, d, e, a, b, Parity, K12, ASG1(12));
+	MIX1(b, c, d, e, a, Parity, K12, ASG1(13));
+	MIX1(a, b, c, d, e, Parity, K12, ASG1(14));
+	MIX1(e, a, b, c, d, Parity, K12, ASG1(15));
+	MIX1(d, e, a, b, c, Parity, K12, ASG1(0));
+	MIX1(c, d, e, a, b, Parity, K12, ASG1(1));
+	MIX1(b, c, d, e, a, Parity, K12, ASG1(2));
+	MIX1(a, b, c, d, e, Parity, K12, ASG1(3));
+	MIX1(e, a, b, c, d, Parity, K12, ASG1(4));
+	MIX1(d, e, a, b, c, Parity, K12, ASG1(5));
+	MIX1(c, d, e, a, b, Parity, K12, ASG1(6));
+	MIX1(b, c, d, e, a, Parity, K12, ASG1(7));
+	MIX1(a, b, c, d, e, Maj, K13, ASG1(8));
+	MIX1(e, a, b, c, d, Maj, K13, ASG1(9));
+	MIX1(d, e, a, b, c, Maj, K13, ASG1(10));
+	MIX1(c, d, e, a, b, Maj, K13, ASG1(11));
+	MIX1(b, c, d, e, a, Maj, K13, ASG1(12));
+	MIX1(a, b, c, d, e, Maj, K13, ASG1(13));
+	MIX1(e, a, b, c, d, Maj, K13, ASG1(14));
+	MIX1(d, e, a, b, c, Maj, K13, ASG1(15));
+	MIX1(c, d, e, a, b, Maj, K13, ASG1(0));
+	MIX1(b, c, d, e, a, Maj, K13, ASG1(1));
+	MIX1(a, b, c, d, e, Maj, K13, ASG1(2));
+	MIX1(e, a, b, c, d, Maj, K13, ASG1(3));
+	MIX1(d, e, a, b, c, Maj, K13, ASG1(4));
+	MIX1(c, d, e, a, b, Maj, K13, ASG1(5));
+	MIX1(b, c, d, e, a, Maj, K13, ASG1(6));
+	MIX1(a, b, c, d, e, Maj, K13, ASG1(7));
+	MIX1(e, a, b, c, d, Maj, K13, ASG1(8));
+	MIX1(d, e, a, b, c, Maj, K13, ASG1(9));
+	MIX1(c, d, e, a, b, Maj, K13, ASG1(10));
+	MIX1(b, c, d, e, a, Maj, K13, ASG1(11));
+	MIX1(a, b, c, d, e, Parity, K14, ASG1(12));
+	MIX1(e, a, b, c, d, Parity, K14, ASG1(13));
+	MIX1(d, e, a, b, c, Parity, K14, ASG1(14));
+	MIX1(c, d, e, a, b, Parity, K14, ASG1(15));
+	MIX1(b, c, d, e, a, Parity, K14, ASG1(0));
+	MIX1(a, b, c, d, e, Parity, K14, ASG1(1));
+	MIX1(e, a, b, c, d, Parity, K14, ASG1(2));
+	MIX1(d, e, a, b, c, Parity, K14, ASG1(3));
+	MIX1(c, d, e, a, b, Parity, K14, ASG1(4));
+	MIX1(b, c, d, e, a, Parity, K14, ASG1(5));
+	MIX1(a, b, c, d, e, Parity, K14, ASG1(6));
+	MIX1(e, a, b, c, d, Parity, K14, ASG1(7));
+	MIX1(d, e, a, b, c, Parity, K14, ASG1(8));
+	MIX1(c, d, e, a, b, Parity, K14, ASG1(9));
+	MIX1(b, c, d, e, a, Parity, K14, ASG1(10));
+	MIX1(a, b, c, d, e, Parity, K14, ASG1(11));
+	MIX1(e, a, b, c, d, Parity, K14, ASG1(12));
+	MIX1(d, e, a, b, c, Parity, K14, ASG1(13));
+	MIX1(c, d, e, a, b, Parity, K14, ASG1(14));
+	MIX1(b, c, d, e, a, Parity, K14, ASG1(15));
 	p->H[0] += a; p->H[1] += b; p->H[2] += c; p->H[3] += d; p->H[4] += e;
 }
 
@@ -203,7 +204,7 @@ SHA *p;
 unsigned char *block;
 {
 	int t;
-	unsigned long a, b, c, d, e, f, g, h, T1, T2;
+	unsigned long a, b, c, d, e, f, g, h, T1;
 	unsigned long *q = W;
 
 	if (sha_big_endian)
@@ -212,16 +213,88 @@ unsigned char *block;
 		*q = *block++; *q = (*q << 8) + *block++;
 		*q = (*q << 8) + *block++; *q = (*q << 8) + *block++;
 	}
-	for (t = 16; t < 64; t++)
-		W[t] = sigma1(W[t-2]) + W[t-7] + sigma0(W[t-15]) + W[t-16];
+
+/*
+ * Use same technique as in sha1()
+ *
+ * To improve performance, unroll the loop and consolidate assignments
+ * by changing the roles of variables "a" through "h" at each step.
+ * Note that the variable "T2" is no longer needed.
+ *
+ */
+
+#define MIX2(a,b,c,d,e,f,g,h,k,w)	\
+	T1=h+SIGMA1(e)+Ch(e,f,g)+k+w; d+=T1; h=T1+SIGMA0(a)+Maj(a,b,c)
+
+#define ASG2(s)				\
+	(W[s&15]+=sigma1(W[(s+14)&15])+W[(s+9)&15]+sigma0(W[(s+1)&15]))
+
 	a = p->H[0]; b = p->H[1]; c = p->H[2]; d = p->H[3];
 	e = p->H[4]; f = p->H[5]; g = p->H[6]; h = p->H[7];
-	for (t = 0; t < 64; t++) {
-		T1 = h + SIGMA1(e) + Ch(e, f, g) + K256[t] + W[t];
-		T2 = SIGMA0(a) + Maj(a, b, c);
-		h = g; g = f; f = e; e = d + T1;
-		d = c; c = b; b = a; a = T1 + T2;
-	}
+	MIX2(a, b, c, d, e, f, g, h, K256[0], W[0]);
+	MIX2(h, a, b, c, d, e, f, g, K256[1], W[1]);
+	MIX2(g, h, a, b, c, d, e, f, K256[2], W[2]);
+	MIX2(f, g, h, a, b, c, d, e, K256[3], W[3]);
+	MIX2(e, f, g, h, a, b, c, d, K256[4], W[4]);
+	MIX2(d, e, f, g, h, a, b, c, K256[5], W[5]);
+	MIX2(c, d, e, f, g, h, a, b, K256[6], W[6]);
+	MIX2(b, c, d, e, f, g, h, a, K256[7], W[7]);
+	MIX2(a, b, c, d, e, f, g, h, K256[8], W[8]);
+	MIX2(h, a, b, c, d, e, f, g, K256[9], W[9]);
+	MIX2(g, h, a, b, c, d, e, f, K256[10], W[10]);
+	MIX2(f, g, h, a, b, c, d, e, K256[11], W[11]);
+	MIX2(e, f, g, h, a, b, c, d, K256[12], W[12]);
+	MIX2(d, e, f, g, h, a, b, c, K256[13], W[13]);
+	MIX2(c, d, e, f, g, h, a, b, K256[14], W[14]);
+	MIX2(b, c, d, e, f, g, h, a, K256[15], W[15]);
+	MIX2(a, b, c, d, e, f, g, h, K256[16], ASG2(0));
+	MIX2(h, a, b, c, d, e, f, g, K256[17], ASG2(1));
+	MIX2(g, h, a, b, c, d, e, f, K256[18], ASG2(2));
+	MIX2(f, g, h, a, b, c, d, e, K256[19], ASG2(3));
+	MIX2(e, f, g, h, a, b, c, d, K256[20], ASG2(4));
+	MIX2(d, e, f, g, h, a, b, c, K256[21], ASG2(5));
+	MIX2(c, d, e, f, g, h, a, b, K256[22], ASG2(6));
+	MIX2(b, c, d, e, f, g, h, a, K256[23], ASG2(7));
+	MIX2(a, b, c, d, e, f, g, h, K256[24], ASG2(8));
+	MIX2(h, a, b, c, d, e, f, g, K256[25], ASG2(9));
+	MIX2(g, h, a, b, c, d, e, f, K256[26], ASG2(10));
+	MIX2(f, g, h, a, b, c, d, e, K256[27], ASG2(11));
+	MIX2(e, f, g, h, a, b, c, d, K256[28], ASG2(12));
+	MIX2(d, e, f, g, h, a, b, c, K256[29], ASG2(13));
+	MIX2(c, d, e, f, g, h, a, b, K256[30], ASG2(14));
+	MIX2(b, c, d, e, f, g, h, a, K256[31], ASG2(15));
+	MIX2(a, b, c, d, e, f, g, h, K256[32], ASG2(0));
+	MIX2(h, a, b, c, d, e, f, g, K256[33], ASG2(1));
+	MIX2(g, h, a, b, c, d, e, f, K256[34], ASG2(2));
+	MIX2(f, g, h, a, b, c, d, e, K256[35], ASG2(3));
+	MIX2(e, f, g, h, a, b, c, d, K256[36], ASG2(4));
+	MIX2(d, e, f, g, h, a, b, c, K256[37], ASG2(5));
+	MIX2(c, d, e, f, g, h, a, b, K256[38], ASG2(6));
+	MIX2(b, c, d, e, f, g, h, a, K256[39], ASG2(7));
+	MIX2(a, b, c, d, e, f, g, h, K256[40], ASG2(8));
+	MIX2(h, a, b, c, d, e, f, g, K256[41], ASG2(9));
+	MIX2(g, h, a, b, c, d, e, f, K256[42], ASG2(10));
+	MIX2(f, g, h, a, b, c, d, e, K256[43], ASG2(11));
+	MIX2(e, f, g, h, a, b, c, d, K256[44], ASG2(12));
+	MIX2(d, e, f, g, h, a, b, c, K256[45], ASG2(13));
+	MIX2(c, d, e, f, g, h, a, b, K256[46], ASG2(14));
+	MIX2(b, c, d, e, f, g, h, a, K256[47], ASG2(15));
+	MIX2(a, b, c, d, e, f, g, h, K256[48], ASG2(0));
+	MIX2(h, a, b, c, d, e, f, g, K256[49], ASG2(1));
+	MIX2(g, h, a, b, c, d, e, f, K256[50], ASG2(2));
+	MIX2(f, g, h, a, b, c, d, e, K256[51], ASG2(3));
+	MIX2(e, f, g, h, a, b, c, d, K256[52], ASG2(4));
+	MIX2(d, e, f, g, h, a, b, c, K256[53], ASG2(5));
+	MIX2(c, d, e, f, g, h, a, b, K256[54], ASG2(6));
+	MIX2(b, c, d, e, f, g, h, a, K256[55], ASG2(7));
+	MIX2(a, b, c, d, e, f, g, h, K256[56], ASG2(8));
+	MIX2(h, a, b, c, d, e, f, g, K256[57], ASG2(9));
+	MIX2(g, h, a, b, c, d, e, f, K256[58], ASG2(10));
+	MIX2(f, g, h, a, b, c, d, e, K256[59], ASG2(11));
+	MIX2(e, f, g, h, a, b, c, d, K256[60], ASG2(12));
+	MIX2(d, e, f, g, h, a, b, c, K256[61], ASG2(13));
+	MIX2(c, d, e, f, g, h, a, b, K256[62], ASG2(14));
+	MIX2(b, c, d, e, f, g, h, a, K256[63], ASG2(15));
 	p->H[0] += a; p->H[1] += b; p->H[2] += c; p->H[3] += d;
 	p->H[4] += e; p->H[5] += f; p->H[6] += g; p->H[7] += h;
 }

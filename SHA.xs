@@ -152,3 +152,19 @@ shawrite(bitstr, bitcnt, s)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 	SHA *	s
+
+void
+add(self, ...)
+        AV* self
+PREINIT:
+        STRLEN len;
+        unsigned char *data;
+        unsigned int i;
+        SHA *state;
+PPCODE:
+        state = (SHA *) (SvIV(SvRV(*av_fetch(self, 0, 0))));
+        for (i = 1; i < items; i++) {
+                data = (unsigned char *)(SvPV(ST(i), len));
+                shawrite(data, len << 3, state);
+        }
+        XSRETURN(1);

@@ -41,7 +41,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw();
 
-our $VERSION = '4.0.4';
+our $VERSION = '4.0.5';
 
 require XSLoader;
 XSLoader::load('Digest::SHA', $VERSION);
@@ -199,7 +199,7 @@ sub hmac_sha512_base64 {
 
 sub hashsize {
 	my $self = shift;
-	return(length(shahex($self->{STATE})) << 2);
+	return(length(shahex($self->[0])) << 2);
 }
 
 sub new {
@@ -208,40 +208,32 @@ sub new {
 		$alg = $class->hashsize unless defined $alg;
 		$alg =~ s/\D+//g;
 		$alg = 1 if $alg == 160;
-		shaclose($class->{STATE}) if $class->{STATE};
-		$class->{STATE} = shaopen($alg) || return;
+		shaclose($class->[0]) if $class->[0];
+		$class->[0] = shaopen($alg) || return;
 		return($class);
 	}
 	$alg = 1 unless defined $alg;
 	$alg =~ s/\D+//g;
-	my $self = {};
-	$self->{STATE} = shaopen($alg) || return;
+	my $self = [];
+	$self->[0] = shaopen($alg) || return;
 	bless($self, $class);
 	return($self);
 }
 
 sub DESTROY {
 	my $self = shift;
-	shaclose($self->{STATE}) if $self->{STATE};
+	shaclose($self->[0]) if $self->[0];
 }
 
 sub clone {
 	my $self = shift;
 	my $copy = Digest::SHA->new() || return;
-	shaclose($copy->{STATE}) if $copy->{STATE};
-	$copy->{STATE} = shadup($self->{STATE});
+	shaclose($copy->[0]) if $copy->[0];
+	$copy->[0] = shadup($self->[0]);
 	return($copy);
 }
 
 *reset = \&new;
-
-sub add {
-        my $self = shift;
-        for (@_) {
-                shawrite($_, length($_) << 3, $self->{STATE});
-        }
-        return($self);
-}
 
 sub add_bits {
 	my($self, $data, $nbits) = @_;
@@ -249,7 +241,7 @@ sub add_bits {
 		$nbits = length($data);
 		$data = pack("B*", $data);
 	}
-	shawrite($data, $nbits, $self->{STATE});
+	shawrite($data, $nbits, $self->[0]);
 	return($self);
 }
 
@@ -258,7 +250,7 @@ sub addfile {
         my $fh = shift;
         my $buf;   
         while (read($fh, $buf, 1<<12)) {
-                shawrite($buf, length($buf) << 3, $self->{STATE});
+                shawrite($buf, length($buf) << 3, $self->[0]);
         }
         return($self);
 }       
@@ -267,7 +259,7 @@ sub dump {
 	my $self = shift;
 	my $file = shift || "";
 
-	c_shadump($file, $self->{STATE}) || return;
+	c_shadump($file, $self->[0]) || return;
 	return($self);
 }
 
@@ -275,36 +267,36 @@ sub load {
 	my $class = shift;
 	my $file = shift || "";
 	if (ref($class)) {	# instance method
-		shaclose($class->{STATE}) if $class->{STATE};
-		$class->{STATE} = shaload($file) || return;
+		shaclose($class->[0]) if $class->[0];
+		$class->[0] = shaload($file) || return;
 		return($class);
 	}
-	my $self = {};
-	$self->{STATE} = shaload($file) || return;
+	my $self = [];
+	$self->[0] = shaload($file) || return;
 	bless($self, $class);
 	return($self);
 }
 
 sub digest {
 	my $self = shift;
-	shafinish($self->{STATE});
-	my $val = pack("H*", shahex($self->{STATE}));
+	shafinish($self->[0]);
+	my $val = pack("H*", shahex($self->[0]));
 	$self->reset;
 	return($val);
 }
 
 sub hexdigest {
         my $self = shift; 
-        shafinish($self->{STATE});
-        my $val = shahex($self->{STATE});
+        shafinish($self->[0]);
+        my $val = shahex($self->[0]);
         $self->reset;
         return($val);
 }       
 
 sub b64digest {
         my $self = shift;
-        shafinish($self->{STATE});
-        my $val = shabase64($self->{STATE});
+        shafinish($self->[0]);
+        my $val = shabase64($self->[0]);
         $self->reset;
         return($val);
 }       
@@ -332,12 +324,7 @@ Digest::SHA - Perl extension for SHA-1/256/384/512
  $sha = Digest::SHA->new($alg);		# alg = 1, 256, 384, 512
 
  $sha->add($data);
- $sha->add_bits($data, $nbits);
- $sha->add_bits($bits);
  $sha->addfile(*FILE);
-
- $sha->dump($filename);
- $sha->load($filename);
 
  $digest = $sha->digest;
  $digest = $sha->hexdigest;
@@ -346,9 +333,9 @@ Digest::SHA - Perl extension for SHA-1/256/384/512
 =head1 ABSTRACT
 
 Digest::SHA is a full implementation of the NIST Secure Hash
-Standard.  It calculates message digests using the SHA-1, SHA-256,
-SHA-384, and SHA-512 algorithms.  The module accepts all message
-types, including bit data that's not aligned on byte boundaries.
+Standard.  It gives Perl programmers a convenient way to calculate
+SHA-1, SHA-256, SHA-384, and SHA-512 message digests.  The module
+can process all message types, including partial-byte data.
 
 =head1 DESCRIPTION
 
@@ -467,7 +454,7 @@ Returns a new Digest::SHA object.  Values for I<$alg> are 1, 256,
 of the algorithm (e.g. "sha256", "SHA-384").  If the argument is
 missing, SHA-1 will be used by default.
 
-Invoking "new" as an instance method will not create a new object;
+Invoking I<new> as an instance method will not create a new object;
 instead, it will simply reset the object to the initial state
 associated with I<$alg>.  If the argument is missing, the object
 will continue using the same algorithm that was selected at creation.
@@ -475,7 +462,7 @@ will continue using the same algorithm that was selected at creation.
 =item B<$sha-E<gt>reset($alg)>
 
 This method has exactly the same effect as I<$sha-E<gt>new($alg)>.
-In fact, "reset" is just an alias for "new".
+In fact, I<reset> is just an alias for I<new>.
 
 =item B<$sha-E<gt>hashsize>
 
@@ -529,7 +516,7 @@ state.  The return value is the updated I<$sha> object itself.
 Provides persistent storage of intermediate SHA states by writing
 a portable, human-readable representation of the current state to
 I<$filename>.  If the argument is missing, or equal to the empty
-string, the state information will be written to stdout.
+string, the state information will be written to STDOUT.
 
 =item B<$sha-E<gt>load($filename)>
 
@@ -537,6 +524,8 @@ Returns a Digest::SHA object representing the intermediate SHA
 state that was previously stored to I<$filename>.  If called as a
 class method, a new object is created; if called as an instance
 method, the object is reset to the state contained in I<$filename>.
+If the argument is missing, or equal to the empty string, the state
+information will be read from STDIN.
 
 =item B<$sha-E<gt>digest>
 
@@ -636,5 +625,7 @@ Copyright (C) 2003 by Mark Shelor
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
+
+L<perlartistic>
 
 =cut

@@ -1,4 +1,4 @@
-Digest::SHA version 4.0.4
+Digest::SHA version 4.0.5
 =========================
 
 The Digest::SHA module provides a Perl interface to all varieties
@@ -17,9 +17,12 @@ beyond those found with typical compilers.  However, if your compiler
 doesn't recognize the "long long" type, the functions associated
 with SHA-384 and SHA-512 will return null values.
 
-As of Version 4.0, the Digest::SHA module is deprecating the
-redundant "shaopen()/shawrite()/shaclose()" interface in favor of
-the standard (and more streamlined) object-oriented style.
+Version 4.0.5 focuses on performance optimization.  The "add()"
+method has been rewritten in XS, and loops have been unrolled in
+the SHA-256 transform.  This has resulted in as much as a 50%
+performance increase on SHA benchmarks that compute digests in an
+iterative fashion.  The reader is urged to update to this version
+if speed is important to your application.
 
 The tests subdirectory (t/*.t) contains an extensive set of SHA
 vectors compiled from various sources.  Of particular interest are
@@ -31,8 +34,8 @@ exceed 2^32 bits in length.
 
 The examples directory, kindly provided by Julius Duque, contains
 useful and instructive applications of the SHA digest routines.
-Refer to the "finddups" utility (recently featured in The Perl
-Journal) for a particularly interesting example.
+Refer to the "finddups" utility (featured in the December 2003
+issue of The Perl Journal) for a particularly interesting example.
 
 INSTALLATION
 
@@ -53,3 +56,7 @@ Copyright (C) 2003 Mark Shelor
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
+
+Please refer to the Perl Artistic License for details:
+
+http://search.cpan.org/~nwclark/perl-5.8.2/pod/perlartistic.pod
