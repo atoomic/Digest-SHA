@@ -5,7 +5,9 @@
 use Test::More tests => 8;
 use strict;
 use integer;
-use Digest::SHA qw(shaopen shawrite shafinish shahex shaclose shadup);
+use File::Basename qw(dirname);
+use Digest::SHA qw(shaopen shawrite shafinish shahex 
+			shaclose shadup shadump shaload);
 
 #	SHA-1 Test Vectors from Jim Gillogly (jim@acm.org)
 #
@@ -40,27 +42,48 @@ my @vecs011 = (	# 011 rep 1431655764
 	"01101", "3eee3e1e28dede2ca444d68da5675b2faaab3203"
 );
 
+my $STATE110 = dirname($0) . "/gillogly/state.110";
+my $STATE011 = dirname($0) . "/gillogly/state.011";
+
 my $reps = 1 << 14;
 my $loops = int(1431655764 / $reps);
 my $rest = 3 * (1431655764 - $loops * $reps);
 
 sub state110 {
-	my $bitstr = pack("B*", "110" x $reps);
-	my $state = shaopen(1);
+	my $state;
+	my $bitstr;
+
+	if (-r $STATE110) {
+		if ($state = shaload($STATE110)) {
+			return($state);
+		}
+	}
+	$bitstr = pack("B*", "110" x $reps);
+	$state = shaopen(1);
 	for (my $i = 0; $i < $loops; $i++) {
 		shawrite($bitstr, 3 * $reps, $state);
 	}
 	shawrite($bitstr, $rest, $state);
+	shadump($STATE110, $state);
 	return($state);
 }
 
 sub state011 {
-	my $bitstr = pack("B*", "011" x $reps);
-	my $state = shaopen(1);
+	my $state;
+	my $bitstr;
+
+	if (-r $STATE011) {
+		if ($state = shaload($STATE011)) {
+			return($state);
+		}
+	}
+	$bitstr = pack("B*", "011" x $reps);
+	$state = shaopen(1);
 	for (my $i = 0; $i < $loops; $i++) {
 		shawrite($bitstr, 3 * $reps, $state);
 	}
 	shawrite($bitstr, $rest, $state);
+	shadump($STATE011, $state);
 	return($state);
 }
 

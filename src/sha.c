@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 1.0
- * Sun Oct 19 23:24:31 MST 2003
+ * Version: 1.01
+ * Fri Oct 24 19:15:26 MST 2003
  *
  */
 
@@ -691,6 +691,167 @@ SHA *s;
 		return(NULL);
 	memcpy(p, s, sizeof(SHA));
 	return(p);
+}
+
+int shadump(file, s)
+char *file;
+SHA *s;
+{
+	int i;
+	int alg;
+	FILE *f;
+
+	if ((f = fopen(file, "w")) == NULL)
+		return(0);
+	if (s->digestlen == SHA1_DIGEST_BITS >> 3)
+		alg = SHA1;
+	else if (s->digestlen == SHA256_DIGEST_BITS >> 3)
+		alg = SHA256;
+
+#ifdef SHA_384_512
+
+	else if (s->digestlen == SHA384_DIGEST_BITS >> 3)
+		alg = SHA384;
+	else if (s->digestlen == SHA512_DIGEST_BITS >> 3)
+		alg = SHA512;
+
+#endif
+
+	else {
+		fclose(f);
+		return(0);
+	}
+	fprintf(f, "alg:%d\n", alg);
+	fprintf(f, "H");
+	for (i = 0; i < sizeof(s->H)/sizeof(s->H[0]); i++)
+		fprintf(f, ":%lx", s->H[i]);
+	fprintf(f, "\n");
+	fprintf(f, "block");
+	for (i = 0; i < sizeof(s->block); i++)
+		fprintf(f, ":%x", s->block[i]);
+	fprintf(f, "\n");
+	fprintf(f, "blockcnt:%u\n", s->blockcnt);
+	fprintf(f, "lenhh:%lu\n", s->lenhh);
+	fprintf(f, "lenhl:%lu\n", s->lenhl);
+	fprintf(f, "lenlh:%lu\n", s->lenlh);
+	fprintf(f, "lenll:%lu\n", s->lenll);
+
+#ifdef SHA_384_512
+
+	fprintf(f, "HQ");
+	for (i = 0; i < sizeof(s->HQ)/sizeof(s->HQ[0]); i++)
+		fprintf(f, ":%llx", s->HQ[i]);
+	fprintf(f, "\n");
+
+#endif
+
+	fclose(f);
+	return(1);
+}
+
+#ifdef SHA_384_512
+
+static unsigned long long hex2ull(s)
+char *s;
+{
+	char str[2];
+	unsigned long long u = 0ULL;
+
+	str[1] = '\0';
+	while ((str[0] = *s++) != 0)
+		u = (u << 4) + strtoul(str, NULL, 16);
+	return(u);
+}
+
+#endif
+
+SHA *shaload(file)
+char *file;
+{
+	int i;
+	SHA *s;
+	FILE *f;
+	static char line[1024];
+
+	if ((f = fopen(file, "r")) == NULL)
+		return(NULL);
+	fgets(line, sizeof(line), f);
+	if (strcmp(strtok(line, ":\n"), "alg") != 0) {
+		fclose(f);
+		return(NULL);
+	}
+	if ((s = shaopen(atoi(strtok(NULL, ":\n")))) == NULL) {
+		fclose(f);
+		return(NULL);
+	}
+	fgets(line, sizeof(line), f);
+	if (strcmp(strtok(line, ":\n"), "H") != 0) {
+		fclose(f);
+		shaclose(s);
+		return(NULL);
+	}
+	for (i = 0; i < sizeof(s->H)/sizeof(s->H[0]); i++)
+		s->H[i] = strtoul(strtok(NULL, ":\n"), NULL, 16);
+	fgets(line, sizeof(line), f);
+	if (strcmp(strtok(line, ":\n"), "block") != 0) {
+		fclose(f);
+		shaclose(s);
+		return(NULL);
+	}
+	for (i = 0; i < sizeof(s->block); i++)
+		s->block[i] = strtoul(strtok(NULL, ":\n"), NULL, 16);
+	fgets(line, sizeof(line), f);
+	if (strcmp(strtok(line, ":\n"), "blockcnt") != 0) {
+		fclose(f);
+		shaclose(s);
+		return(NULL);
+	}
+	s->blockcnt = strtoul(strtok(NULL, ":\n"), NULL, 10);
+	fgets(line, sizeof(line), f);
+	if (strcmp(strtok(line, ":\n"), "lenhh") != 0) {
+		fclose(f);
+		shaclose(s);
+		return(NULL);
+	}
+	s->lenhh = strtoul(strtok(NULL, ":\n"), NULL, 10);
+	fgets(line, sizeof(line), f);
+	if (strcmp(strtok(line, ":\n"), "lenhl") != 0) {
+		fclose(f);
+		shaclose(s);
+		return(NULL);
+	}
+	s->lenhl = strtoul(strtok(NULL, ":\n"), NULL, 10);
+	fgets(line, sizeof(line), f);
+	if (strcmp(strtok(line, ":\n"), "lenlh") != 0) {
+		fclose(f);
+		shaclose(s);
+		return(NULL);
+	}
+	s->lenlh = strtoul(strtok(NULL, ":\n"), NULL, 10);
+	fgets(line, sizeof(line), f);
+	if (strcmp(strtok(line, ":\n"), "lenll") != 0) {
+		fclose(f);
+		shaclose(s);
+		return(NULL);
+	}
+	s->lenll = strtoul(strtok(NULL, ":\n"), NULL, 10);
+
+#ifdef SHA_384_512
+
+	fgets(line, sizeof(line), f);
+	if (strcmp(strtok(line, ":\n"), "HQ") != 0) {
+		fclose(f);
+		shaclose(s);
+		return(NULL);
+	}
+	/* strtoull() not universal, so cook up an alternative */
+	for (i = 0; i < sizeof(s->HQ)/sizeof(s->HQ[0]); i++)
+		s->HQ[i] = hex2ull(strtok(NULL, ":\n"));
+
+#endif
+
+	fclose(f);
+	return(s);
 }
 
 int shaclose(s)

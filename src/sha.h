@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 1.0
- * Sun Oct 19 23:24:31 MST 2003
+ * Version: 1.01
+ * Fri Oct 24 19:15:26 MST 2003
  *
  */
 
@@ -45,20 +45,20 @@ typedef struct {
 	void (*sha)();
 	void (*pad)();
 	void (*put)();
-	unsigned long H[SHA256_DIGEST_BITS / 32];
-
-#ifdef SHA_384_512
-	unsigned long long HQ[SHA_MAX_DIGEST_BITS / 64];
-#endif
-
-	unsigned char block[SHA_MAX_BLOCK_BITS / 8];
+	unsigned long H[SHA256_DIGEST_BITS/32];
+	unsigned char block[SHA_MAX_BLOCK_BITS/8];
 	unsigned int blockcnt;
 	unsigned int blocksize;
 	unsigned long lenhh, lenhl, lenlh, lenll;
-	unsigned char digest[SHA_MAX_DIGEST_BITS / 8];
+	unsigned char digest[SHA_MAX_DIGEST_BITS/8];
 	int digestlen;
-	char hex[SHA_MAX_HEX_LEN + 1];
-	char base64[SHA_MAX_BASE64_LEN + 1];
+	char hex[SHA_MAX_HEX_LEN+1];
+	char base64[SHA_MAX_BASE64_LEN+1];
+
+#ifdef SHA_384_512
+	unsigned long long HQ[SHA_MAX_DIGEST_BITS/64];
+#endif
+
 } SHA;
 
 
@@ -74,6 +74,8 @@ unsigned char *shadigest(SHA *s);
 char *shahex(SHA *s);
 char *shabase64(SHA *s);
 SHA *shadup(SHA *s);
+int shadump(char *file, SHA *s);
+SHA *shaload(char *file);
 int shaclose(SHA *s);
 
 unsigned char *sha1digest(
@@ -129,6 +131,8 @@ unsigned char *shadigest();
 char *shahex();
 char *shabase64();
 SHA *shadup();
+int shadump();
+SHA *shaload();
 int shaclose();
 
 unsigned char *sha1digest();

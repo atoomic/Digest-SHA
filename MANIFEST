@@ -10,10 +10,11 @@ src/sha.c
 src/sha.h
 t/1-exist.t
 t/1-hello-world.t
-t/2-nist-sha1.t
-t/2-nist-sha256.t
-t/2-nist-sha384.t
-t/2-nist-sha512.t
+t/2-nist-sha-1.t
+t/2-nist-sha-256.t
+t/2-nist-sha-384.t
+t/2-nist-sha-512.t
+t/2-nist-sha-base64.t
 t/2-nist-vectors-bit.t
 t/2-nist-vectors-byte.t
 t/3-gillogly-easy.t
@@ -21,7 +22,9 @@ t/3-gillogly-hard.t
 t/4-bitstr-increasing.t
 t/4-bitstr-large.t
 t/4-bitstr-random.t
-t/5-bytestr-base64.t
+t/gillogly/state.011
+t/gillogly/state.110
+t/nist/COPYRIGHT
 t/nist/Readme.txt
 t/nist/bit-hashes.sha1
 t/nist/bit-messages.sha1

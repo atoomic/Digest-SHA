@@ -27,9 +27,11 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 	sha512hex
 	shabase64
 	shaclose
+	shadump
 	shadup
 	shafinish
 	shahex
+	shaload
 	shaopen
 	shawrite
 ) ] );
@@ -40,7 +42,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '1.0';
+our $VERSION = '1.01';
 
 require XSLoader;
 XSLoader::load('Digest::SHA', $VERSION);
@@ -65,7 +67,7 @@ Digest::SHA - Perl extension for SHA-1/256/384/512
 
   # Iterative computation
   use Digest::SHA qw(shaopen shawrite shafinish shaclose
-			shahex shabase64 shadup);
+			shahex shabase64 shadup shadump shaload);
 
   $state = shaopen($alg);	# $alg = 1, 256, 384, or 512
 
@@ -222,22 +224,34 @@ Returns the digest value, encoded as a Base64 string.
 
 =item B<shadup($state)>
 
-Returns a duplicate copy of the current state.  This helps to speed
-up SHA calculations for data sets that share identical headers.
-See the "gillogly-hard" script in the "t/" subdirectory for an
-example of how "shadup()" can improve performance for such data
-sets.
+Returns a duplicate copy of the current state.
+
+=item B<shadump($filename, $state)>
+
+Provides persistent storage of intermediate SHA states by writing
+the contents of the $state structure to disk.  In combination with
+"shaload()" and "shadup()", this routine can help to speed up SHA
+calculations for data sets that share identical headers.  See the
+"gillogly-hard" script in the "t/" subdirectory for a simple
+illustration.
+
+=item B<shaload($filename)>
+
+Retrieves the contents of an intermediate SHA state that was
+previously stored to disk by "shadump()".  The "shaload()" routine
+returns a fresh copy of this state, so it's not necessary to create
+or initialize it beforehand by calling "shaopen()".
 
 =item B<shaclose($state)>
 
-Frees all memory associated with the SHA calculation initiated in
-the corresponding "shaopen()" call.
+Frees all memory allocated during the previous "shaopen()",
+"shadup()", or "shaload()" call.
 
 =back
 
 =head1 SEE ALSO
 
-L<Digest>, L<Digest::SHA1>
+L<Digest::SHA1>
 
 The Secure Hash Standard (FIPS PUB 180-2) can be found at:
 

@@ -63,6 +63,11 @@ int
 shaclose(s)
 	SHA *	s
 
+int
+shadump(file, s)
+	char *	file
+	SHA *	s
+
 SHA *
 shadup(s)
 	SHA *	s
@@ -74,6 +79,10 @@ shafinish(s)
 char *
 shahex(s)
 	SHA *	s
+
+SHA *
+shaload(file)
+	char *	file
 
 SHA *
 shaopen(alg)

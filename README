@@ -1,5 +1,5 @@
-Digest/SHA version 1.0
-======================
+Digest/SHA version 1.01
+=======================
 
 The Digest::SHA module provides a Perl interface to all varieties
 of the Secure Hash Algorithm specified in the current NIST Secure
@@ -26,9 +26,10 @@ optimizations.
 The tests subdirectory (t/*.t) contains an extensive set of SHA
 vectors compiled from various sources.  Of particular interest are
 the NIST vectors, which examine a large variety of bit-strings and
-byte-strings.  Also useful are the bit-vectors provided by Jim
-Gillogly, which check the behavior of implementations for large
-inputs (i.e. when input strings exceed length 2^32).
+byte-strings (see the "t/nist/COPYRIGHT" file for details).  Also
+useful are the bit-vectors compiled by Jim Gillogly, which check
+the behavior of implementations for input strings that exceed 2^32
+bits in length.
 
 INSTALLATION
 

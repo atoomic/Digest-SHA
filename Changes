@@ -13,3 +13,14 @@ Revision history for Perl extension Digest::SHA.
 	- code cleanup: no more compiler warnings from gcc -Wall
 	- added code to allow reading of intermediate digest state
 		-- shahex() prior to shafinish() returns current state
+
+1.01  Sat Oct 25 02:44:55 MST 2003
+	- package now downloads and installs much faster
+	- reduced distribution size by 80%
+		-- pruned extensive NIST vectors to a useful subset
+		-- still possible to test all vectors if desired
+			--- see "t/nist/COPYRIGHT" file for details
+	- added routines to provide persistent storage of SHA states
+		-- shadump() and shaload()
+	- reduced runtime of large bitstring tests (gillogly-hard)
+		-- illustrates usefulness of shadump()/shaload()
