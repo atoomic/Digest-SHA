@@ -1,55 +1,43 @@
 package Digest::SHA;
 
-use 5.008;
 use strict;
 use warnings;
 use integer;
 
-require Exporter;
+our $VERSION = '4.0.8';
 
+require Exporter;
 our @ISA = qw(Exporter);
 
-our %EXPORT_TAGS = (
-'all' => [ qw(
-	hmac_sha1
-	hmac_sha1_base64
-	hmac_sha1_hex
-	hmac_sha256
-	hmac_sha256_base64
-	hmac_sha256_hex
-	hmac_sha384
-	hmac_sha384_base64
-	hmac_sha384_hex
-	hmac_sha512
-	hmac_sha512_base64
-	hmac_sha512_hex
-	sha1
-	sha1_base64
-	sha1_hex
-	sha256
-	sha256_base64
-	sha256_hex
-	sha384
-	sha384_base64
-	sha384_hex
-	sha512
-	sha512_base64
-	sha512_hex) ]
-);
+our @EXPORT_OK = qw(
+	hmac_sha1	hmac_sha1_base64	hmac_sha1_hex
+	hmac_sha256	hmac_sha256_base64	hmac_sha256_hex
+	hmac_sha384	hmac_sha384_base64	hmac_sha384_hex
+	hmac_sha512	hmac_sha512_base64	hmac_sha512_hex
+	sha1		sha1_base64		sha1_hex
+	sha256		sha256_base64		sha256_hex
+	sha384		sha384_base64		sha384_hex
+	sha512		sha512_base64		sha512_hex);
 
-our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+# If possible, inherit from Digest::base (which depends on MIME::Base64)
 
-our @EXPORT = qw();
-
-our $VERSION = '4.0.7';
+eval {
+	require MIME::Base64;
+	require Digest::base;
+	push(@ISA, 'Digest::base');
+};
+if ($@) {
+	*addfile = \&Addfile;
+	*hexdigest = \&Hexdigest;
+	*b64digest = \&B64digest;
+}
 
 require XSLoader;
 XSLoader::load('Digest::SHA', $VERSION);
 
 # Preloaded methods go here.
 
-# The following routines aren't particularly time-critical, so they
-# can be left in Perl.
+# The following routines aren't time-critical, so they can be left in Perl
 
 sub new {
 	my($class, $alg) = @_;
@@ -95,15 +83,24 @@ sub add_bits {
 	return($self);
 }
 
-sub addfile {
-        my $self = shift; 
-        my $fh = shift;
-        my $buf;   
-        while (read($fh, $buf, 1<<12)) {
-                shawrite($buf, length($buf) << 3, $self->[0]);
-        }
-        return($self);
-}       
+# local copy of "addfile" in case Digest::base not installed
+
+sub Addfile {	# this is "addfile" from Digest::base 1.00
+    my ($self, $handle) = @_;
+
+    my $n;
+    my $buf = "";
+
+    while (($n = read($handle, $buf, 4096))) {
+	$self->add($buf);
+    }
+    unless (defined $n) {
+	require Carp;
+	Carp::croak("Read failed: $!");
+    }
+
+    $self;
+}
 
 sub dump {
 	my $self = shift;
@@ -185,7 +182,7 @@ offers two ways to calculate digests: all-at-once, or in stages.
 To illustrate, the following short program computes the SHA-256
 digest of "hello world" using each approach:
 
-	use Digest::SHA ':all';
+	use Digest::SHA qw(sha256_hex);
 
 	$data = "hello world";
 	@frags = split(//, $data);
@@ -221,22 +218,18 @@ of computation.  You can subsequently retrieve the file with
 I<load()> to resume where the calculation left off.
 
 If you're curious about what a state description looks like, just
-run the following two-liner:
+run the following:
 
-	use Digest::SHA;
 	Digest::SHA->new(256)->add("COL Bat Guano" x 1964)->dump;
 
-As a temporary convenience, the Digest::SHA module offers routines
-to calculate keyed hashes using the HMAC-SHA-1/256/384/512 algorithms.
+As an added convenience, the Digest::SHA module offers routines to
+calculate keyed hashes using the HMAC-SHA-1/256/384/512 algorithms.
 These services exist in functional form only, and mimic the style
 and behavior of the I<sha()>, I<sha_hex()>, and I<sha_base64()>
-functions.  It's expected that they'll move to an appropriate
-Digest::HMAC module once the related OO methods are developed and
-tested.
+functions.
 
 	# test vector from draft-ietf-ipsec-ciph-sha-256-01.txt
 
-	use Digest::SHA qw(hmac_sha256_hex);
 	print hmac_sha256_hex("Hi There", chr(0x0b) x 32), "\n";
 
 =head1 EXPORT
@@ -369,6 +362,9 @@ So, the following two statements do the same thing:
 Reads from I<FILE> until EOF, and appends that data to the current
 state.  The return value is the updated I<$sha> object itself.
 
+This method is inherited if L<Digest::base> is installed on your
+system.  Otherwise, a functionally equivalent substitute is used.
+
 =item B<$sha-E<gt>dump($filename)>
 
 Provides persistent storage of intermediate SHA states by writing
@@ -403,6 +399,9 @@ Like I<digest>, this method is a read-once operation.  Call
 I<$sha-E<gt>clone-E<gt>hexdigest> if it's necessary to preserve
 the original digest state.
 
+This method is inherited if L<Digest::base> is installed on your
+system.  Otherwise, a functionally equivalent substitute is used.
+
 =item B<$sha-E<gt>b64digest>
 
 Returns the digest encoded as a Base64 string.
@@ -410,6 +409,9 @@ Returns the digest encoded as a Base64 string.
 Like I<digest>, this method is a read-once operation.  Call
 I<$sha-E<gt>clone-E<gt>b64digest> if it's necessary to preserve
 the original digest state.
+
+This method is inherited if L<Digest::base> is installed on your
+system.  Otherwise, a functionally equivalent substitute is used.
 
 =back
 
@@ -473,9 +475,6 @@ http://csrc.nist.gov/publications/fips/fips198/fips-198a.pdf
 =head1 AUTHOR
 
 Mark Shelor, E<lt>mshelor@comcast.netE<gt>
-
-Many thanks to Gisle Aas, Julius Duque, Jeffrey Friedl, and Chris
-Skiscim for their valuable comments and suggestions.
 
 =head1 COPYRIGHT AND LICENSE
 

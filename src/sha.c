@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 4.0.6
- * Thu Dec 11 02:18:00 MST 2003
+ * Version: 4.0.8
+ * Thu Dec 18 23:32:00 MST 2003
  *
  */
 
@@ -30,16 +30,12 @@
 #define sigma0(x)	( ROTR(x,  7) ^ ROTR(x, 18) ^  SHR(x,  3) )
 #define sigma1(x)	( ROTR(x, 17) ^ ROTR(x, 19) ^  SHR(x, 10) )
 
-#define SETBIT(str, pos)	str[(pos) >> 3] |=  (0x01 << (7 - (pos) % 8))
-#define CLRBIT(str, pos)	str[(pos) >> 3] &= ~(0x01 << (7 - (pos) % 8))
-#define BYTECNT(bitcnt)		(1 + (((bitcnt) - 1) >> 3))
+#define K00	0x5a827999UL		/* SHA-1 constants */
+#define K20	0x6ed9eba1UL
+#define K40	0x8f1bbcdcUL
+#define K60	0xca62c1d6UL
 
-#define K11	0x5a827999UL
-#define K12	0x6ed9eba1UL
-#define K13	0x8f1bbcdcUL
-#define K14	0xca62c1d6UL
-
-static unsigned long K256[64] =
+static unsigned long K256[64] =		/* SHA-256 constants */
 {
 	0x428a2f98UL, 0x71374491UL, 0xb5c0fbcfUL, 0xe9b5dba5UL,
 	0x3956c25bUL, 0x59f111f1UL, 0x923f82a4UL, 0xab1c5ed5UL,
@@ -59,32 +55,22 @@ static unsigned long K256[64] =
 	0x90befffaUL, 0xa4506cebUL, 0xbef9a3f7UL, 0xc67178f2UL
 };
 
-static unsigned long H01[5] =
+static unsigned long H01[5] =		/* SHA-1 initial hash value */
 {
 	0x67452301UL, 0xefcdab89UL, 0x98badcfeUL,
 	0x10325476UL, 0xc3d2e1f0UL
 };
 
-static unsigned long H0256[8] =
+static unsigned long H0256[8] =		/* SHA-256 initial hash value */
 {
 	0x6a09e667UL, 0xbb67ae85UL, 0x3c6ef372UL, 0xa54ff53aUL,
 	0x510e527fUL, 0x9b05688cUL, 0x1f83d9abUL, 0x5be0cd19UL
 };
 
-static void ul2mem(mem, ul)		/* endian-neutral */
-unsigned char *mem;
-unsigned long ul;
-{
-	int i;
+static unsigned long W[16];	/* message schedule for SHA-1/256 */
 
-	for (i = 0; i < 4; i++)
-		*mem++ = SHR(ul, 24 - i * 8) & 0xff;
-}
-
-static unsigned long W[16];
-
-static void sha1(p, block)
-SHA *p;
+static void sha1(s, block)
+SHA *s;
 unsigned char *block;
 {
 	int t;
@@ -102,101 +88,103 @@ unsigned char *block;
  * To improve performance, unroll the loop and consolidate assignments
  * by changing the roles of variables "a" through "e" at each step.
  * Note that the variable "T" is no longer needed.
- *
  */
 
-#define MIX1(a,b,c,d,e,f,k,w)	\
+#define MIX1(a,b,c,d,e,f,k,w)\
 	e+=ROTL(a,5)+f(b,c,d)+k+w;b=ROTL(b,30)
 
-#define ASG1(s)			\
-	(W[s&15]=ROTL(W[(s+13)&15]^W[(s+8)&15]^W[(s+2)&15]^W[s&15],1))
+#define ASG1(s)\
+	(W[s&15]=ROTL(W[(s+13)&15]^W[(s+8)&15]\
+	^W[(s+2)&15]^W[s&15],1))
 
-	a = p->H[0]; b = p->H[1]; c = p->H[2]; d = p->H[3]; e = p->H[4];
-	MIX1(a, b, c, d, e, Ch, K11, W[0]);
-	MIX1(e, a, b, c, d, Ch, K11, W[1]);
-	MIX1(d, e, a, b, c, Ch, K11, W[2]);
-	MIX1(c, d, e, a, b, Ch, K11, W[3]);
-	MIX1(b, c, d, e, a, Ch, K11, W[4]);
-	MIX1(a, b, c, d, e, Ch, K11, W[5]);
-	MIX1(e, a, b, c, d, Ch, K11, W[6]);
-	MIX1(d, e, a, b, c, Ch, K11, W[7]);
-	MIX1(c, d, e, a, b, Ch, K11, W[8]);
-	MIX1(b, c, d, e, a, Ch, K11, W[9]);
-	MIX1(a, b, c, d, e, Ch, K11, W[10]);
-	MIX1(e, a, b, c, d, Ch, K11, W[11]);
-	MIX1(d, e, a, b, c, Ch, K11, W[12]);
-	MIX1(c, d, e, a, b, Ch, K11, W[13]);
-	MIX1(b, c, d, e, a, Ch, K11, W[14]);
-	MIX1(a, b, c, d, e, Ch, K11, W[15]);
-	MIX1(e, a, b, c, d, Ch, K11, ASG1(0));
-	MIX1(d, e, a, b, c, Ch, K11, ASG1(1));
-	MIX1(c, d, e, a, b, Ch, K11, ASG1(2));
-	MIX1(b, c, d, e, a, Ch, K11, ASG1(3));
-	MIX1(a, b, c, d, e, Parity, K12, ASG1(4));
-	MIX1(e, a, b, c, d, Parity, K12, ASG1(5));
-	MIX1(d, e, a, b, c, Parity, K12, ASG1(6));
-	MIX1(c, d, e, a, b, Parity, K12, ASG1(7));
-	MIX1(b, c, d, e, a, Parity, K12, ASG1(8));
-	MIX1(a, b, c, d, e, Parity, K12, ASG1(9));
-	MIX1(e, a, b, c, d, Parity, K12, ASG1(10));
-	MIX1(d, e, a, b, c, Parity, K12, ASG1(11));
-	MIX1(c, d, e, a, b, Parity, K12, ASG1(12));
-	MIX1(b, c, d, e, a, Parity, K12, ASG1(13));
-	MIX1(a, b, c, d, e, Parity, K12, ASG1(14));
-	MIX1(e, a, b, c, d, Parity, K12, ASG1(15));
-	MIX1(d, e, a, b, c, Parity, K12, ASG1(0));
-	MIX1(c, d, e, a, b, Parity, K12, ASG1(1));
-	MIX1(b, c, d, e, a, Parity, K12, ASG1(2));
-	MIX1(a, b, c, d, e, Parity, K12, ASG1(3));
-	MIX1(e, a, b, c, d, Parity, K12, ASG1(4));
-	MIX1(d, e, a, b, c, Parity, K12, ASG1(5));
-	MIX1(c, d, e, a, b, Parity, K12, ASG1(6));
-	MIX1(b, c, d, e, a, Parity, K12, ASG1(7));
-	MIX1(a, b, c, d, e, Maj, K13, ASG1(8));
-	MIX1(e, a, b, c, d, Maj, K13, ASG1(9));
-	MIX1(d, e, a, b, c, Maj, K13, ASG1(10));
-	MIX1(c, d, e, a, b, Maj, K13, ASG1(11));
-	MIX1(b, c, d, e, a, Maj, K13, ASG1(12));
-	MIX1(a, b, c, d, e, Maj, K13, ASG1(13));
-	MIX1(e, a, b, c, d, Maj, K13, ASG1(14));
-	MIX1(d, e, a, b, c, Maj, K13, ASG1(15));
-	MIX1(c, d, e, a, b, Maj, K13, ASG1(0));
-	MIX1(b, c, d, e, a, Maj, K13, ASG1(1));
-	MIX1(a, b, c, d, e, Maj, K13, ASG1(2));
-	MIX1(e, a, b, c, d, Maj, K13, ASG1(3));
-	MIX1(d, e, a, b, c, Maj, K13, ASG1(4));
-	MIX1(c, d, e, a, b, Maj, K13, ASG1(5));
-	MIX1(b, c, d, e, a, Maj, K13, ASG1(6));
-	MIX1(a, b, c, d, e, Maj, K13, ASG1(7));
-	MIX1(e, a, b, c, d, Maj, K13, ASG1(8));
-	MIX1(d, e, a, b, c, Maj, K13, ASG1(9));
-	MIX1(c, d, e, a, b, Maj, K13, ASG1(10));
-	MIX1(b, c, d, e, a, Maj, K13, ASG1(11));
-	MIX1(a, b, c, d, e, Parity, K14, ASG1(12));
-	MIX1(e, a, b, c, d, Parity, K14, ASG1(13));
-	MIX1(d, e, a, b, c, Parity, K14, ASG1(14));
-	MIX1(c, d, e, a, b, Parity, K14, ASG1(15));
-	MIX1(b, c, d, e, a, Parity, K14, ASG1(0));
-	MIX1(a, b, c, d, e, Parity, K14, ASG1(1));
-	MIX1(e, a, b, c, d, Parity, K14, ASG1(2));
-	MIX1(d, e, a, b, c, Parity, K14, ASG1(3));
-	MIX1(c, d, e, a, b, Parity, K14, ASG1(4));
-	MIX1(b, c, d, e, a, Parity, K14, ASG1(5));
-	MIX1(a, b, c, d, e, Parity, K14, ASG1(6));
-	MIX1(e, a, b, c, d, Parity, K14, ASG1(7));
-	MIX1(d, e, a, b, c, Parity, K14, ASG1(8));
-	MIX1(c, d, e, a, b, Parity, K14, ASG1(9));
-	MIX1(b, c, d, e, a, Parity, K14, ASG1(10));
-	MIX1(a, b, c, d, e, Parity, K14, ASG1(11));
-	MIX1(e, a, b, c, d, Parity, K14, ASG1(12));
-	MIX1(d, e, a, b, c, Parity, K14, ASG1(13));
-	MIX1(c, d, e, a, b, Parity, K14, ASG1(14));
-	MIX1(b, c, d, e, a, Parity, K14, ASG1(15));
-	p->H[0] += a; p->H[1] += b; p->H[2] += c; p->H[3] += d; p->H[4] += e;
+	a = s->H[0]; b = s->H[1]; c = s->H[2];
+	d = s->H[3]; e = s->H[4];
+	MIX1(a, b, c, d, e, Ch, K00, W[0]);
+	MIX1(e, a, b, c, d, Ch, K00, W[1]);
+	MIX1(d, e, a, b, c, Ch, K00, W[2]);
+	MIX1(c, d, e, a, b, Ch, K00, W[3]);
+	MIX1(b, c, d, e, a, Ch, K00, W[4]);
+	MIX1(a, b, c, d, e, Ch, K00, W[5]);
+	MIX1(e, a, b, c, d, Ch, K00, W[6]);
+	MIX1(d, e, a, b, c, Ch, K00, W[7]);
+	MIX1(c, d, e, a, b, Ch, K00, W[8]);
+	MIX1(b, c, d, e, a, Ch, K00, W[9]);
+	MIX1(a, b, c, d, e, Ch, K00, W[10]);
+	MIX1(e, a, b, c, d, Ch, K00, W[11]);
+	MIX1(d, e, a, b, c, Ch, K00, W[12]);
+	MIX1(c, d, e, a, b, Ch, K00, W[13]);
+	MIX1(b, c, d, e, a, Ch, K00, W[14]);
+	MIX1(a, b, c, d, e, Ch, K00, W[15]);
+	MIX1(e, a, b, c, d, Ch, K00, ASG1(0));
+	MIX1(d, e, a, b, c, Ch, K00, ASG1(1));
+	MIX1(c, d, e, a, b, Ch, K00, ASG1(2));
+	MIX1(b, c, d, e, a, Ch, K00, ASG1(3));
+	MIX1(a, b, c, d, e, Parity, K20, ASG1(4));
+	MIX1(e, a, b, c, d, Parity, K20, ASG1(5));
+	MIX1(d, e, a, b, c, Parity, K20, ASG1(6));
+	MIX1(c, d, e, a, b, Parity, K20, ASG1(7));
+	MIX1(b, c, d, e, a, Parity, K20, ASG1(8));
+	MIX1(a, b, c, d, e, Parity, K20, ASG1(9));
+	MIX1(e, a, b, c, d, Parity, K20, ASG1(10));
+	MIX1(d, e, a, b, c, Parity, K20, ASG1(11));
+	MIX1(c, d, e, a, b, Parity, K20, ASG1(12));
+	MIX1(b, c, d, e, a, Parity, K20, ASG1(13));
+	MIX1(a, b, c, d, e, Parity, K20, ASG1(14));
+	MIX1(e, a, b, c, d, Parity, K20, ASG1(15));
+	MIX1(d, e, a, b, c, Parity, K20, ASG1(0));
+	MIX1(c, d, e, a, b, Parity, K20, ASG1(1));
+	MIX1(b, c, d, e, a, Parity, K20, ASG1(2));
+	MIX1(a, b, c, d, e, Parity, K20, ASG1(3));
+	MIX1(e, a, b, c, d, Parity, K20, ASG1(4));
+	MIX1(d, e, a, b, c, Parity, K20, ASG1(5));
+	MIX1(c, d, e, a, b, Parity, K20, ASG1(6));
+	MIX1(b, c, d, e, a, Parity, K20, ASG1(7));
+	MIX1(a, b, c, d, e, Maj, K40, ASG1(8));
+	MIX1(e, a, b, c, d, Maj, K40, ASG1(9));
+	MIX1(d, e, a, b, c, Maj, K40, ASG1(10));
+	MIX1(c, d, e, a, b, Maj, K40, ASG1(11));
+	MIX1(b, c, d, e, a, Maj, K40, ASG1(12));
+	MIX1(a, b, c, d, e, Maj, K40, ASG1(13));
+	MIX1(e, a, b, c, d, Maj, K40, ASG1(14));
+	MIX1(d, e, a, b, c, Maj, K40, ASG1(15));
+	MIX1(c, d, e, a, b, Maj, K40, ASG1(0));
+	MIX1(b, c, d, e, a, Maj, K40, ASG1(1));
+	MIX1(a, b, c, d, e, Maj, K40, ASG1(2));
+	MIX1(e, a, b, c, d, Maj, K40, ASG1(3));
+	MIX1(d, e, a, b, c, Maj, K40, ASG1(4));
+	MIX1(c, d, e, a, b, Maj, K40, ASG1(5));
+	MIX1(b, c, d, e, a, Maj, K40, ASG1(6));
+	MIX1(a, b, c, d, e, Maj, K40, ASG1(7));
+	MIX1(e, a, b, c, d, Maj, K40, ASG1(8));
+	MIX1(d, e, a, b, c, Maj, K40, ASG1(9));
+	MIX1(c, d, e, a, b, Maj, K40, ASG1(10));
+	MIX1(b, c, d, e, a, Maj, K40, ASG1(11));
+	MIX1(a, b, c, d, e, Parity, K60, ASG1(12));
+	MIX1(e, a, b, c, d, Parity, K60, ASG1(13));
+	MIX1(d, e, a, b, c, Parity, K60, ASG1(14));
+	MIX1(c, d, e, a, b, Parity, K60, ASG1(15));
+	MIX1(b, c, d, e, a, Parity, K60, ASG1(0));
+	MIX1(a, b, c, d, e, Parity, K60, ASG1(1));
+	MIX1(e, a, b, c, d, Parity, K60, ASG1(2));
+	MIX1(d, e, a, b, c, Parity, K60, ASG1(3));
+	MIX1(c, d, e, a, b, Parity, K60, ASG1(4));
+	MIX1(b, c, d, e, a, Parity, K60, ASG1(5));
+	MIX1(a, b, c, d, e, Parity, K60, ASG1(6));
+	MIX1(e, a, b, c, d, Parity, K60, ASG1(7));
+	MIX1(d, e, a, b, c, Parity, K60, ASG1(8));
+	MIX1(c, d, e, a, b, Parity, K60, ASG1(9));
+	MIX1(b, c, d, e, a, Parity, K60, ASG1(10));
+	MIX1(a, b, c, d, e, Parity, K60, ASG1(11));
+	MIX1(e, a, b, c, d, Parity, K60, ASG1(12));
+	MIX1(d, e, a, b, c, Parity, K60, ASG1(13));
+	MIX1(c, d, e, a, b, Parity, K60, ASG1(14));
+	MIX1(b, c, d, e, a, Parity, K60, ASG1(15));
+	s->H[0] += a; s->H[1] += b; s->H[2] += c;
+	s->H[3] += d; s->H[4] += e;
 }
 
-static void sha256(p, block)
-SHA *p;
+static void sha256(s, block)
+SHA *s;
 unsigned char *block;
 {
 	int t;
@@ -214,17 +202,19 @@ unsigned char *block;
  * To improve performance, unroll the loop and consolidate assignments
  * by changing the roles of variables "a" through "h" at each step.
  * Note that the variable "T2" is no longer needed.
- *
  */
 
-#define MIX2(a,b,c,d,e,f,g,h,k,w)	\
-	T1=h+SIGMA1(e)+Ch(e,f,g)+k+w; d+=T1; h=T1+SIGMA0(a)+Maj(a,b,c)
+#define MIX2(a,b,c,d,e,f,g,h,k,w)\
+	T1=h+SIGMA1(e)+Ch(e,f,g)+k+w;\
+	d+=T1; h=T1+SIGMA0(a)+Maj(a,b,c)
 
-#define ASG2(s)				\
-	(W[s&15]+=sigma1(W[(s+14)&15])+W[(s+9)&15]+sigma0(W[(s+1)&15]))
+#define ASG2(s)\
+	(W[s&15]+=sigma1(W[(s+14)&15])\
+	+W[(s+9)&15]+sigma0(W[(s+1)&15]))
 
-	a = p->H[0]; b = p->H[1]; c = p->H[2]; d = p->H[3];
-	e = p->H[4]; f = p->H[5]; g = p->H[6]; h = p->H[7];
+	a = s->H[0]; b = s->H[1]; c = s->H[2];
+	d = s->H[3]; e = s->H[4]; f = s->H[5];
+	g = s->H[6]; h = s->H[7];
 	MIX2(a, b, c, d, e, f, g, h, K256[0], W[0]);
 	MIX2(h, a, b, c, d, e, f, g, K256[1], W[1]);
 	MIX2(g, h, a, b, c, d, e, f, K256[2], W[2]);
@@ -289,11 +279,26 @@ unsigned char *block;
 	MIX2(d, e, f, g, h, a, b, c, K256[61], ASG2(13));
 	MIX2(c, d, e, f, g, h, a, b, K256[62], ASG2(14));
 	MIX2(b, c, d, e, f, g, h, a, K256[63], ASG2(15));
-	p->H[0] += a; p->H[1] += b; p->H[2] += c; p->H[3] += d;
-	p->H[4] += e; p->H[5] += f; p->H[6] += g; p->H[7] += h;
+	s->H[0] += a; s->H[1] += b; s->H[2] += c;
+	s->H[3] += d; s->H[4] += e; s->H[5] += f;
+	s->H[6] += g; s->H[7] += h;
 }
 
 #include "sha64bit.c"
+
+static void ul2mem(mem, ul)
+unsigned char *mem;
+unsigned long ul;
+{
+	int i;
+
+	for (i = 0; i < 4; i++)
+		*mem++ = SHR(ul, 24 - i * 8) & 0xff;
+}
+
+#define SETBIT(str, pos)  str[(pos) >> 3] |=  (0x01 << (7 - (pos) % 8))
+#define CLRBIT(str, pos)  str[(pos) >> 3] &= ~(0x01 << (7 - (pos) % 8))
+#define BYTECNT(bitcnt)   (1 + (((bitcnt) - 1) >> 3))
 
 static void pad(s)
 SHA *s;
@@ -528,6 +533,8 @@ SHA *s;
 	return(s->digest);
 }
 
+#define HEXLEN(bytecnt) ((bytecnt) << 1)
+
 char *shahex(s)
 SHA *s;
 {
@@ -535,6 +542,8 @@ SHA *s;
 
 	digcpy(s);
 	s->hex[0] = '\0';
+	if (HEXLEN(s->digestlen) >= sizeof(s->hex))
+		return(s->hex);
 	for (i = 0; i < s->digestlen; i++)
 		sprintf(s->hex+i*2, "%02x", s->digest[i]);
 	return(s->hex);
@@ -543,7 +552,7 @@ SHA *s;
 static char map[] =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-static char *enc3bytes(b, n)
+static char *encbase64(b, n)	/* encodes 0..3 bytes into Base64 */
 unsigned char *b;
 int n;
 {
@@ -562,6 +571,9 @@ int n;
 	return(out);
 }
 
+#define B64LEN(bytecnt) (((bytecnt) % 3 == 0) ? ((bytecnt) / 3) * 4 \
+	: ((bytecnt) / 3) * 4 + ((bytecnt) % 3) + 1)
+
 char *shabase64(s)
 SHA *s;
 {
@@ -570,9 +582,11 @@ SHA *s;
 
 	digcpy(s);
 	s->base64[0] = '\0';
+	if (B64LEN(s->digestlen) >= sizeof(s->base64))
+		return(s->base64);
 	for (n = s->digestlen, q = s->digest; n > 3; n -= 3, q += 3)
-		strcat(s->base64, enc3bytes(q, 3));
-	strcat(s->base64, enc3bytes(q, n));
+		strcat(s->base64, encbase64(q, 3));
+	strcat(s->base64, encbase64(q, n));
 	return(s->base64);
 }
 

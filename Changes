@@ -1,5 +1,16 @@
 Revision history for Perl extension Digest::SHA.
 
+4.0.8 Thu Dec 18 23:32:00 MST 2003
+	- inherits from Digest::base if installed
+		-- also checks for MIME::Base64 
+		-- still fully-functional if neither are installed
+	- added buffer overflow protection in underlying C code
+		-- ref. shahex() and shabase64() routines
+		-- prior code appeared impossible to exploit, but ...
+			-- better safe than sorry
+		-- does not impact runtime efficiency
+	- minor code cleanup
+
 4.0.7 Sat Dec 13 00:48:24 MST 2003
 	- check for undefined SHA handle when calling "shaclose()"
 		-- was causing cleanup err during global destruction

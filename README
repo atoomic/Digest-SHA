@@ -1,4 +1,4 @@
-Digest::SHA version 4.0.7
+Digest::SHA version 4.0.8
 =========================
 
 The Digest::SHA module provides an easy way to compute message
@@ -18,12 +18,10 @@ However, if your compiler doesn't recognize the "long long" type,
 the routines associated with SHA-384 and SHA-512 will return null
 values.
 
-Version 4.0.7 focuses on further performance enhancements.  All
-time-critical functions and methods have been rewritten in XS.
-Digest::SHA now compares favorably with other CPAN SHA modules in
-terms of performance.  Its speed on big-endian platforms is often
-significantly greater (e.g. when using the benchmark developed by
-Digest::  author Gisle Aas).
+Version 4.0.8 now inherits from Digest::base if the latter is
+installed on your platform.  If the base class is not present,
+Digest::SHA still works; it simply uses its own local routines to
+supply the missing functionality.
 
 Please refer to the tests subdirectory (t/*.t) for an extensive
 set of SHA vectors compiled from various sources.  Of particular

@@ -223,8 +223,8 @@ digest(self)
 	AV *	self
 ALIAS:
 	Digest::SHA::digest = 0
-	Digest::SHA::hexdigest = 1
-	Digest::SHA::b64digest = 2
+	Digest::SHA::Hexdigest = 1
+	Digest::SHA::B64digest = 2
 PREINIT:
 	unsigned int i;
 	unsigned char *data;
