@@ -7,7 +7,7 @@
 #include <src/sha.c>
 #include <src/hmac.c>
 
-static int sha_alg[] = {1,1,1,256,256,256,384,384,384,512,512,512};
+static int sha_alg[] = {1,1,1,224,224,224,256,256,256,384,384,384,512,512,512};
 
 MODULE = Digest::SHA		PACKAGE = Digest::SHA		
 
@@ -105,15 +105,18 @@ ALIAS:
 	Digest::SHA::sha1 = 0
 	Digest::SHA::sha1_hex = 1
 	Digest::SHA::sha1_base64 = 2
-	Digest::SHA::sha256 = 3
-	Digest::SHA::sha256_hex = 4
-	Digest::SHA::sha256_base64 = 5
-	Digest::SHA::sha384 = 6
-	Digest::SHA::sha384_hex = 7
-	Digest::SHA::sha384_base64 = 8
-	Digest::SHA::sha512 = 9
-	Digest::SHA::sha512_hex = 10
-	Digest::SHA::sha512_base64 = 11
+	Digest::SHA::sha224 = 3
+	Digest::SHA::sha224_hex = 4
+	Digest::SHA::sha224_base64 = 5
+	Digest::SHA::sha256 = 6
+	Digest::SHA::sha256_hex = 7
+	Digest::SHA::sha256_base64 = 8
+	Digest::SHA::sha384 = 9
+	Digest::SHA::sha384_hex = 10
+	Digest::SHA::sha384_base64 = 11
+	Digest::SHA::sha512 = 12
+	Digest::SHA::sha512_hex = 13
+	Digest::SHA::sha512_base64 = 14
 PREINIT:
 	unsigned int i;
 	unsigned char *data;
@@ -147,15 +150,18 @@ ALIAS:
 	Digest::SHA::hmac_sha1 = 0
 	Digest::SHA::hmac_sha1_hex = 1
 	Digest::SHA::hmac_sha1_base64 = 2
-	Digest::SHA::hmac_sha256 = 3
-	Digest::SHA::hmac_sha256_hex = 4
-	Digest::SHA::hmac_sha256_base64 = 5
-	Digest::SHA::hmac_sha384 = 6
-	Digest::SHA::hmac_sha384_hex = 7
-	Digest::SHA::hmac_sha384_base64 = 8
-	Digest::SHA::hmac_sha512 = 9
-	Digest::SHA::hmac_sha512_hex = 10
-	Digest::SHA::hmac_sha512_base64 = 11
+	Digest::SHA::hmac_sha224 = 3
+	Digest::SHA::hmac_sha224_hex = 4
+	Digest::SHA::hmac_sha224_base64 = 5
+	Digest::SHA::hmac_sha256 = 6
+	Digest::SHA::hmac_sha256_hex = 7
+	Digest::SHA::hmac_sha256_base64 = 8
+	Digest::SHA::hmac_sha384 = 9
+	Digest::SHA::hmac_sha384_hex = 10
+	Digest::SHA::hmac_sha384_base64 = 11
+	Digest::SHA::hmac_sha512 = 12
+	Digest::SHA::hmac_sha512_hex = 13
+	Digest::SHA::hmac_sha512_base64 = 14
 PREINIT:
 	unsigned int i;
 	unsigned char *key;

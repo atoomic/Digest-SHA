@@ -1,12 +1,12 @@
 /*
- * sha.c: routines to compute SHA-1/256/384/512 digests
+ * sha.c: routines to compute SHA-1/224/256/384/512 digests
  *
  * Ref: NIST FIPS PUB 180-2 Secure Hash Standard
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 4.0.8
- * Thu Dec 18 23:32:00 MST 2003
+ * Version: 4.2.0
+ * Sat Dec 27 16:08:00 MST 2003
  *
  */
 
@@ -35,7 +35,7 @@
 #define K40	0x8f1bbcdcUL
 #define K60	0xca62c1d6UL
 
-static unsigned long K256[64] =		/* SHA-256 constants */
+static unsigned long K256[64] =		/* SHA-224/256 constants */
 {
 	0x428a2f98UL, 0x71374491UL, 0xb5c0fbcfUL, 0xe9b5dba5UL,
 	0x3956c25bUL, 0x59f111f1UL, 0x923f82a4UL, 0xab1c5ed5UL,
@@ -61,13 +61,19 @@ static unsigned long H01[5] =		/* SHA-1 initial hash value */
 	0x10325476UL, 0xc3d2e1f0UL
 };
 
+static unsigned long H0224[8] =		/* SHA-224 initial hash value */
+{
+	0xc1059ed8UL, 0x367cd507UL, 0x3070dd17UL, 0xf70e5939UL,
+	0xffc00b31UL, 0x68581511UL, 0x64f98fa7UL, 0xbefa4fa4UL
+};
+
 static unsigned long H0256[8] =		/* SHA-256 initial hash value */
 {
 	0x6a09e667UL, 0xbb67ae85UL, 0x3c6ef372UL, 0xa54ff53aUL,
 	0x510e527fUL, 0x9b05688cUL, 0x1f83d9abUL, 0x5be0cd19UL
 };
 
-static unsigned long W[16];	/* message schedule for SHA-1/256 */
+static unsigned long W[16];	/* message schedule for SHA-1/224/256 */
 
 static void sha1(s, block)
 SHA *s;
@@ -351,6 +357,12 @@ SHA *s;
 		s->blocksize = SHA1_BLOCK_BITS;
 		s->digestlen = SHA1_DIGEST_BITS >> 3;
 	}
+	else if (alg == SHA224) {
+		s->sha = sha256;
+		memcpy(s->H, H0224, sizeof(H0224));
+		s->blocksize = SHA224_BLOCK_BITS;
+		s->digestlen = SHA224_DIGEST_BITS >> 3;
+	}
 	else if (alg == SHA256) {
 		s->sha = sha256;
 		memcpy(s->H, H0256, sizeof(H0256));
@@ -384,6 +396,12 @@ int alg;
 		memcpy(s->H, H01, sizeof(H01));
 		s->blocksize = SHA1_BLOCK_BITS;
 		s->digestlen = SHA1_DIGEST_BITS >> 3;
+	}
+	else if (alg == SHA224) {
+		s->sha = sha256;
+		memcpy(s->H, H0224, sizeof(H0224));
+		s->blocksize = SHA224_BLOCK_BITS;
+		s->digestlen = SHA224_DIGEST_BITS >> 3;
 	}
 	else if (alg == SHA256) {
 		s->sha = sha256;

@@ -1,12 +1,12 @@
 /*
- * sha.h: header file for SHA-1/256/384/512 routines
+ * sha.h: header file for SHA-1/224/256/384/512 routines
  *
  * Ref: NIST FIPS PUB 180-2 Secure Hash Standard
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 4.0.8
- * Thu Dec 18 23:32:00 MST 2003
+ * Version: 4.2.0
+ * Sat Dec 27 16:08:00 MST 2003
  *
  */
 
@@ -26,16 +26,19 @@
 #endif
 
 #define SHA1	1
+#define SHA224	224
 #define SHA256	256
 #define SHA384	384
 #define SHA512	512
 
 #define SHA1_BLOCK_BITS		512
+#define SHA224_BLOCK_BITS	SHA1_BLOCK_BITS
 #define SHA256_BLOCK_BITS	SHA1_BLOCK_BITS
 #define SHA384_BLOCK_BITS	1024
 #define SHA512_BLOCK_BITS	SHA384_BLOCK_BITS
 
 #define SHA1_DIGEST_BITS	160
+#define SHA224_DIGEST_BITS	224
 #define SHA256_DIGEST_BITS	256
 #define SHA384_DIGEST_BITS	384
 #define SHA512_DIGEST_BITS	512
@@ -90,6 +93,9 @@ int		 shaclose	_SHA_P((_SHA_STATE));
 unsigned char	*sha1digest	_SHA_P((_SHA_DATA));
 char		*sha1hex	_SHA_P((_SHA_DATA));
 char		*sha1base64	_SHA_P((_SHA_DATA));
+unsigned char	*sha224digest	_SHA_P((_SHA_DATA));
+char		*sha224hex	_SHA_P((_SHA_DATA));
+char		*sha224base64	_SHA_P((_SHA_DATA));
 unsigned char	*sha256digest	_SHA_P((_SHA_DATA));
 char		*sha256hex	_SHA_P((_SHA_DATA));
 char		*sha256base64	_SHA_P((_SHA_DATA));

@@ -1,12 +1,12 @@
 /*
- * hmac.c: routines to compute HMAC-SHA-1/256/384/512 digests
+ * hmac.c: routines to compute HMAC-SHA-1/224/256/384/512 digests
  *
  * Ref: FIPS PUB 198 The Keyed-Hash Message Authentication Code
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 4.0.8
- * Thu Dec 18 23:32:00 MST 2003
+ * Version: 4.2.0
+ * Sat Dec 27 16:08:00 MST 2003
  *
  */
 

@@ -4,17 +4,19 @@ use strict;
 use warnings;
 use integer;
 
-our $VERSION = '4.1.0';
+our $VERSION = '4.2.0';
 
 require Exporter;
 our @ISA = qw(Exporter);
 
 our @EXPORT_OK = qw(
 	hmac_sha1	hmac_sha1_base64	hmac_sha1_hex
+	hmac_sha224	hmac_sha224_base64	hmac_sha224_hex
 	hmac_sha256	hmac_sha256_base64	hmac_sha256_hex
 	hmac_sha384	hmac_sha384_base64	hmac_sha384_hex
 	hmac_sha512	hmac_sha512_base64	hmac_sha512_hex
 	sha1		sha1_base64		sha1_hex
+	sha224		sha224_base64		sha224_hex
 	sha256		sha256_base64		sha256_hex
 	sha384		sha384_base64		sha384_hex
 	sha512		sha512_base64		sha512_hex);
@@ -129,7 +131,7 @@ __END__
 
 =head1 NAME
 
-Digest::SHA - Perl extension for SHA-1/256/384/512
+Digest::SHA - Perl extension for SHA-1/224/256/384/512
 
 =head1 SYNOPSIS (SHA)
 
@@ -144,7 +146,7 @@ Digest::SHA - Perl extension for SHA-1/256/384/512
  # OO style
  use Digest::SHA;
 
- $sha = Digest::SHA->new($alg);		# alg = 1, 256, 384, 512
+ $sha = Digest::SHA->new($alg);		# alg = 1, 224, 256, 384, 512
 
  $sha->add($data);
  $sha->addfile(*FILE);
@@ -170,13 +172,14 @@ Digest::SHA - Perl extension for SHA-1/256/384/512
 
 Digest::SHA is a full implementation of the NIST Secure Hash
 Standard.  It gives Perl programmers a convenient way to calculate
-SHA-1, SHA-256, SHA-384, and SHA-512 message digests.  The module
-can handle all types of input, including partial-byte data.
+SHA-1, SHA-224, SHA-256, SHA-384, and SHA-512 message digests.
+The module can handle all types of input, including partial-byte
+data.
 
 =head1 DESCRIPTION
 
 Digest::SHA is a Perl interface to portable C code that implements
-all four hashing algorithms defined in NIST FIPS PUB 180-2.  It
+all five hashing algorithms defined in NIST FIPS PUB 180-2.  It
 offers two ways to calculate digests: all-at-once, or in stages.
 
 To illustrate, the following short program computes the SHA-256
@@ -223,10 +226,10 @@ run the following:
 	Digest::SHA->new(256)->add("COL Bat Guano" x 1964)->dump;
 
 As an added convenience, the Digest::SHA module offers routines to
-calculate keyed hashes using the HMAC-SHA-1/256/384/512 algorithms.
-These services exist in functional form only, and mimic the style
-and behavior of the I<sha()>, I<sha_hex()>, and I<sha_base64()>
-functions.
+calculate keyed hashes using the HMAC-SHA-1/224/256/384/512
+algorithms.  These services exist in functional form only, and
+mimic the style and behavior of the I<sha()>, I<sha_hex()>, and
+I<sha_base64()> functions.
 
 	# test vector from draft-ietf-ipsec-ciph-sha-256-01.txt
 
@@ -253,6 +256,8 @@ I<Functional style>
 
 =item B<sha1($data, ...)>
 
+=item B<sha224($data, ...)>
+
 =item B<sha256($data, ...)>
 
 =item B<sha384($data, ...)>
@@ -260,9 +265,11 @@ I<Functional style>
 =item B<sha512($data, ...)>
 
 Logically joins the arguments into a single string, and returns
-its SHA-1/256/384/512 digest encoded as a binary string.
+its SHA-1/224/256/384/512 digest encoded as a binary string.
 
 =item B<sha1_hex($data, ...)>
+
+=item B<sha224_hex($data, ...)>
 
 =item B<sha256_hex($data, ...)>
 
@@ -271,9 +278,11 @@ its SHA-1/256/384/512 digest encoded as a binary string.
 =item B<sha512_hex($data, ...)>
 
 Logically joins the arguments into a single string, and returns
-its SHA-1/256/384/512 digest encoded as a hexadecimal string.
+its SHA-1/224/256/384/512 digest encoded as a hexadecimal string.
 
 =item B<sha1_base64($data, ...)>
+
+=item B<sha224_base64($data, ...)>
 
 =item B<sha256_base64($data, ...)>
 
@@ -282,7 +291,7 @@ its SHA-1/256/384/512 digest encoded as a hexadecimal string.
 =item B<sha512_base64($data, ...)>
 
 Logically joins the arguments into a single string, and returns
-its SHA-1/256/384/512 digest encoded as a Base64 string.
+its SHA-1/224/256/384/512 digest encoded as a Base64 string.
 
 =back
 
@@ -292,10 +301,10 @@ I<OO style>
 
 =item B<$sha = Digest::SHA-E<gt>new($alg)>
 
-Returns a new Digest::SHA object.  Values for I<$alg> are 1, 256,
-384, or 512.  It's also possible to use common string representations
-of the algorithm (e.g. "sha256", "SHA-384").  If the argument is
-missing, SHA-1 will be used by default.
+Returns a new Digest::SHA object.  Values for I<$alg> are 1, 224,
+256, 384, or 512.  It's also possible to use common string
+representations of the algorithm (e.g. "sha256", "SHA-384").  If
+the argument is missing, SHA-1 will be used by default.
 
 Invoking I<new> as an instance method will not create a new object;
 instead, it will simply reset the object to the initial state
@@ -310,14 +319,14 @@ In fact, I<reset> is just an alias for I<new>.
 =item B<$sha-E<gt>hashsize>
 
 Returns the number of digest bits for this object.  The values are
-160, 256, 384, and 512 for SHA-1, SHA-256, SHA-384, and SHA-512,
-respectively.
+160, 224, 256, 384, and 512 for SHA-1, SHA-224, SHA-256, SHA-384,
+and SHA-512, respectively.
 
 =item B<$sha-E<gt>algorithm>
 
 Returns the digest algorithm for this object.  The values are 1,
-256, 384, and 512 for SHA-1, SHA-256, SHA-384, and SHA-512,
-respectively.
+224, 256, 384, and 512 for SHA-1, SHA-224, SHA-256, SHA-384, and
+SHA-512, respectively.
 
 =item B<$sha-E<gt>clone>
 
@@ -415,11 +424,13 @@ system.  Otherwise, a functionally equivalent substitute is used.
 
 =back
 
-I<HMAC-SHA-1/256/384/512>
+I<HMAC-SHA-1/224/256/384/512>
 
 =over 4
 
 =item B<hmac_sha1($data, $key)>
+
+=item B<hmac_sha224($data, $key)>
 
 =item B<hmac_sha256($data, $key)>
 
@@ -427,12 +438,14 @@ I<HMAC-SHA-1/256/384/512>
 
 =item B<hmac_sha512($data, $key)>
 
-Returns the HMAC-SHA-1/256/384/512 digest of I<$data>/I<$key>, with
-the result encoded as a binary string.  Multiple I<$data> arguments
-are allowed, provided that I<$key> is the last argument in the
-list.
+Returns the HMAC-SHA-1/224/256/384/512 digest of I<$data>/I<$key>,
+with the result encoded as a binary string.  Multiple I<$data>
+arguments are allowed, provided that I<$key> is the last argument
+in the list.
 
 =item B<hmac_sha1_hex($data, $key)>
+
+=item B<hmac_sha224_hex($data, $key)>
 
 =item B<hmac_sha256_hex($data, $key)>
 
@@ -440,12 +453,14 @@ list.
 
 =item B<hmac_sha512_hex($data, $key)>
 
-Returns the HMAC-SHA-1/256/384/512 digest of I<$data>/I<$key>, with
-the result encoded as a hexadecimal string.  Multiple I<$data>
+Returns the HMAC-SHA-1/224/256/384/512 digest of I<$data>/I<$key>,
+with the result encoded as a hexadecimal string.  Multiple I<$data>
 arguments are allowed, provided that I<$key> is the last argument
 in the list.
 
 =item B<hmac_sha1_base64($data, $key)>
+
+=item B<hmac_sha224_base64($data, $key)>
 
 =item B<hmac_sha256_base64($data, $key)>
 
@@ -453,10 +468,10 @@ in the list.
 
 =item B<hmac_sha512_base64($data, $key)>
 
-Returns the HMAC-SHA-1/256/384/512 digest of I<$data>/I<$key>, with
-the result encoded as a Base64 string.  Multiple I<$data> arguments
-are allowed, provided that I<$key> is the last argument in the
-list.
+Returns the HMAC-SHA-1/224/256/384/512 digest of I<$data>/I<$key>,
+with the result encoded as a Base64 string.  Multiple I<$data>
+arguments are allowed, provided that I<$key> is the last argument
+in the list.
 
 =back
 

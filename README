@@ -1,10 +1,11 @@
-Digest::SHA version 4.1.0
+Digest::SHA version 4.2.0
 =========================
 
 The Digest::SHA module provides an easy way to compute message
 digests using Perl.  It supports all algorithms of the NIST Secure
-Hash Standard (i.e. SHA-1, 256, 384, and 512).  The module also
-includes functions to compute keyed-hashes using the HMAC algorithm.
+Hash Standard (i.e. SHA-1, 224, 256, 384, and 512).  The module
+also includes functions to compute keyed-hashes using the HMAC
+algorithm.
 
 Digest::SHA conforms to the naming conventions and styles of the
 CPAN Digest module.  Several features have been added, such as the

@@ -1,5 +1,10 @@
 Revision history for Perl extension Digest::SHA.
 
+4.2.0 Sat Dec 27 16:08:00 MST 2003
+	- added support for recently-announced SHA-224 algorithm
+		-- ref. FIPS 180-2 Change Notice 1
+		-- also includes HMAC-SHA-224
+
 4.1.0 Thu Dec 25 00:58:00 MST 2003
 	- repaired "nist-vectors" test scripts for MSWin32 portability
 		-- use binmode for data files

@@ -15,6 +15,7 @@ src/sha64bit.h
 t/1-exist.t
 t/1-hello-world.t
 t/2-nist-sha-1.t
+t/2-nist-sha-224.t
 t/2-nist-sha-256.t
 t/2-nist-sha-384.t
 t/2-nist-sha-512.t

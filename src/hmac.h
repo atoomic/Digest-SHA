@@ -1,12 +1,12 @@
 /*
- * hmac.h: header file for HMAC-SHA-1/256/384/512 routines
+ * hmac.h: header file for HMAC-SHA-1/224/256/384/512 routines
  *
  * Ref: FIPS PUB 198 The Keyed-Hash Message Authentication Code
  *
  * Copyright (C) 2003 Mark Shelor, All Rights Reserved
  *
- * Version: 4.0.8
- * Thu Dec 18 23:32:00 MST 2003
+ * Version: 4.2.0
+ * Sat Dec 27 16:08:00 MST 2003
  *
  */
 
@@ -46,6 +46,9 @@ int		 hmacclose	_HMAC_P((_HMAC_STATE));
 unsigned char	*hmac1digest	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
 char		*hmac1hex	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
 char		*hmac1base64	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
+unsigned char	*hmac224digest	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
+char		*hmac224hex	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
+char		*hmac224base64	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
 unsigned char	*hmac256digest	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
 char		*hmac256hex	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
 char		*hmac256base64	_HMAC_P((_HMAC_DATA, _HMAC_KEY));
