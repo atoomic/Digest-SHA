@@ -1,12 +1,12 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.41.
+signed via the Module::Signature module, version 0.44.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
 
     % cpansign -v
 
-It would check each file's integrity, as well as the signature's
+It will check each file's integrity, as well as the signature's
 validity.  If "==> Signature verified OK! <==" is not displayed,
 the distribution may already have been compromised, and you should
 not run its Makefile.PL or Build.PL.
@@ -14,20 +14,20 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 4bf8b48882cb81b9b7a1503c2135ee7a3aee385b Changes
+SHA1 0b07195f0671171c86f8529fbf05628bbad2288d Changes
 SHA1 afc50f6b503cb14f2be7f047b661bd9cdd56c4e5 MANIFEST
-SHA1 a4be4fbb26d550affa423b3a042ccf8588401f58 META.yml
+SHA1 484bd32934f0f2f55d915381be628ce8d803c089 META.yml
 SHA1 9903634fd8ce5d1ed2fbece7be5ed0cd5d98f158 Makefile.PL
-SHA1 ae695555a2613d8624197d5e0d022c5945a4551e README
-SHA1 13114f41eeb8007d54f974b6b9a26018c20f5534 SHA.pm
+SHA1 d93e0f3c0f845f94f0f26f7de1c5c2683f9ecf74 README
+SHA1 cce03089597cf878cd6cb1556f9f10639643c3ee SHA.pm
 SHA1 51d3d1db41241cdf960bb3d5c81efa9eac13b197 SHA.xs
 SHA1 0389154c992f23bfc99b36f187500c4d2e47ac95 ppport.h
-SHA1 4fef81c47e41a6dba3398e6a205b855792f66946 shasum
-SHA1 f6babbf404c4329c810bc770a893737182d65713 src/hmac.c
-SHA1 6370370fa63e1f97ff79681281f677ff1656a6c0 src/hmac.h
+SHA1 8711f9e0d35c99430a282f651d4cfdb3a04b0146 shasum
+SHA1 021ae2abdeefe0d22e842cadbca10e0b1cc5879f src/hmac.c
+SHA1 90090e2f123756edacc6ca2dd7ad8ba11aa6ff2e src/hmac.h
 SHA1 7589c6ce33e74a58ded932d69756659e91723fdb src/hmacxtra.c
-SHA1 47e803433ba7cdecbab59d76e622945000ded384 src/sha.c
-SHA1 2bc90270882ae12a511d690dbe61c2cc1e0a10c3 src/sha.h
+SHA1 b688b47259c49281136b957bca5822b1dc81c1a2 src/sha.c
+SHA1 02cfd98b2b01239c0e0642ab3c7b650ca2494cf3 src/sha.h
 SHA1 c1bba35de65c8d81362472b76075dba8cf1e542b src/sha64bit.c
 SHA1 48d806b05a15dfd8211d5f7158b3294d86fa24d2 src/sha64bit.h
 SHA1 329ac17325437c725331fbf84ae0c9484f50041a src/shaxtra.c
@@ -67,9 +67,9 @@ SHA1 2130ee8086bc7bf41fc329e9d87a81e2d98b68c8 t/state/state.384
 SHA1 69cd49d84cb11c83ef8e6eb36f6a472edb37079d t/state/state.512
 SHA1 e93dd71c67ba56e170516c16eeeb7659a41f91fd typemap
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.2.4 (Darwin)
+Version: GnuPG v1.4.0 (Darwin)
 
-iD8DBQFBmw1XBwNg/wr1Y/4RAvBkAKCgcbVbCPSnIyJXA8cELDUJPuAjFACgtkxq
-ifa4arH5mPdZCym9BkO+4ik=
-=0BbG
+iD8DBQFC/y/fBwNg/wr1Y/4RAklrAJ93IX7GXe1j3XtCdivgvHFtKbGgfgCdGUMk
+mG8UqJ7mHWYOUvWyUe6oiW8=
+=7YRs
 -----END PGP SIGNATURE-----

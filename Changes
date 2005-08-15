@@ -1,5 +1,11 @@
 Revision history for Perl extension Digest::SHA.
 
+5.29  Sun Aug 14 04:48:34 MST 2005
+	- added explicit casts in "shaload" routine (ref. "ldvals")
+		-- thanks to E. Allen Smith for pointing out SGI compiler
+			warnings on IPxx-irix platforms
+	- updated docs with cautionary note about SHA-1
+
 5.28  Wed Nov 10 15:33:20 MST 2004
 	- provided more flexible formatting of SHA state files
 		-- entries may now contain embedded whitespace

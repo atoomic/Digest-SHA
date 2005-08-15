@@ -3,10 +3,10 @@
  *
  * Ref: NIST FIPS PUB 180-2 Secure Hash Standard
  *
- * Copyright (C) 2003-2004 Mark Shelor, All Rights Reserved
+ * Copyright (C) 2003-2005 Mark Shelor, All Rights Reserved
  *
- * Version: 5.28
- * Wed Nov 10 15:33:20 MST 2004
+ * Version: 5.29
+ * Sun Aug 14 04:48:34 MST 2005
  *
  */
 
@@ -26,6 +26,7 @@
 #define UCHR	unsigned char
 #define UINT	unsigned int
 #define ULNG	unsigned long
+#define VP	void *
 
 #define ROTR(x, n)	(SR32(x, n) | SL32(x, 32-(n)))
 #define ROTL(x, n)	(SL32(x, n) | SR32(x, 32-(n)))
@@ -650,17 +651,18 @@ char *file;
 	else if ((f = SHA_open(file, "r")) == NULL)
 		return(NULL);
 	if (
-		!ldvals(f, "alg", T_I, &alg, 1, 10)			||
+		/* avoid parens by exploiting precedence of (type)&-> */
+		!ldvals(f,"alg",T_I,(VP)&alg,1,10)			||
 		((s = shaopen(alg)) == NULL)				||
-		!ldvals(f, "H", alg <= SHA256 ? T_L : T_Q, s->H, 8, 16)	||
-		!ldvals(f, "block", T_C, s->block, s->blocksize/8, 16)	||
-		!ldvals(f, "blockcnt", T_I, &s->blockcnt, 1, 10)	||
+		!ldvals(f,"H",alg<=SHA256?T_L:T_Q,(VP)s->H,8,16)	||
+		!ldvals(f,"block",T_C,(VP)s->block,s->blocksize/8,16)	||
+		!ldvals(f,"blockcnt",T_I,(VP)&s->blockcnt,1,10)		||
 		(alg <= SHA256 && s->blockcnt >= SHA1_BLOCK_BITS)	||
 		(alg >= SHA384 && s->blockcnt >= SHA384_BLOCK_BITS)	||
-		!ldvals(f, "lenhh", T_L, &s->lenhh, 1, 10)		||
-		!ldvals(f, "lenhl", T_L, &s->lenhl, 1, 10)		||
-		!ldvals(f, "lenlh", T_L, &s->lenlh, 1, 10)		||
-		!ldvals(f, "lenll", T_L, &s->lenll, 1, 10)
+		!ldvals(f,"lenhh",T_L,(VP)&s->lenhh,1,10)		||
+		!ldvals(f,"lenhl",T_L,(VP)&s->lenhl,1,10)		||
+		!ldvals(f,"lenlh",T_L,(VP)&s->lenlh,1,10)		||
+		!ldvals(f,"lenll",T_L,(VP)&s->lenll,1,10)
 	)
 		return(closeall(f, s));
 	if (f != SHA_stdin())
