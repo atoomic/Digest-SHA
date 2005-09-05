@@ -17,6 +17,8 @@ src/sha.h
 src/shaxtra.c			Not used for Perl build
 src/sha64bit.c
 src/sha64bit.h
+t/0-pod-coverage.t
+t/0-pod.t
 t/1-exist.t
 t/1-hello-world.t
 t/2-nist-sha-1.t

@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.44.
+signed via the Module::Signature module, version 0.50.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -14,23 +14,25 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 1b4edb10ca7f1bc84fb34c987df37c411d1a4503 Changes
-SHA1 afc50f6b503cb14f2be7f047b661bd9cdd56c4e5 MANIFEST
-SHA1 f9d43c44c16aee51cd56fe37ba9053da765195bc META.yml
+SHA1 226f2775375a3481d1fc34c176b7b10876b43230 Changes
+SHA1 952a17b73eeb605287d1aa08d2e8bf4837106b43 MANIFEST
+SHA1 0a2a774c849ac1df06df6c9fc9f32c437032368e META.yml
 SHA1 9903634fd8ce5d1ed2fbece7be5ed0cd5d98f158 Makefile.PL
-SHA1 bca09f0da973a2ee16b677b87f82ba747c096749 README
-SHA1 c541d63e4e41fc2078e3113b87fd53095456ca75 SHA.pm
+SHA1 cf127ddcb3023c8f357eea4a377644d36dd2505f README
+SHA1 736019bcd8cc385ffb6d922c37b91a0b17bd1c26 SHA.pm
 SHA1 51d3d1db41241cdf960bb3d5c81efa9eac13b197 SHA.xs
 SHA1 0389154c992f23bfc99b36f187500c4d2e47ac95 ppport.h
-SHA1 4e220d49cd06246c7b1302ff9269b2af7cfa940e shasum
-SHA1 34a0d00bbb2adf3bbdc1adc20efa0362de7baa20 src/hmac.c
-SHA1 95bdd8326f5c6595ec134d7f06c88dc542034c7b src/hmac.h
+SHA1 d8faf01f83da1fedb6659364fd470adc98f65c10 shasum
+SHA1 c42f2e8f2357ece6882bbe276cb60e397f7151da src/hmac.c
+SHA1 915f3f64518c40a61b4d3ef15f8b93120110aa26 src/hmac.h
 SHA1 7589c6ce33e74a58ded932d69756659e91723fdb src/hmacxtra.c
-SHA1 c793a8f6fcdfed44f888fac2a3ce4860b7aa2788 src/sha.c
-SHA1 da189d0b50b6131c6c3e63363828f2689c99b51e src/sha.h
+SHA1 42138d24d6db3e6797503a27c93b4ea0120c0c8d src/sha.c
+SHA1 a026c7288fd89b4ef17c37252289082c708dfcdc src/sha.h
 SHA1 c1bba35de65c8d81362472b76075dba8cf1e542b src/sha64bit.c
 SHA1 48d806b05a15dfd8211d5f7158b3294d86fa24d2 src/sha64bit.h
 SHA1 329ac17325437c725331fbf84ae0c9484f50041a src/shaxtra.c
+SHA1 40cbf841dee0e93f741ab63e32c9fe5a7177edbd t/0-pod-coverage.t
+SHA1 e9c6a5881fc60173fbc8d479c1afd2ce3b43bef1 t/0-pod.t
 SHA1 9d80d4157cbf2791d830c26e1757cbfb1fda717d t/1-exist.t
 SHA1 89d62a1c05ad0d2721d85d921490b181031ad2f8 t/1-hello-world.t
 SHA1 73700867f0df504d7f4545cd674c6f9bb64e4d1b t/2-nist-sha-1.t
@@ -39,7 +41,7 @@ SHA1 d745cd3fe82b686f958782615a270b31261e1b59 t/2-nist-sha-256.t
 SHA1 baeb0deb7582bc6c7f5178b3e14d7dfe22ac5dba t/2-nist-sha-384.t
 SHA1 0a21b8f93bf56c64da46c39df2ea7addbc8bc937 t/2-nist-sha-512.t
 SHA1 60a4d5cdb98367fd4e31ac39f30cb05c6762d5ff t/2-nist-sha-base64.t
-SHA1 2a7c3b1210b32e1214a3972e926e5d6085425b69 t/2-nist-sha-oo.t
+SHA1 0c394207595a2e631e0e524fc618bd56402d2b9f t/2-nist-sha-oo.t
 SHA1 81a3e7ba244407c517ea15b391fbbc087c656cab t/2-nist-vectors-bit.t
 SHA1 7782177cf67fd8ad2074f433e4b30814a34524e5 t/2-nist-vectors-byte.t
 SHA1 2268f236c26d00bfc8c7d805f09108b4913ae5ec t/3-gillogly-easy.t
@@ -69,7 +71,7 @@ SHA1 e93dd71c67ba56e170516c16eeeb7659a41f91fd typemap
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.0 (Darwin)
 
-iD8DBQFDB8D4BwNg/wr1Y/4RAowEAJwPGr7Ugi5kMLlwEwVkUgDCVruyXwCeKUiC
-3Zd4NFkkqjtF0Hv96uuTgHc=
-=zeXp
+iD8DBQFDG/mEBwNg/wr1Y/4RAlDyAKDe/1HH7Ve16rGkvaLDZCtPlY4iUwCgon76
+x3mClMHPFnCVwnSTFShiPMk=
+=xtkD
 -----END PGP SIGNATURE-----
