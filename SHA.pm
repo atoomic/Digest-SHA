@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use integer;
 
-our $VERSION = '5.31';
+our $VERSION = '5.32';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -543,6 +543,7 @@ The author is particularly grateful to
 	Alex Muntada
 	Chris Skiscim
 	Martin Thurn
+	Gunnar Wolf
 	Adam Woodbury
 
 for their valuable comments and suggestions.

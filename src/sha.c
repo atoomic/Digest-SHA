@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2005 Mark Shelor, All Rights Reserved
  *
- * Version: 5.31
- * Mon Sep  5 00:52:42 MST 2005
+ * Version: 5.32
+ * Fri Dec  2 02:32:20 MST 2005
  *
  */
 
@@ -385,7 +385,7 @@ UCHR *bitstr;
 ULNG bitcnt;
 SHA *s;
 {
-	if (bitcnt == 0)
+	if (bitcnt < 1)
 		return(0);
 	if (SHA_LO32(s->lenll += bitcnt) < bitcnt)
 		if (SHA_LO32(++s->lenlh) == 0)
@@ -410,19 +410,19 @@ SHA *s;
 	llpos  = s->blocksize == SHA1_BLOCK_BITS ?  60 : 124;
 	SETBIT(s->block, s->blockcnt), s->blockcnt++;
 	while (s->blockcnt > lenpos)
-		if (s->blockcnt == s->blocksize)
-			s->sha(s, s->block), s->blockcnt = 0;
-		else
+		if (s->blockcnt < s->blocksize)
 			CLRBIT(s->block, s->blockcnt), s->blockcnt++;
+		else
+			s->sha(s, s->block), s->blockcnt = 0;
 	while (s->blockcnt < lenpos)
 		CLRBIT(s->block, s->blockcnt), s->blockcnt++;
-	if (s->blocksize != SHA1_BLOCK_BITS) {
+	if (s->blocksize > SHA1_BLOCK_BITS) {
 		w32mem(s->block + 112, s->lenhh);
 		w32mem(s->block + 116, s->lenhl);
 	}
 	w32mem(s->block + lhpos, s->lenlh);
 	w32mem(s->block + llpos, s->lenll);
-	s->sha(s, s->block), s->blockcnt = 0;
+	s->sha(s, s->block);
 }
 
 /* shadigest: returns pointer to current digest (binary) */
@@ -517,7 +517,7 @@ int shadump(file, s)
 char *file;
 SHA *s;
 {
-	int i, j;
+	unsigned int i, j;
 	SHA_FILE *f;
 	UCHR *p = shadigest(s);
 
