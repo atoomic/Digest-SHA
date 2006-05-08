@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.50.
+signed via the Module::Signature module, version 0.53.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -14,20 +14,20 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 4ec4dd0ac5a6e679b7ac77e0b5fb4be54e685e62 Changes
+SHA1 0bc11491155f158a898c4ff60c257468a5558be2 Changes
 SHA1 952a17b73eeb605287d1aa08d2e8bf4837106b43 MANIFEST
-SHA1 44c45b209faa50d5cea2cd3aa154543473224068 META.yml
-SHA1 9903634fd8ce5d1ed2fbece7be5ed0cd5d98f158 Makefile.PL
-SHA1 8525f94799ac062aa636851ec618242b39b7c40f README
-SHA1 1b4d9e922933406df2c062878be9c5340dd40031 SHA.pm
+SHA1 16cdd646330cbe6f45d3462aa3e3b47be1916758 META.yml
+SHA1 def31e4ea732857338ca9858b091a7b9b4c35fd7 Makefile.PL
+SHA1 3af4c0931607041a7f978d9579ca416aafcc102b README
+SHA1 6b6f081165cea0a948f15596990c50ee92d2eae2 SHA.pm
 SHA1 51d3d1db41241cdf960bb3d5c81efa9eac13b197 SHA.xs
 SHA1 48517b1bf0ddf48ae4bc24910d3b9af625bc2325 ppport.h
-SHA1 3feeaa9113148ee3bff0073c7d0aa7977652581d shasum
-SHA1 8b7099c5959550c621ff6ba6e9ac0a856b5b25db src/hmac.c
-SHA1 5b081137aae691475eac941783b7842c81767485 src/hmac.h
+SHA1 6d165406df411bb37018b2612c721afe26698012 shasum
+SHA1 63fe5bbee612fc0a2302b0034115ad0a4fa38dbb src/hmac.c
+SHA1 ccdea4213ee7b08bd3196e1a8f724b3d905ff4eb src/hmac.h
 SHA1 7589c6ce33e74a58ded932d69756659e91723fdb src/hmacxtra.c
-SHA1 c31a02bd6128a416e85eb979258bf392e639d37e src/sha.c
-SHA1 fe5481cafe6d17424100d0c3119023d033acf783 src/sha.h
+SHA1 b4f5804368be6db704737560e6353dc151b35337 src/sha.c
+SHA1 5d135de5c2d5659c1cab7b28fa83a9a889bc966b src/sha.h
 SHA1 c1bba35de65c8d81362472b76075dba8cf1e542b src/sha64bit.c
 SHA1 48d806b05a15dfd8211d5f7158b3294d86fa24d2 src/sha64bit.h
 SHA1 329ac17325437c725331fbf84ae0c9484f50041a src/shaxtra.c
@@ -58,20 +58,20 @@ SHA1 21c02922ef7908fd6d6ed3d1cc99df57b700274c t/7-ireland.t
 SHA1 636d5e987243f6634fdc1dff1fe1d11d07778347 t/gillogly/state.011
 SHA1 b1e86af6b46e066555bbcd749982ccba816cf744 t/gillogly/state.110
 SHA1 427874bceb58bc3a36b5808a204023334614930b t/nist/COPYRIGHT
-SHA1 573d7d4bba50c5cecb4a86f1ffff14d764a31ecb t/nist/Readme.txt
-SHA1 7996bb1a434fb3f6fd38f64800ab3b2fe5d23c6b t/nist/bit-hashes.sha1
-SHA1 d21096373dfbf3330d89bcb2e704b543a27b6065 t/nist/bit-messages.sha1
-SHA1 dd66fe858830fb1b23d35affa402b52a77a15b1f t/nist/byte-hashes.sha1
-SHA1 936304c2db3a3ee49ecb1247f8466814cab080a0 t/nist/byte-messages.sha1
+SHA1 fb62fba7cf3abd4a3f102e3c5d1364885f3fca0c t/nist/Readme.txt
+SHA1 1c5e5609f4a68cbaac298d0bbcbc7f56866ac296 t/nist/bit-hashes.sha1
+SHA1 f5d19f0842895dc74ec3f9b1b2bc684088552d8e t/nist/bit-messages.sha1
+SHA1 81cc5e5a0c57de956de3f44977e486afa871068f t/nist/byte-hashes.sha1
+SHA1 505c66bd2326114b05fa96474ff1973e52761137 t/nist/byte-messages.sha1
 SHA1 3b51b03c790b1cf112d4804573f5fd4814b384c2 t/state/state.1
 SHA1 cc3d0feffc019e4651fb085e7bc51e190e58fa53 t/state/state.256
 SHA1 2130ee8086bc7bf41fc329e9d87a81e2d98b68c8 t/state/state.384
 SHA1 69cd49d84cb11c83ef8e6eb36f6a472edb37079d t/state/state.512
 SHA1 e93dd71c67ba56e170516c16eeeb7659a41f91fd typemap
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.0 (Darwin)
+Version: GnuPG v1.4.1 (GNU/Linux)
 
-iD8DBQFD4rkjBwNg/wr1Y/4RAonyAJ4x4Z4AcLWE19ia1AaD2qc4uk+0BQCgitCp
-cRrFVjJh69RZtmw12owCn8U=
-=2SJ3
+iD8DBQFEXpF8BwNg/wr1Y/4RAs/yAJ4qLNVSLOb6rbrH74Sqft5gAfT/jwCg9SK9
++eYmArMnEQyI56+7DXXoVeE=
+=Ltf6
 -----END PGP SIGNATURE-----
