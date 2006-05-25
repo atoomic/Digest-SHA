@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.53.
+signed via the Module::Signature module, version 0.54.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -14,20 +14,20 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 9dae4901104eacfc178804a57044bd7a8c726112 Changes
+SHA1 7f6dd6a6964b1bf4ee00460fa4cf1d9d367d1b98 Changes
 SHA1 952a17b73eeb605287d1aa08d2e8bf4837106b43 MANIFEST
-SHA1 3d3ae680a9e1a638a8396456fa26bb42ac4bfdbb META.yml
+SHA1 acee3393bc445b585f55ff5d233f574602cb9f6f META.yml
 SHA1 def31e4ea732857338ca9858b091a7b9b4c35fd7 Makefile.PL
-SHA1 20e4a2f253acdfa257434c4815110047dc2891b1 README
-SHA1 a4af96d97f9e60ac2edfd79138d9daa3d363f1c1 SHA.pm
+SHA1 65000dfda5a4f739709bc2f6e3e741d2ace4e6ae README
+SHA1 b184a2bd2ffa378ceed4fc2a16c736182a3f5c12 SHA.pm
 SHA1 51d3d1db41241cdf960bb3d5c81efa9eac13b197 SHA.xs
 SHA1 48517b1bf0ddf48ae4bc24910d3b9af625bc2325 ppport.h
-SHA1 8ac9940d0fed994e598c54329407ea8e7f52d512 shasum
-SHA1 a342b82ef6d8fd63c67f7d2e3b20686c8fa999ca src/hmac.c
-SHA1 080ccd280007d2148fa3f2b4100952cf423036b8 src/hmac.h
+SHA1 a04c3ec62ceb3b650abffbc4fcce8c39a0bcc4f6 shasum
+SHA1 04beeb92d063efa12d9a564e86c0d4b86305882e src/hmac.c
+SHA1 303539496955f291d45e221284e608a8ea69efde src/hmac.h
 SHA1 7589c6ce33e74a58ded932d69756659e91723fdb src/hmacxtra.c
-SHA1 44a321ffc9ea5d1731f42ef70f9c1b26514255d5 src/sha.c
-SHA1 8ba6b8262480821a22a701fbb13a7e81198167ff src/sha.h
+SHA1 62f3004b595575cace7adc1abf09fd25f6e6175e src/sha.c
+SHA1 a0de05b1ded7db201afbbf74fce5cb5d3fb8d0b1 src/sha.h
 SHA1 c1bba35de65c8d81362472b76075dba8cf1e542b src/sha64bit.c
 SHA1 48d806b05a15dfd8211d5f7158b3294d86fa24d2 src/sha64bit.h
 SHA1 329ac17325437c725331fbf84ae0c9484f50041a src/shaxtra.c
@@ -41,7 +41,7 @@ SHA1 008137e8d01cc1846346433f9ae4ed95acf67a17 t/2-nist-sha-256.t
 SHA1 5ff47d34427af615dd5222486a3460e2a75535aa t/2-nist-sha-384.t
 SHA1 4d5dfce16efb801b27dcd5cfcd904d91175e97f1 t/2-nist-sha-512.t
 SHA1 902f263f29354655886cc5e5361bf8ff6fc6dc68 t/2-nist-sha-base64.t
-SHA1 a0c79db3485aac71beaa52f2e492445b19bdbf3f t/2-nist-sha-oo.t
+SHA1 cbfd1bd7c5f3b708b0a1b581dcf6af65490c446f t/2-nist-sha-oo.t
 SHA1 62b21ae81d5e57c0b064f7ba0c6bc81952ea2808 t/2-nist-vectors-bit.t
 SHA1 f8f550ff0161091803e163f56ecc043a9ae2387c t/2-nist-vectors-byte.t
 SHA1 3e9a29e58dfc4a6c40b5f92982d7ba26f175cf9c t/3-gillogly-easy.t
@@ -71,7 +71,7 @@ SHA1 e93dd71c67ba56e170516c16eeeb7659a41f91fd typemap
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.1 (GNU/Linux)
 
-iD8DBQFEaF+dBwNg/wr1Y/4RArFlAKCpngR4crxBQ4iXB1W+SuFKIETNbACeNQaS
-MXO0ShoOBU9s3xzHxXMRw0E=
-=ltCM
+iD8DBQFEdX7DBwNg/wr1Y/4RAmooAJ4k7vSVam9XdFSZcfbWQltdIZYTxgCdGvtD
+UAGJ4e3YFM1tpQ9Ub83M/So=
+=4as1
 -----END PGP SIGNATURE-----
