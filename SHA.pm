@@ -6,7 +6,7 @@ use strict;
 use warnings;
 use integer;
 
-our $VERSION = '5.40';
+our $VERSION = '5.41';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -112,8 +112,7 @@ sub _addfile {  # this is "addfile" from Digest::base 1.00
 sub Addfile {
 	my ($self, $file, $mode) = @_;
 
-	return(_addfile($self, $file)) if
-		ref($file) eq 'GLOB' || ref(\$file) eq 'GLOB';
+	return(_addfile($self, $file)) unless ref(\$file) eq 'SCALAR';
 
 	$mode = defined($mode) ? $mode : "";
 	my ($binary, $portable) = map { $_ eq $mode } ("b", "p");
