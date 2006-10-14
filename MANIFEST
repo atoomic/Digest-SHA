@@ -2,13 +2,12 @@ Changes
 Makefile.PL
 MANIFEST
 META.yml
-ppport.h
 README
 SHA.pm
 SHA.xs
 shasum
-SIGNATURE
 typemap
+examples/dups
 src/hmac.c
 src/hmac.h
 src/hmacxtra.c			Not used for Perl build
