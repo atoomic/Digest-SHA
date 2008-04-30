@@ -4,6 +4,8 @@ use ExtUtils::MakeMaker;
 use Getopt::Std;
 use Config;
 
+my $PM = 'lib/Digest/SHA.pm';
+
 my %opts;
 getopts('tx', \%opts);
 
@@ -25,11 +27,12 @@ my $define = join(' ', @defines);
 
 my %att = (
 	'NAME'		=> 'Digest::SHA',
-	'VERSION_FROM'	=> 'SHA.pm',
+	'VERSION_FROM'	=> $PM,
 	'LIBS'		=> [''],
 	'DEFINE'	=> $define,
 	'INC'		=> '-I.',
 	'EXE_FILES'	=> [ 'shasum' ],
+	'INSTALLDIRS'	=> ($] >= 5.010) ? 'perl' : 'site',
 );
 
 my $MMversion = $ExtUtils::MakeMaker::VERSION || 0;

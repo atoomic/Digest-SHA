@@ -3,10 +3,10 @@ Makefile.PL
 MANIFEST
 META.yml
 README
-SHA.pm
 SHA.xs
 shasum
 examples/dups
+lib/Digest/SHA.pm
 src/hmac.c
 src/hmac.h
 src/hmacxtra.c			Not used for Perl build
