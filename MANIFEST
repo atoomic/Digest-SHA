@@ -7,14 +7,10 @@ SHA.xs
 shasum
 examples/dups
 lib/Digest/SHA.pm
-src/hmac.c
-src/hmac.h
-src/hmacxtra.c			Not used for Perl build
 src/sha.c
 src/sha.h
 src/sha64bit.c
 src/sha64bit.h
-src/shaxtra.c			Not used for Perl build
 t/allfcns.t
 t/base64.t
 t/bitbuf.t
