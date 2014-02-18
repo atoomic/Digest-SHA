@@ -1,5 +1,12 @@
 Revision history for Perl extension Digest::SHA.
 
+5.87  Mon Feb 17 16:42:02 MST 2014
+	- simplified capture of intermediate SHA states
+		-- can now be done via strings (ref. getstate/putstate)
+		-- substantially reduces size of src/sha.c
+	- tightened code in SHA.xs
+		-- added sv_isa checks when invoking methods
+
 5.86  Thu Jan 30 08:24:28 MST 2014
 	- improved the performance of hexadecimal output functions
 		-- ref. 'shahex' in src/sha.c
