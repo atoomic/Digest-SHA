@@ -1,12 +1,32 @@
 Revision history for Perl extension Digest::SHA.
 
+5.89  Sat Apr 19 05:14:48 MST 2014
+	- added universal newlines mode ("U") to addfile and shasum
+		-- based on Python Universal Newlines concept
+			-- newlines identical across MacOS, DOS, and UNIX
+		-- will deprecate portable mode ("p") in future
+			-- "U" mode is cleaner and more efficient
+	- enhanced performance
+		-- reduced number of dynamic memory allocations
+		-- sped up addfile method with use of C code
+			-- ref. SHA.xs (_addfilebin and _addfileuniv)
+	- eliminated experimental -M option in favor of new -R option
+		-- reverses order of digest module preference
+		-- undocumented: for test and development use only
+	- sealed memory leak in SHA.xs
+		-- arose only with SvPVbyte exceptions during eval
+	- patched inheritence bug (ref: rt.cpan.org #94830)
+		-- use sv_isobject/sv_derived_from instead of sv_isa
+	- added 'allocated' flag to SHA structure (ref. src/sha.h)
+		-- to guard against Perl double frees
+
 5.88  Mon Mar 17 08:46:10 MST 2014
 	- added OUTPUT clause in SHA.xs to silence compiler warning
 		-- ref. shaclose()
 	- changed text file test (-T) to act on filehandles
 		-- ref. addfile portable mode
 		-- improves consistency when reading from STDIN
-		-- still acts on filenames for early Perls (< 5.6)
+		-- still must act on filenames for early Perls (< 5.6)
 	- added -M and -V options to shasum
 		-- undocumented: for development and testing use only
 

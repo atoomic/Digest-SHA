@@ -1,2 +1,4 @@
-SHA *						T_PTROBJ
-HMAC *						T_PTROBJ
+TYPEMAP
+SHA *		T_PTROBJ
+HMAC *		T_PTROBJ
+PerlIO *	T_IN

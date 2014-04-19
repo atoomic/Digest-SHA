@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2014 Mark Shelor, All Rights Reserved
  *
- * Version: 5.88
- * Mon Mar 17 08:46:10 MST 2014
+ * Version: 5.89
+ * Sat Apr 19 05:14:48 MST 2014
  *
  * The following macros supply placeholder values that enable the
  * sha.c module to successfully compile when 64-bit integer types
