@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2014 Mark Shelor, All Rights Reserved
  *
- * Version: 5.89
- * Sat Apr 19 05:14:48 MST 2014
+ * Version: 5.90
+ * Wed May  7 07:57:08 MST 2014
  *
  */
 
@@ -14,12 +14,6 @@
 #define _INCLUDE_SHA_H_
 
 #include <limits.h>
-
-#define SHA_new		New
-#define SHA_newz	Newz
-#define SHA_free	Safefree
-#define SHA_Copy	Copy
-#define SHA_Zero	Zero
 
 #define SHA32_MAX	4294967295U
 
@@ -85,10 +79,10 @@
 
 #if defined(BYTEORDER) && (BYTEORDER & 0xffff) == 0x4321
 	#if defined(SHA32_ALIGNED)
-		#define SHA32_SCHED(W, b)	SHA_Copy(b, W, 64, char)
+		#define SHA32_SCHED(W, b)	Copy(b, W, 64, char)
 	#endif
 	#if defined(SHA64) && defined(SHA64_ALIGNED)
-		#define SHA64_SCHED(W, b)	SHA_Copy(b, W, 128, char)
+		#define SHA64_SCHED(W, b)	Copy(b, W, 128, char)
 	#endif
 #endif
 
@@ -155,7 +149,6 @@ typedef struct SHA {
 	int digestlen;
 	char hex[SHA_MAX_HEX_LEN+1];
 	char base64[SHA_MAX_BASE64_LEN+1];
-	int allocated;
 } SHA;
 
 typedef struct {

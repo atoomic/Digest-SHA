@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2014 Mark Shelor, All Rights Reserved
  *
- * Version: 5.89
- * Sat Apr 19 05:14:48 MST 2014
+ * Version: 5.90
+ * Wed May  7 07:57:08 MST 2014
  *
  */
 
@@ -280,13 +280,11 @@ static UCHR *statecpy(SHA *s, UCHR *buf)
 
 #define SHA_INIT(s, algo, transform) 					\
 	do {								\
-		int allocated = s->allocated;				\
-		SHA_Zero(s, 1, SHA);					\
+		Zero(s, 1, SHA);					\
 		s->alg = algo; s->sha = sha ## transform;		\
-		SHA_Copy(H0 ## algo, s->H, sizeof(H0 ## algo), char);	\
+		Copy(H0 ## algo, s->H, sizeof(H0 ## algo), char);	\
 		s->blocksize = SHA ## algo ## _BLOCK_BITS;		\
 		s->digestlen = SHA ## algo ## _DIGEST_BITS >> 3;	\
-		s->allocated = allocated;					\
 	} while (0)
 
 /* sharewind: resets digest object */
@@ -302,56 +300,17 @@ static void sharewind(SHA *s)
 }
 
 /* shainit: initializes digest object */
-static SHA *shainit(SHA *s, int alg)
+static int shainit(SHA *s, int alg)
 {
 	if (alg >= SHA384 && !sha_384_512)
-		return(NULL);
+		return 0;
 	if (alg != SHA1 && alg != SHA224 && alg != SHA256 &&
 		alg != SHA384    && alg != SHA512 &&
 		alg != SHA512224 && alg != SHA512256)
-		return(NULL);
+		return 0;
 	s->alg = alg;
 	sharewind(s);
-	return(s);
-}
-
-/* shaopen: creates new digest object */
-static SHA *shaopen(int alg)
-{
-	SHA *s;
-
-	SHA_newz(0, s, 1, SHA);
-	if (s == NULL)
-		return(NULL);
-	if (shainit(s, alg) == NULL) {
-		SHA_free(s);
-		return(NULL);
-	}
-	s->allocated = 1;
-	return(s);
-}
-
-/* shadup: duplicates digest object */
-static SHA *shadup(SHA *s)
-{
-	SHA *p;
-
-	SHA_new(0, p, 1, SHA);
-	if (p == NULL)
-		return(NULL);
-	SHA_Copy(s, p, 1, SHA);
-	p->allocated = 1;
-	return(p);
-}
-
-/* shaclose: frees memory used by digest object */
-static int shaclose(SHA *s)
-{
-	if (s->allocated) {
-		s->allocated = 0;
-		SHA_free(s);
-	}
-	return(0);
+	return 1;
 }
 
 /* shadirect: updates state directly (w/o going through s->block) */
@@ -365,7 +324,7 @@ static ULNG shadirect(UCHR *bitstr, ULNG bitcnt, SHA *s)
 		bitcnt -= s->blocksize;
 	}
 	if (bitcnt > 0) {
-		SHA_Copy(bitstr, s->block, NBYTES(bitcnt), char);
+		Copy(bitstr, s->block, NBYTES(bitcnt), char);
 		s->blockcnt = bitcnt;
 	}
 	return(savecnt);
@@ -381,14 +340,14 @@ static ULNG shabytes(UCHR *bitstr, ULNG bitcnt, SHA *s)
 	offset = s->blockcnt >> 3;
 	if (s->blockcnt + bitcnt >= s->blocksize) {
 		nbits = s->blocksize - s->blockcnt;
-		SHA_Copy(bitstr, s->block+offset, nbits>>3, char);
+		Copy(bitstr, s->block+offset, nbits>>3, char);
 		bitcnt -= nbits;
 		bitstr += (nbits >> 3);
 		s->sha(s, s->block), s->blockcnt = 0;
 		shadirect(bitstr, bitcnt, s);
 	}
 	else {
-		SHA_Copy(bitstr, s->block+offset, NBYTES(bitcnt), char);
+		Copy(bitstr, s->block+offset, NBYTES(bitcnt), char);
 		s->blockcnt += bitcnt;
 	}
 	return(savecnt);
@@ -509,7 +468,7 @@ static void encbase64(UCHR *in, int n, char *out)
 	out[0] = '\0';
 	if (n < 1 || n > 3)
 		return;
-	SHA_Copy(in, byte, n, UCHR);
+	Copy(in, byte, n, UCHR);
 	out[0] = bmap[byte[0] >> 2];
 	out[1] = bmap[((byte[0] & 0x03) << 4) | (byte[1] >> 4)];
 	out[2] = bmap[((byte[1] & 0x0f) << 2) | (byte[2] >> 6)];
@@ -543,19 +502,19 @@ static HMAC *hmacinit(HMAC *h, int alg, UCHR *key, UINT keylen)
 	UINT i;
 	SHA ksha;
 
-	SHA_Zero(h, 1, HMAC);
-	if (shainit(&h->isha, alg) == NULL)
+	Zero(h, 1, HMAC);
+	if (!shainit(&h->isha, alg))
 		return(NULL);
-	if (shainit(&h->osha, alg) == NULL)
+	if (!shainit(&h->osha, alg))
 		return(NULL);
 	if (keylen <= h->osha.blocksize / 8)
-		SHA_Copy(key, h->key, keylen, char);
+		Copy(key, h->key, keylen, char);
 	else {
-		if (shainit(&ksha, alg) == NULL)
+		if (!shainit(&ksha, alg))
 			return(NULL);
 		shawrite(key, keylen * 8, &ksha);
 		shafinish(&ksha);
-		SHA_Copy(digcpy(&ksha), h->key, ksha.digestlen, char);
+		Copy(digcpy(&ksha), h->key, ksha.digestlen, char);
 	}
 	h->digestlen = h->osha.digestlen;
 	for (i = 0; i < h->osha.blocksize / 8; i++)
@@ -564,7 +523,7 @@ static HMAC *hmacinit(HMAC *h, int alg, UCHR *key, UINT keylen)
 	for (i = 0; i < h->isha.blocksize / 8; i++)
 		h->key[i] ^= (0x5c ^ 0x36);
 	shawrite(h->key, h->isha.blocksize, &h->isha);
-	SHA_Zero(h->key, sizeof(h->key), char);
+	Zero(h->key, sizeof(h->key), char);
 	return(h);
 }
 

@@ -3,11 +3,12 @@ package Digest::SHA;
 require 5.003000;
 
 use strict;
+use warnings;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 use Fcntl;
 use integer;
 
-$VERSION = '5.89';
+$VERSION = '5.90';
 
 require Exporter;
 require DynaLoader;
@@ -28,17 +29,6 @@ require DynaLoader;
 	sha512224	sha512224_base64	sha512224_hex
 	sha512256	sha512256_base64	sha512256_hex);
 
-# If possible, inherit from Digest::base
-
-eval {
-	require Digest::base;
-	push(@ISA, 'Digest::base');
-};
-
-*addfile   = \&Addfile;
-*hexdigest = \&Hexdigest;
-*b64digest = \&B64digest;
-
 # The following routines aren't time-critical, so they can be left in Perl
 
 sub new {
@@ -46,31 +36,16 @@ sub new {
 	$alg =~ s/\D+//g if defined $alg;
 	if (ref($class)) {	# instance method
 		if (!defined($alg) || ($alg == $class->algorithm)) {
-			sharewind($$class);
+			sharewind($class);
 			return($class);
 		}
-		return shainit($$class, $alg) ? $class : undef;
+		return shainit($class, $alg) ? $class : undef;
 	}
 	$alg = 1 unless defined $alg;
-	my $state = shaopen($alg) || return;
-	my $self = \$state;
-	bless($self, $class);
+	return $class->newSHA($alg);
 }
 
-sub DESTROY {
-	my $self = shift;
-	shaclose($$self);
-}
-
-sub clone {
-	my $self = shift;
-	my $state = shadup($$self) || return;
-	my $copy = \$state;
-	bless($copy, ref($self));
-	return($copy);
-}
-
-*reset = \&new;
+BEGIN { *reset = \&new }
 
 sub add_bits {
 	my($self, $data, $nbits) = @_;
@@ -79,7 +54,7 @@ sub add_bits {
 		$data = pack("B*", $data);
 	}
 	$nbits = length($data) * 8 if $nbits > length($data) * 8;
-	shawrite($data, $nbits, $$self);
+	shawrite($data, $nbits, $self);
 	return($self);
 }
 
@@ -91,22 +66,24 @@ sub _bail {
 	Carp::croak($msg);
 }
 
-my $_can_T_filehandle;
+{
+	my $_can_T_filehandle;
 
-sub _istext {
-	local *FH = shift;
-	my $file = shift;
+	sub _istext {
+		local *FH = shift;
+		my $file = shift;
 
-	if (! defined $_can_T_filehandle) {
-		local $^W = 0;
-		my $istext = eval { -T FH };
-		$_can_T_filehandle = $@ ? 0 : 1;
-		return $_can_T_filehandle ? $istext : -T $file;
+		if (! defined $_can_T_filehandle) {
+			local $^W = 0;
+			my $istext = eval { -T FH };
+			$_can_T_filehandle = $@ ? 0 : 1;
+			return $_can_T_filehandle ? $istext : -T $file;
+		}
+		return $_can_T_filehandle ? -T FH : -T $file;
 	}
-	return $_can_T_filehandle ? -T FH : -T $file;
 }
 
-sub Addfile {
+sub addfile {
 	my ($self, $file, $mode) = @_;
 
 	return(_addfilebin($self, $file)) unless ref(\$file) eq 'SCALAR';

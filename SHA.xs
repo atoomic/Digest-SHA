@@ -21,6 +21,11 @@
 	#include "src/sdf.c"
 #endif
 
+#ifndef Newx
+	#define Newx(ptr, num, type)	New(0, ptr, num, type)
+	#define Newxz(ptr, num, type)	Newz(0, ptr, num, type)
+#endif
+
 #include "src/sha.c"
 
 static int ix2alg[] =
@@ -38,22 +43,14 @@ static SHA *getSHA(SV *self)
 {
 	if (!sv_isobject(self) || !sv_derived_from(self, "Digest::SHA"))
 		return(NULL);
-	return(INT2PTR(SHA *, SvIV(SvRV(SvRV(self)))));
+	return INT2PTR(SHA *, SvIV(SvRV(self)));
 }
 
 MODULE = Digest::SHA		PACKAGE = Digest::SHA
 
 PROTOTYPES: ENABLE
 
-SHA *
-shaopen(alg)
-	int	alg
-
 int
-shaclose(s)
-	SHA *	s
-
-SHA *
 shainit(s, alg)
 	SHA *	s
 	int	alg
@@ -62,16 +59,53 @@ void
 sharewind(s)
 	SHA *	s
 
-SHA *
-shadup(s)
-	SHA *	s
-
 unsigned long
 shawrite(bitstr, bitcnt, s)
 	unsigned char *	bitstr
 	unsigned long	bitcnt
 	SHA *	s
 
+SV *
+newSHA(class, alg)
+	char *	class
+	int 	alg
+PREINIT:
+	SHA *state;
+CODE:
+	Newxz(state, 1, SHA);
+	if (!shainit(state, alg)) {
+		Safefree(state);
+		XSRETURN_UNDEF;
+	}
+	RETVAL = newSV(0);
+	sv_setref_pv(RETVAL, class, (void *) state);
+	SvREADONLY_on(SvRV(RETVAL));
+OUTPUT:
+	RETVAL
+
+SV *
+clone(self)
+	SV *	self
+PREINIT:
+	SHA *state;
+	SHA *clone;
+CODE:
+	if ((state = getSHA(self)) == NULL)
+		XSRETURN_UNDEF;
+	Newx(clone, 1, SHA);
+	RETVAL = newSV(0);
+	sv_setref_pv(RETVAL, sv_reftype(SvRV(self), 1), (void *) clone);
+	SvREADONLY_on(SvRV(RETVAL));
+	Copy(state, clone, 1, SHA);
+OUTPUT:
+	RETVAL
+
+void
+DESTROY(s)
+	SHA *	s
+CODE:
+	Safefree(s);
+	
 SV *
 sha1(...)
 ALIAS:
@@ -103,7 +137,7 @@ PREINIT:
 	SHA sha;
 	char *result;
 CODE:
-	if (shainit(&sha, ix2alg[ix]) == NULL)
+	if (!shainit(&sha, ix2alg[ix]))
 		XSRETURN_UNDEF;
 	for (i = 0; i < items; i++) {
 		data = (UCHR *) (SvPVbyte(ST(i), len));
@@ -154,7 +188,7 @@ ALIAS:
 	Digest::SHA::hmac_sha512256_base64 = 20
 PREINIT:
 	int i;
-	UCHR *key = "";
+	UCHR *key = (UCHR *) "";
 	UCHR *data;
 	STRLEN len = 0;
 	HMAC hmac;
@@ -196,7 +230,6 @@ ALIAS:
 	Digest::SHA::algorithm = 1
 PREINIT:
 	SHA *state;
-	int result;
 CODE:
 	if ((state = getSHA(self)) == NULL)
 		XSRETURN_UNDEF;
@@ -231,8 +264,8 @@ digest(self)
 	SV *	self
 ALIAS:
 	Digest::SHA::digest = 0
-	Digest::SHA::Hexdigest = 1
-	Digest::SHA::B64digest = 2
+	Digest::SHA::hexdigest = 1
+	Digest::SHA::b64digest = 2
 PREINIT:
 	STRLEN len;
 	SHA *state;
@@ -265,9 +298,9 @@ PREINIT:
 CODE:
 	if ((state = getSHA(self)) == NULL)
 		XSRETURN_UNDEF;
-	SHA_Copy(digcpy(state), ptr, state->alg <= SHA256 ? 32 : 64, UCHR);
+	Copy(digcpy(state), ptr, state->alg <= SHA256 ? 32 : 64, UCHR);
 	ptr += state->alg <= SHA256 ? 32 : 64;
-	SHA_Copy(state->block, ptr, state->alg <= SHA256 ? 64 : 128, UCHR);
+	Copy(state->block, ptr, state->alg <= SHA256 ? 64 : 128, UCHR);
 	ptr += state->alg <= SHA256 ? 64 : 128;
 	ptr = w32mem(ptr, state->blockcnt);
 	ptr = w32mem(ptr, state->lenhh);
@@ -294,7 +327,7 @@ PPCODE:
 	if (len != (state->alg <= SHA256 ? 116 : 212))
 		XSRETURN_UNDEF;
 	data = statecpy(state, data);
-	SHA_Copy(data, state->block, state->blocksize >> 3, UCHR);
+	Copy(data, state->block, state->blocksize >> 3, UCHR);
 	data += (state->blocksize >> 3);
 	bc = memw32(data), data += 4;
 	if (bc >= (state->alg <= SHA256 ? 512 : 1024))
@@ -313,7 +346,7 @@ _addfilebin(self, f)
 PREINIT:
 	SHA *state;
 	int n;
-	char in[IO_BUFFER_SIZE];
+	UCHR in[IO_BUFFER_SIZE];
 PPCODE:
 	if (!f || (state = getSHA(self)) == NULL)
 		XSRETURN_UNDEF;
@@ -329,8 +362,8 @@ PREINIT:
 	char c;
 	int n;
 	int cr = 0;
-	char *src, *dst;
-	char in[IO_BUFFER_SIZE+1];
+	UCHR *src, *dst;
+	UCHR in[IO_BUFFER_SIZE+1];
 	SHA *state;
 PPCODE:
 	if (!f || (state = getSHA(self)) == NULL)
