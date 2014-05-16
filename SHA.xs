@@ -276,7 +276,7 @@ CODE:
 	shafinish(state);
 	len = 0;
 	if (ix == 0) {
-		result = (char *) digcpy(state);
+		result = (char *) shadigest(state);
 		len = state->digestlen;
 	}
 	else if (ix == 1)

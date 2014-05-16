@@ -1,5 +1,13 @@
 Revision history for Perl extension Digest::SHA.
 
+5.91  Fri May 16 10:21:44 MST 2014
+	- restored original 'addfile' for use on opened file handles
+		-- allows callbacks in place of actual files
+			-- ref. IO::Callback (rt.cpan.org #95643)
+	- re-established inheritance from Digest::base
+		-- to pick up future Digest enhancements automatically
+	- cleaned up documentation
+
 5.90  Wed May  7 07:57:08 MST 2014
 	- consolidated all dynamic memory allocation into XSUBs
 		-- streamlines referencing of SHA objects

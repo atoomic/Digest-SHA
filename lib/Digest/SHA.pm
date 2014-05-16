@@ -8,7 +8,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 use Fcntl;
 use integer;
 
-$VERSION = '5.90';
+$VERSION = '5.91';
 
 require Exporter;
 require DynaLoader;
@@ -28,6 +28,13 @@ require DynaLoader;
 	sha512		sha512_base64		sha512_hex
 	sha512224	sha512224_base64	sha512224_hex
 	sha512256	sha512256_base64	sha512256_hex);
+
+# Inherit from Digest::base if possible
+
+eval {
+	require Digest::base;
+	push(@ISA, 'Digest::base');
+};
 
 # The following routines aren't time-critical, so they can be left in Perl
 
@@ -83,10 +90,24 @@ sub _bail {
 	}
 }
 
+sub _addfile {
+	my ($self, $handle) = @_;
+
+	my $n;
+	my $buf = "";
+
+	while (($n = read($handle, $buf, 4096))) {
+		$self->add($buf);
+	}
+	_bail("Read failed") unless defined $n;
+
+	$self;
+}
+
 sub addfile {
 	my ($self, $file, $mode) = @_;
 
-	return(_addfilebin($self, $file)) unless ref(\$file) eq 'SCALAR';
+	return(_addfile($self, $file)) unless ref(\$file) eq 'SCALAR';
 
 	$mode = defined($mode) ? $mode : "";
 	my ($binary, $UNIVERSAL, $BITS, $portable) =
@@ -652,9 +673,6 @@ Like I<digest>, this method is a read-once operation.  Call
 I<$sha-E<gt>clone-E<gt>hexdigest> if it's necessary to preserve
 the original digest state.
 
-This method is inherited if L<Digest::base> is installed on your
-system.  Otherwise, a functionally equivalent substitute is used.
-
 =item B<b64digest>
 
 Returns the digest encoded as a Base64 string.
@@ -662,9 +680,6 @@ Returns the digest encoded as a Base64 string.
 Like I<digest>, this method is a read-once operation.  Call
 I<$sha-E<gt>clone-E<gt>b64digest> if it's necessary to preserve
 the original digest state.
-
-This method is inherited if L<Digest::base> is installed on your
-system.  Otherwise, a functionally equivalent substitute is used.
 
 It's important to note that the resulting string does B<not> contain
 the padding characters typical of Base64 encodings.  This omission is
