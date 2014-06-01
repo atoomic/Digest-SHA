@@ -1,5 +1,12 @@
 Revision history for Perl extension Digest::SHA.
 
+5.92  Sun Jun  1 00:15:44 MST 2014
+	- fixed reserved-word clash when compiling with C++
+		-- use 'classname' instead of 'class'
+			-- ref. SHA.xs (rt.cpan.org #96090)
+	- silenced MSC compiler warning about signed/unsigned comparison
+		-- ref. SHA.xs (rt.cpan.org #95830)
+
 5.91  Fri May 16 10:21:44 MST 2014
 	- restored original 'addfile' for use on opened file handles
 		-- allows callbacks in place of actual files

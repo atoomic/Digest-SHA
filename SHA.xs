@@ -66,8 +66,8 @@ shawrite(bitstr, bitcnt, s)
 	SHA *	s
 
 SV *
-newSHA(class, alg)
-	char *	class
+newSHA(classname, alg)
+	char *	classname
 	int 	alg
 PREINIT:
 	SHA *state;
@@ -78,7 +78,7 @@ CODE:
 		XSRETURN_UNDEF;
 	}
 	RETVAL = newSV(0);
-	sv_setref_pv(RETVAL, class, (void *) state);
+	sv_setref_pv(RETVAL, classname, (void *) state);
 	SvREADONLY_on(SvRV(RETVAL));
 OUTPUT:
 	RETVAL
@@ -330,7 +330,7 @@ PPCODE:
 	Copy(data, state->block, state->blocksize >> 3, UCHR);
 	data += (state->blocksize >> 3);
 	bc = memw32(data), data += 4;
-	if (bc >= (state->alg <= SHA256 ? 512 : 1024))
+	if (bc >= (state->alg <= SHA256 ? 512U : 1024U))
 		XSRETURN_UNDEF;
 	state->blockcnt = bc;
 	state->lenhh = memw32(data), data += 4;
