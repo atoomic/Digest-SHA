@@ -1,5 +1,12 @@
 Revision history for Perl extension Digest::SHA.
 
+5.93  Sun Oct 26 06:00:48 MST 2014
+	- corrected alignment problem in SHA struct (src/sha.h)
+		-- thanks to H. Merijn Brand and J. Hietaniemi for 
+			analysis and suggested patch
+	- provided workaround in t/methods.t for unreliable -T test
+		-- Some Perl 5.8's mistake text for binary
+
 5.92  Sun Jun  1 00:15:44 MST 2014
 	- fixed reserved-word clash when compiling with C++
 		-- use 'classname' instead of 'class'
