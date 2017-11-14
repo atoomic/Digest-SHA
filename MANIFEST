@@ -15,6 +15,7 @@ src/sha64bit.h
 t/allfcns.t
 t/base64.t
 t/bitbuf.t
+t/bitorder.t
 t/fips180-4.t
 t/fips198.t
 t/gg.t
